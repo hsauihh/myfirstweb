@@ -3,66 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>个人主页</title>
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/hero.css" />
-    <link rel="stylesheet" href="css/nav.css" />
-    <link rel="stylesheet" href="css/cards.css" />
-    <link rel="stylesheet" href="css/lab.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
+    <title>Zero to Tech</title>
   </head>
   <body>
-    <div class="app-shell">
-      <div class="page-shell">
-        <main class="page-content">
-          <section class="dashboard-grid">
-
-            <!-- ↓↓↓ 顶部 hero：品牌 + 导航 + 大标题 + 副标题 ↓↓↓ -->
-            <!-- 这一整块在 text-lab.html 里几乎一字不差地又抄了一遍 -->
-            <article class="hero-stage panel-full">
-              <div class="hero-topline">
-                <p class="brand-eyebrow">zero to tech</p>
-                <nav class="inline-links hero-nav">
-                  <a class="nav-link" href="index.html">个人主页</a>
-                  <a class="nav-link" href="text-lab.html">文字实验室</a>
-                </nav>
-              </div>
-              <div class="hero-copy">
-                <h1 class="hero-display">关于我</h1>
-                <p class="hero-subtitle">项目，创意，灵感，心得，我的作品</p>
-              </div>
-            </article>
-            <!-- ↑↑↑ hero 结束 ↑↑↑ -->
-
-            <article class="panel panel-full featured-work-panel card">
-              <p class="section-kicker">作品</p>
-              <p class="featured-title">文字实验室</p>
-              <p class="featured-copy">拼音和情绪，挖掘中文里的细节</p>
-              <a class="featured-link" href="text-lab.html">
-                <span class="featured-link-label">打开作品</span>
-                <span class="arrow">›</span>
-              </a>
-            </article>
-
-            <article class="panel panel-full identity-panel card">
-              <div class="identity-item">
-                <p class="section-kicker">座右铭</p>
-                <p class="identity-value identity-quote">已识乾坤大，尤怜草木青</p>
-              </div>
-              <div class="identity-item">
-                <p class="section-kicker">正在学习</p>
-                <p class="identity-value">零到全栈</p>
-              </div>
-            </article>
-
-          </section>
-        </main>
-      </div>
-    </div>
-
-    <script type="module" src="js/main.js"></script>
-
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,17 +1,20 @@
 {
   "name": "zero-to-full",
   "version": "1.0.0",
-  "description": "> 这是 **零到全栈 · 模块 4.1：现代前端第一步——模块化** 的配套代码—— > 网站**模块化改造之前**的起点版本。",
-  "main": "index.js",
+  "type": "module",
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.2.2"
   },
   "dependencies": {
-    "animejs": "^4.5.0"
+    "animejs": "^4.5.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }
