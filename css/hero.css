@@ -1,0 +1,46 @@
+.hero-stage {
+  padding: 8px 0 18px;
+  min-height: 36vh;
+  display: grid;
+  align-content: center;
+}
+
+.hero-topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.hero-copy {
+  max-width: 620px;
+}
+
+.brand-eyebrow {
+  color: rgba(29, 29, 31, 0.88);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+
+.hero-display {
+  font-size: clamp(56px, 10vw, 96px);
+  line-height: 1.04;
+  letter-spacing: -0.06em;
+  font-weight: 600;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-subtitle {
+  max-width: 540px;
+  margin-top: 10px;
+  color: var(--text-soft);
+  font-size: clamp(18px, 2.2vw, 24px);
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+}

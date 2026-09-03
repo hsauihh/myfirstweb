@@ -1,0 +1,26 @@
+body {
+  font-family: var(--font);
+  line-height: 1.5;
+  color: var(--text-main);
+  background: var(--page-bg);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, var(--page-bg) 28%, var(--page-bg) 100%);
+}
+
+.page-shell {
+  width: min(var(--maxw), calc(100% - 40px));
+  margin: 0 auto;
+  padding: 0 0 32px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.panel-full { grid-column: span 12; }
+.panel-half { grid-column: span 6; }

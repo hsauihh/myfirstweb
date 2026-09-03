@@ -1,0 +1,23 @@
+.inline-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.hero-nav {
+  justify-content: flex-end;
+}
+
+.nav-link {
+  color: rgba(29, 29, 31, 0.54);
+  font-size: 15px;
+  line-height: 1.33;
+  letter-spacing: -0.24px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-link.active {
+  color: var(--text-main);
+  font-weight: 500;
+}

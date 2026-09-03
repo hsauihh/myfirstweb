@@ -1,0 +1,99 @@
+.panel {
+  padding: 24px 28px;
+  background: var(--surface);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow);
+}
+
+/* 卡片的初始状态：藏起来 + 微微下沉，等动画把它们抬起来。
+   cards.js 在浏览器加载完后用 anime.js 给它们做 stagger 入场。 */
+.card {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.section-kicker {
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: -0.12px;
+}
+
+/* === 作品 panel === */
+.featured-work-panel {
+  display: grid;
+  gap: 8px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+  min-height: 220px;
+  align-content: center;
+}
+
+.featured-title {
+  max-width: 720px;
+  font-size: clamp(34px, 4.2vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+}
+
+.featured-copy {
+  max-width: 520px;
+  color: var(--text-soft);
+  font-size: clamp(17px, 2vw, 21px);
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+}
+
+.featured-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 6px;
+  transition: opacity 0.2s;
+}
+
+.featured-link:hover { opacity: 0.86; }
+
+.featured-link-label {
+  color: var(--brand);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.37px;
+}
+
+.arrow {
+  color: var(--brand);
+  font-size: 28px;
+  line-height: 1;
+}
+
+/* === 身份 panel === */
+.identity-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.identity-item { padding-top: 4px; }
+
+.identity-value {
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.identity-quote {
+  max-width: 520px;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
