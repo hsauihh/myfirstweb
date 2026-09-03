@@ -54,6 +54,13 @@
   letter-spacing: -0.12px;
 }
 
+/* 分析请求失败时的提示文案（这一节新增） */
+.lab-error {
+  color: #b42318;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .primary-button {
   justify-self: start;
   min-width: 128px;
