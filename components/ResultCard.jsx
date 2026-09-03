@@ -1,9 +1,12 @@
+"use client";
+
+// 结果区卡片。和 4.4 一字未改。
+// 一挂载就自己淡入、把情感分数滚动归位（anime.js 的入场动画）。
+// 因为用了 useEffect / useRef / anime.js，要在浏览器里跑，所以顶上标了 "use client"。
+// （拼音、情感分数都是写死的假数据，真分析等模块 5 接后端。）
 import { useEffect, useRef } from "react";
 import { animate, scrambleText } from "animejs";
 
-// 一个完整的 React 组件：它自己 import 要用的 anime，自己 export 出去。
-// 一挂载（出现在页面上），就自己淡入、并把情感分数滚动归位——这是它自带的"入场动画"。
-// （点"开始分析"再去驱动分析，是"数据驱动界面"的活儿，留到 4.4。）
 export default function ResultCard() {
   const cardRef = useRef(null);
   const scoreRef = useRef(null);
