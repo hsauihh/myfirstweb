@@ -47,6 +47,13 @@
   color: var(--text-muted);
 }
 
+.lab-count {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: -0.12px;
+}
+
 .primary-button {
   justify-self: start;
   min-width: 128px;

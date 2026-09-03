@@ -1,20 +1,25 @@
-import { useState } from "react";
 import HomePage from "./components/HomePage.jsx";
 import TextLabPage from "./components/TextLabPage.jsx";
+import { useRoute } from "./router/useRoute.js";
 
 export default function App() {
-  // page 是个"状态"——它一变，下面的界面就跟着重新渲染。
-  // 这一节先把它当"框架的规则"用、不展开；"状态到底替你管什么"，留到 4.4。
-  const [page, setPage] = useState("home");
+  // 4.3 里"现在在哪一页"记在内存（useState）里——一刷新就被打回首页。
+  // 这一节换成 useRoute：把"在哪一页"读自 / 写入浏览器地址栏。
+  const { path, navigate } = useRoute();
+
+  // 看地址栏决定显示哪一页：/text-lab → 文字实验室；其它（含 /）→ 个人主页
+  const current = path.startsWith("/text-lab") ? "textlab" : "home";
+
+  // 点导航 → 改地址栏（而不再是改内存里的值）
+  const onNavigate = (key) => navigate(key === "textlab" ? "/text-lab" : "/");
 
   return (
     <div className="app-shell">
       <div className="page-shell">
         <main className="page-content">
-          {/* 两个页面来回切——靠的是组件，不再是两个独立的 html 文件 */}
-          {page === "home"
-            ? <HomePage current={page} onNavigate={setPage} />
-            : <TextLabPage current={page} onNavigate={setPage} />}
+          {current === "home"
+            ? <HomePage current={current} onNavigate={onNavigate} />
+            : <TextLabPage current={current} onNavigate={onNavigate} />}
         </main>
       </div>
     </div>
