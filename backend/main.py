@@ -3,7 +3,23 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from pypinyin import lazy_pinyin, Style
 from snownlp import SnowNLP
+import json
+from datetime import datetime, timezone
 
+HISTORY_FILE = "history.json"
+
+def load_history():
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_record(record):
+    records = load_history()
+    records.append(record)
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False, indent=2)
 
 
 app = FastAPI()
@@ -49,10 +65,19 @@ def score_label(score):
 @app.post("/api/analyze")
 def analyze(req: AnalyzeRequest):
     text = req.text
-    score = round(SnowNLP(text).sentiments, 2)                    # 真模型打的分
-    return {
+    score = round(SnowNLP(text).sentiments, 2)
+    result = {
         "text": text,
         "score": score,
-        "label": score_label(score),                                         # ← 先留着，下面处理
-        "pinyin": " ".join(lazy_pinyin(text, style=Style.TONE)),  # 真拼音，带声调
+        "label": score_label(score),
+        "pinyin": " ".join(lazy_pinyin(text, style=Style.TONE)),
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),  # ← 新增
     }
+    save_record(result)                                                          # ← 存档到文件
+    return result
+
+@app.get("/api/history")
+def history():
+    records = load_history()   # 读出文件里的全部记录
+    records.reverse()
+    return records[:5]
