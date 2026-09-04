@@ -10,8 +10,9 @@ build/
 dist/
 
 # editor
-.vscode/*
+.vscode
 !.vscode/extensions.json
+.vscode/*
 
 # misc
 *.log
@@ -24,3 +25,4 @@ backend/__pycache__
 
 history.json
 history.db
+
