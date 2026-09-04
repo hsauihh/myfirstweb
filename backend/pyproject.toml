@@ -9,5 +9,7 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.141.1",
+    "pypinyin>=0.55.0",
     "requests>=2.34.2",
+    "snownlp>=0.12.3",
 ]
