@@ -11,6 +11,15 @@ export default function AnimatedCardGrid({ className, children }) {
 
   useEffect(() => {
     const cards = ref.current.querySelectorAll(".card");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      // 尊重系统「减少动态效果」：直接呈现最终状态，不播动画
+      cards.forEach((card) => {
+        card.style.opacity = "1";
+        card.style.transform = "none";
+      });
+      return;
+    }
     animate(cards, {
       opacity: [0, 1],
       translateY: [24, 0],

@@ -6,10 +6,12 @@
 // 请求失败时（比如后端没跑、跨源被拦）就保持打底数据、把错误打到控制台，页面不至于崩。
 // 注意：后端地址暂时写死在下面，跟着课件，这一节最后会把它收进 .env.local。
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Nav from "./Nav.jsx";
 import PageHeading from "./PageHeading.jsx";
 import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
+import DailyQuote from "./DailyQuote.jsx";
+import CloudButton from "./CloudButton.jsx";
+import FeaturedWorkCarousel from "./FeaturedWorkCarousel.jsx";
 import { home } from "../data/site.js";
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -34,32 +36,24 @@ export default function HomeView() {
   }, []);
 
   return (
-    <AnimatedCardGrid className="dashboard-grid">
-      <article className="hero-stage panel-full">
-        <Nav />
-        <PageHeading title={data.heroTitle} subtitle={data.heroSubtitle} />
-      </article>
+    <>
+      <AnimatedCardGrid className="dashboard-grid">
+        <article className="hero-stage panel-full">
+          <Nav />
+          <PageHeading title={data.heroTitle} subtitle={data.heroSubtitle} />
+        </article>
 
-      <article className="panel panel-full featured-work-panel card">
-        <p className="section-kicker">{data.featuredWork.kicker}</p>
-        <p className="featured-title">{data.featuredWork.title}</p>
-        <p className="featured-copy">{data.featuredWork.copy}</p>
-        <Link className="featured-link" href="/text-lab">
-          <span className="featured-link-label">{data.featuredWork.linkLabel}</span>
-          <span className="arrow">›</span>
-        </Link>
-      </article>
+        <FeaturedWorkCarousel />
 
-      <article className="panel panel-full identity-panel card">
-        <div className="identity-item">
-          <p className="section-kicker">座右铭</p>
-          <p className="identity-value identity-quote">{data.identity.motto}</p>
-        </div>
-        <div className="identity-item">
-          <p className="section-kicker">正在学习</p>
-          <p className="identity-value">{data.identity.learning}</p>
-        </div>
-      </article>
-    </AnimatedCardGrid>
+        <article className="panel panel-full identity-panel card">
+          <DailyQuote label="每日一句" />
+          <div className="identity-item">
+            <p className="section-kicker">正在学习</p>
+            <p className="identity-value">{data.identity.learning}</p>
+          </div>
+        </article>
+      </AnimatedCardGrid>
+      <CloudButton />
+    </>
   );
 }

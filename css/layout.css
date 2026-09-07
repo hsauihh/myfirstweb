@@ -3,17 +3,46 @@ body {
   line-height: 1.5;
   color: var(--text-main);
   background: var(--page-bg);
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 .app-shell {
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #ffffff 0%, var(--page-bg) 28%, var(--page-bg) 100%);
+  background: var(--page-bg);
+  transition: background 0.4s ease;
+}
+
+/* 背景光斑：固定视口、彩色渐变，玻璃卡片 backdrop-filter 才能透过看到被模糊的色块 */
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(640px circle at 12% 8%, var(--glow-blue), transparent 62%),
+    radial-gradient(720px circle at 88% 4%, var(--glow-violet), transparent 60%),
+    radial-gradient(560px circle at 72% 96%, var(--glow-orange), transparent 60%);
+  animation: glow-drift 26s ease-in-out infinite alternate;
 }
 
 .page-shell {
+  position: relative;
+  z-index: 1;
   width: min(var(--maxw), calc(100% - 40px));
   margin: 0 auto;
   padding: 0 0 32px;
+}
+
+/* 光斑缓慢漂浮：氛围动效，尊重系统「减少动态效果」 */
+@keyframes glow-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(2%, 3%, 0) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before { animation: none; }
 }
 
 .dashboard-grid {

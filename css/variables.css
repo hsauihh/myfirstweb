@@ -1,17 +1,70 @@
+/* 设计 token：玻璃拟态 · 双模式（浅色默认，[data-theme="dark"] 为暗色）。
+   颜色遵循「暗色用去饱和/更亮的变体，而非反色」；正文对比 ≥ 4.5:1。 */
 :root {
-  --page-bg: #f5f5f7;
-  --surface: #ffffff;
-  --surface-soft: #fbfbfd;
-  --text-main: #1d1d1f;
-  --text-soft: rgba(29, 29, 31, 0.72);
-  --text-muted: rgba(29, 29, 31, 0.56);
-  --brand: #0071e3;
-  --border-soft: rgba(29, 29, 31, 0.08);
-  --shadow: 3px 5px 30px rgba(0, 0, 0, 0.08);
-  --grad: linear-gradient(294deg, #ff00f7 0%, #1e98fd 100%);
-  --radius-panel: 32px;
+  /* 背景与光斑（玻璃拟态需要可被模糊的彩色背景） */
+  --page-bg: #eef2f8;
+  --glow-blue: rgba(37, 99, 235, 0.20);
+  --glow-violet: rgba(139, 92, 246, 0.18);
+  --glow-orange: rgba(234, 88, 12, 0.16);
+
+  /* 玻璃表面 */
+  --surface: rgba(255, 255, 255, 0.60);
+  --surface-strong: rgba(255, 255, 255, 0.78);
+  --surface-soft: rgba(255, 255, 255, 0.46);
+
+  /* 文字 */
+  --text-main: #0f172a;
+  --text-soft: rgba(15, 23, 42, 0.74);
+  --text-muted: rgba(15, 23, 42, 0.58);
+
+  /* 品牌与点缀 */
+  --brand: #2563eb;
+  --accent: #ea580c;
+  --brand-soft: rgba(37, 99, 235, 0.14);
+  --danger: #b42318;
+
+  /* 边框 / 阴影 */
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.55);
+  --shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  --shadow-glass: 0 8px 40px rgba(15, 23, 42, 0.12);
+
+  /* 渐变（hero 标题 / CTA） */
+  --grad: linear-gradient(120deg, #2563eb 0%, #7c3aed 52%, #ea580c 100%);
+
+  /* 几何与字体 */
+  --radius-panel: 28px;
   --radius-soft: 18px;
   --maxw: 980px;
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --blur: 20px;
+  --font: "Poppins", "Noto Sans SC", -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+}
+
+[data-theme="dark"] {
+  --page-bg: #0b1220;
+  --glow-blue: rgba(59, 130, 246, 0.28);
+  --glow-violet: rgba(139, 92, 246, 0.24);
+  --glow-orange: rgba(251, 146, 60, 0.20);
+
+  --surface: rgba(30, 41, 59, 0.56);
+  --surface-strong: rgba(30, 41, 59, 0.80);
+  --surface-soft: rgba(148, 163, 184, 0.12);
+
+  --text-main: #e2e8f0;
+  --text-soft: rgba(226, 232, 240, 0.80);
+  --text-muted: rgba(226, 232, 240, 0.60);
+
+  --brand: #60a5fa;
+  --accent: #fb923c;
+  --brand-soft: rgba(96, 165, 250, 0.18);
+  --danger: #f87171;
+
+  --border-soft: rgba(255, 255, 255, 0.10);
+  --border-glass: rgba(255, 255, 255, 0.16);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --shadow-glass: 0 8px 40px rgba(0, 0, 0, 0.50);
+
+  --grad: linear-gradient(120deg, #60a5fa 0%, #a78bfa 52%, #fb923c 100%);
 }

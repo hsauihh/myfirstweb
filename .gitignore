@@ -26,3 +26,7 @@ backend/__pycache__
 history.json
 history.db
 
+.mcp.json
+
+.pi
+pifile

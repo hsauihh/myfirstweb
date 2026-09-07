@@ -1,0 +1,3 @@
+/* 字体：Poppins（拉丁/数字，玻璃拟态方向的标题字体）+ 思源黑体 Noto Sans SC（中文正文）。
+   纯 CSS @import 引入，兼容静态导出；@import 必须放在本文件首行。 */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');

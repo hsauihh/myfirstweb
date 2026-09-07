@@ -1,6 +1,7 @@
 .inline-links {
   display: inline-flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 18px;
 }
 
@@ -9,7 +10,7 @@
 }
 
 .nav-link {
-  color: rgba(29, 29, 31, 0.54);
+  color: var(--text-muted);
   font-size: 15px;
   line-height: 1.33;
   letter-spacing: -0.24px;
@@ -20,4 +21,100 @@
 .nav-link.active {
   color: var(--text-main);
   font-weight: 500;
+}
+
+/* === 右上角「更多」下拉 === */
+.more-menu {
+  position: relative;
+}
+
+.more-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  /* 让按钮和旁边的文字链接基线/字体一致 */
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.more-chevron { transition: transform 0.2s; }
+.more-trigger.is-open .more-chevron { transform: rotate(180deg); }
+
+.more-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 160px;
+  padding: 8px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-soft);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 40;
+}
+
+.more-link {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.33;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.more-link:hover {
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
+.more-link.active {
+  color: var(--brand);
+  font-weight: 500;
+}
+
+/* 键盘 focus 可见环（配合 .nav-link 已有的 0.2s 颜色过渡） */
+.nav-link:focus-visible,
+.more-trigger:focus-visible,
+.more-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* === 主题切换按钮 === */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.theme-toggle:hover {
+  color: var(--text-main);
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }

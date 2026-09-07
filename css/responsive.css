@@ -16,11 +16,32 @@
   }
   .hero-display { font-size: 48px; }
   .hero-subtitle { margin-top: 14px; font-size: 18px; }
-  .brand-eyebrow { font-size: 18px; }
+  .hero-topline-end { width: 100%; justify-content: flex-start; }
   .panel { padding: 20px; border-radius: 24px; }
   .panel-heading h3,
   .featured-title,
   .identity-value,
   .result-badge strong { font-size: 24px; }
   .identity-quote { font-size: 20px; }
+
+  /* 每日一句 */
+  .daily-quote { gap: 6px; }
+  .quote-arrow { width: 40px; height: 40px; }
+  .quote-text { font-size: 20px; min-height: 60px; } /* 2 行 × 20 × 1.5 */
+
+  /* 作品轮播 */
+  .featured-carousel-controls { top: 14px; right: 12px; }
+  .featured-dots { bottom: 14px; }
+  .carousel-arrow { width: 36px; height: 36px; }
+
+  /* 「哒哒哒哒哒」FAB */
+  .cloud-fab {
+    right: 16px;
+    bottom: 16px;
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+
+  /* 「更多」下拉尽量贴合右缘、避免溢出 */
+  .more-panel { min-width: 150px; }
 }

@@ -1,0 +1,205 @@
+/* 每日一句 + 「哒哒哒哒哒」FAB + 占位页 的样式，共用现有设计 token */
+
+/* === 每日一句 === */
+.daily-quote-item { padding-top: 4px; }
+
+.daily-quote {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 520px;
+  margin-top: 2px;
+}
+
+.quote-stage {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quote-text {
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-main);
+  /* 固定字号 + 预留 2 行高度，长句/短句切换都不会撑高卡片 */
+  font-size: 22px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 66px; /* 2 行 × 22px × 1.5 */
+  overflow: hidden;
+  animation: quote-fade 0.5s ease-out;
+}
+
+@keyframes quote-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.quote-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.quote-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--border-soft);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.quote-dot:hover { background: var(--text-muted); }
+.quote-dot.is-active { background: var(--brand); transform: scale(1.25); }
+
+.quote-arrow {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.quote-arrow:hover {
+  color: var(--text-main);
+  background: var(--surface-soft);
+}
+
+.quote-arrow:focus-visible,
+.quote-dot:focus-visible,
+.quote-text:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* === 作品轮播 === */
+.featured-carousel {
+  position: relative;
+}
+
+.featured-carousel-controls {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.carousel-arrow {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.carousel-arrow:hover {
+  color: var(--text-main);
+  background: var(--surface-soft);
+}
+
+.carousel-count {
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: -0.1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.featured-content { animation: quote-fade 0.5s ease-out; }
+
+.featured-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.featured-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--border-soft);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.featured-dot:hover { background: var(--text-muted); }
+.featured-dot.is-active { background: var(--brand); transform: scale(1.25); }
+
+.carousel-arrow:focus-visible,
+.featured-dot:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+/* === 「哒哒哒哒哒」FAB === */
+.cloud-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  padding: 16px 22px;
+  border-radius: 999px;
+  background: var(--grad);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 30px rgba(30, 152, 253, 0.32);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cloud-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(30, 152, 253, 0.4);
+}
+
+.cloud-fab:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* === 占位页卡片 === */
+.placeholder-panel {
+  min-height: 220px;
+  display: grid;
+  gap: 8px;
+  align-content: center;
+}
+
+/* 尊重系统「减少动态效果」：关掉动画/位移 */
+@media (prefers-reduced-motion: reduce) {
+  .quote-text { animation: none; }
+  .cloud-fab,
+  .cloud-fab:hover { transform: none; transition: none; }
+}

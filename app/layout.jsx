@@ -1,17 +1,14 @@
 // app/layout.jsx 是 Next.js 的"全站外壳"——所有页面都套在它里面。
-// 它取代了 4.4 的 index.html + main.jsx + App.jsx 最外面那层壳：
-//   - <html>/<body> 由它提供；
-//   - app-shell / page-shell / page-content 这层包裹，和 4.4 App.jsx 里一模一样；
-//   - 4.4 main.jsx 里那 8 行 import CSS，原样搬到这里（顺序不变）。
-// 注意：导航条 Nav 不在这儿，它在每一页的 hero 里（HomeView / TextLabView 各放一份），
-// 这样整页布局和 4.4 完全一致。
+// 顶部 head 里的内联脚本在首帧渲染前设置 data-theme（浅色/暗色），避免主题闪烁。
 
+import "../css/fonts.css";
 import "../css/reset.css";
 import "../css/variables.css";
 import "../css/layout.css";
 import "../css/hero.css";
 import "../css/nav.css";
 import "../css/cards.css";
+import "../css/widgets.css";
 import "../css/lab.css";
 import "../css/responsive.css";
 
@@ -22,7 +19,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})();",
+          }}
+        />
+      </head>
       <body>
         <div className="app-shell">
           <div className="page-shell">

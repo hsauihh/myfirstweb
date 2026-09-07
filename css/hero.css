@@ -7,28 +7,27 @@
 
 .hero-topline {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
   margin-bottom: 22px;
 }
 
-.hero-copy {
-  max-width: 620px;
+/* 标题 + 副标题的玻璃卡片 */
+.hero-copy-card {
+  max-width: 720px;
+  padding: 32px 36px;
 }
 
-.brand-eyebrow {
-  color: rgba(29, 29, 31, 0.88);
-  font-size: 21px;
-  font-weight: 500;
-  line-height: 1.14;
-  letter-spacing: -0.03em;
+.hero-copy {
+  max-width: 640px;
+  animation: hero-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-display {
   font-size: clamp(56px, 10vw, 96px);
   line-height: 1.04;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.02em;
   font-weight: 600;
   background: var(--grad);
   -webkit-background-clip: text;
@@ -43,4 +42,104 @@
   font-size: clamp(18px, 2.2vw, 24px);
   line-height: 1.28;
   letter-spacing: -0.02em;
+}
+
+/* 顶部右端：导航 + 天气小部件，与左侧品牌分居两端 */
+.hero-topline-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* === 天气卡片：右上角常驻，默认胶囊显示三项 ===
+   展开的丰富版是绝对定位浮层，不占文档流，因此不撑开卡片、不挤动导航与其他内容。 */
+.weather-card {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-glass);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.25s ease;
+}
+
+.weather-card:hover,
+.weather-card:focus-within {
+  box-shadow: var(--shadow-glass);
+}
+
+.weather-card:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.weather-main {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.33;
+  white-space: nowrap;
+}
+
+.weather-temp {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* 丰富版浮层：绝对定位到卡片下方，不撑开卡片高度 */
+.weather-detail {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 168px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-soft);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 60;
+}
+
+.weather-card:hover .weather-detail,
+.weather-card:focus-within .weather-detail {
+  display: flex;
+  animation: weather-detail-in 0.2s ease-out;
+}
+
+@keyframes weather-detail-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-card { transition: none; }
+  .weather-detail { animation: none; }
+}
+
+/* hero 标题入场：上浮 + 渐显（关键动效，尊重 reduced-motion） */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy { animation: none; }
 }

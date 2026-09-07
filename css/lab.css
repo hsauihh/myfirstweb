@@ -40,7 +40,7 @@
 
 .lab-form textarea:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.14);
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
 .lab-form textarea::placeholder {
@@ -56,7 +56,7 @@
 
 /* 分析请求失败时的提示文案（这一节新增） */
 .lab-error {
-  color: #b42318;
+  color: var(--danger);
   font-size: 14px;
   line-height: 1.4;
 }
@@ -119,4 +119,122 @@
   letter-spacing: -0.03em;
   font-weight: 600;
   color: var(--text-main);
+}
+
+/* ── 历史记录：结果卡右上角的按钮 ＋ 弹窗（这一节新增） ── */
+
+.panel-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ghost-button {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.ghost-button:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.modal-panel {
+  width: min(560px, 100%);
+  max-height: min(70vh, 640px);
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-panel);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+}
+
+.modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-heading h3 {
+  font-size: 28px;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.modal-close {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-close:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.history-item {
+  padding: 14px 18px;
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+}
+
+.history-text {
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.history-meta {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.33;
+  letter-spacing: -0.12px;
+}
+
+.history-empty {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.4;
 }
