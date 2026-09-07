@@ -2,5 +2,5 @@
 import PlaceholderView from "../../components/PlaceholderView.jsx";
 
 export default function Page() {
-  return <PlaceholderView title="关于" subtitle="关于我，关于这个站" />;
+  return <PlaceholderView eyebrow="关于" title="关于我" subtitle="关于我，关于这个站" />;
 }

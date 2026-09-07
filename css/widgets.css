@@ -1,4 +1,84 @@
-/* 每日一句 + 「哒哒哒哒哒」FAB + 占位页 的样式，共用现有设计 token */
+/* 小组件：天气卡片 / 每日一句 / 作品轮播 / 悬浮按钮（均实色，无玻璃拟态） */
+
+/* === 天气卡片（右上角常驻，默认胶囊，悬停/聚焦展开丰富版浮层） === */
+.weather-card {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  box-shadow: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.weather-card.is-loading {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.weather-card:hover,
+.weather-card:focus-within {
+  box-shadow: var(--shadow);
+}
+
+.weather-card:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.weather-main {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.weather-temp {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.weather-detail {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 168px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 60;
+}
+
+.weather-card:hover .weather-detail,
+.weather-card:focus-within .weather-detail {
+  display: flex;
+  animation: weather-detail-in 0.2s ease-out;
+}
+
+@keyframes weather-detail-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-detail { animation: none; }
+}
 
 /* === 每日一句 === */
 .daily-quote-item { padding-top: 4px; }
@@ -25,15 +105,13 @@
   cursor: pointer;
   user-select: none;
   color: var(--text-main);
-  /* 固定字号 + 预留 2 行高度，长句/短句切换都不会撑高卡片 */
   font-size: 22px;
-  line-height: 1.5;
-  letter-spacing: -0.02em;
+  line-height: 1.6;
   font-weight: 500;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  min-height: 66px; /* 2 行 × 22px × 1.5 */
+  min-height: 66px;
   overflow: hidden;
   animation: quote-fade 0.5s ease-out;
 }
@@ -62,8 +140,8 @@
 .quote-dot.is-active { background: var(--brand); transform: scale(1.25); }
 
 .quote-arrow {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -87,47 +165,50 @@
 .quote-text:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 6px;
 }
 
 /* === 作品轮播 === */
 .featured-carousel {
   position: relative;
+  padding: 32px 36px;
+  min-height: 240px;
+  display: grid;
+  gap: 10px;
+  align-content: center;
 }
 
 .featured-carousel-controls {
   position: absolute;
-  top: 20px;
-  right: 22px;
+  top: 22px;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .carousel-arrow {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 0;
+  border: 1px solid var(--border-soft);
   border-radius: 50%;
-  background: transparent;
+  background: var(--surface-soft);
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s, border-color 0.2s;
 }
 
 .carousel-arrow:hover {
   color: var(--text-main);
-  background: var(--surface-soft);
+  border-color: var(--brand);
 }
 
 .carousel-count {
   color: var(--text-muted);
   font-size: 13px;
-  letter-spacing: -0.1px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -136,7 +217,7 @@
 .featured-dots {
   position: absolute;
   left: 50%;
-  bottom: 20px;
+  bottom: 22px;
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
@@ -159,29 +240,27 @@
 .featured-dot:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 50%;
 }
 
-/* === 「哒哒哒哒哒」FAB === */
+/* === 悬浮按钮 === */
 .cloud-fab {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 50;
-  padding: 16px 22px;
+  padding: 14px 20px;
   border-radius: 999px;
-  background: var(--grad);
+  background: var(--brand);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  box-shadow: 0 12px 30px rgba(30, 152, 253, 0.32);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow);
+  transition: background 0.2s, transform 0.2s;
 }
 
 .cloud-fab:hover {
+  background: var(--brand-hover);
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(30, 152, 253, 0.4);
 }
 
 .cloud-fab:focus-visible {
@@ -191,15 +270,16 @@
 
 /* === 占位页卡片 === */
 .placeholder-panel {
-  min-height: 220px;
+  min-height: 200px;
   display: grid;
   gap: 8px;
   align-content: center;
+  text-align: center;
 }
 
-/* 尊重系统「减少动态效果」：关掉动画/位移 */
 @media (prefers-reduced-motion: reduce) {
   .quote-text { animation: none; }
+  .featured-content { animation: none; }
   .cloud-fab,
   .cloud-fab:hover { transform: none; transition: none; }
 }

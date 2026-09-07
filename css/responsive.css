@@ -1,47 +1,28 @@
-@media (max-width: 834px) {
-  .panel-half { grid-column: span 12; }
-  .result-grid { grid-template-columns: 1fr; }
-  .identity-panel { grid-template-columns: 1fr; }
-  .lab-panel { min-height: auto; }
-}
+/* 响应式：覆盖整站断点（与各 CSS 内的局部断点配合） */
 
 @media (max-width: 640px) {
-  .page-shell { width: min(var(--maxw), calc(100% - 24px)); }
-  .hero-stage { padding: 12px 0 20px; min-height: auto; }
-  .hero-topline {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  .hero-display { font-size: 48px; }
-  .hero-subtitle { margin-top: 14px; font-size: 18px; }
-  .hero-topline-end { width: 100%; justify-content: flex-start; }
-  .panel { padding: 20px; border-radius: 24px; }
-  .panel-heading h3,
-  .featured-title,
-  .identity-value,
-  .result-badge strong { font-size: 24px; }
-  .identity-quote { font-size: 20px; }
+  .container { width: calc(100% - 24px); }
+  .page-shell { padding-bottom: 32px; }
+  .dashboard-grid { gap: 18px; }
+
+  .hero { padding: 48px 0 32px; }
+  .hero-title { font-size: 34px; }
+
+  .panel { padding: 22px; }
+  .panel-heading h3 { font-size: 22px; }
+  .section-title { font-size: 26px; }
+  .identity-value { font-size: 24px; }
 
   /* 每日一句 */
   .daily-quote { gap: 6px; }
-  .quote-arrow { width: 40px; height: 40px; }
-  .quote-text { font-size: 20px; min-height: 60px; } /* 2 行 × 20 × 1.5 */
+  .quote-text { font-size: 20px; min-height: 60px; }
 
   /* 作品轮播 */
-  .featured-carousel-controls { top: 14px; right: 12px; }
-  .featured-dots { bottom: 14px; }
-  .carousel-arrow { width: 36px; height: 36px; }
+  .featured-carousel { padding: 26px 22px; }
+  .featured-carousel-controls { top: 16px; right: 14px; }
+  .featured-dots { bottom: 16px; }
+  .carousel-arrow { width: 34px; height: 34px; }
 
-  /* 「哒哒哒哒哒」FAB */
-  .cloud-fab {
-    right: 16px;
-    bottom: 16px;
-    padding: 14px 18px;
-    font-size: 15px;
-  }
-
-  /* 「更多」下拉尽量贴合右缘、避免溢出 */
-  .more-panel { min-width: 150px; }
+  /* 悬浮按钮 */
+  .cloud-fab { right: 16px; bottom: 16px; padding: 12px 16px; font-size: 14px; }
 }

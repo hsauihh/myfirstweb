@@ -1,12 +1,18 @@
-// 页面顶部的大标题 + 副标题，包进一张玻璃卡片（「每个文字部分都加卡片」）。
-// 它纯展示、不带任何交互，所以是个"服务端组件"——顶上不用写 "use client"。
-export default function PageHeading({ title, subtitle }) {
+// 页面顶部 hero：eyebrow 小标签 + 大标题 + 副标题 + 可选 CTA 按钮。
+// 纯展示、无交互，服务端组件。cta 为 { href, label } 时显示按钮。
+import Link from "next/link";
+
+export default function PageHeading({ eyebrow, title, subtitle, cta }) {
   return (
-    <article className="panel card hero-copy-card">
-      <div className="hero-copy">
-        <h1 className="hero-display">{title}</h1>
-        <p className="hero-subtitle">{subtitle}</p>
-      </div>
-    </article>
+    <section className="hero">
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      <h1 className="hero-title">{title}</h1>
+      {subtitle && <p className="hero-subtitle">{subtitle}</p>}
+      {cta && (
+        <Link href={cta.href} className="btn btn-primary hero-cta">
+          {cta.label}
+        </Link>
+      )}
+    </section>
   );
 }

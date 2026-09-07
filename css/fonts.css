@@ -1,3 +1,6 @@
-/* 字体：Poppins（拉丁/数字，玻璃拟态方向的标题字体）+ 思源黑体 Noto Sans SC（中文正文）。
-   纯 CSS @import 引入，兼容静态导出；@import 必须放在本文件首行。 */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+/* 字体：霞鹜文楷 LXGW WenKai 简体版（主字体，字体名 = "LXGW WenKai"）+ 思源黑体 Noto Sans SC（fallback）。
+   用 jsdelivr 的 lxgw-wenkai-webfont，含 unicode-range 分包，浏览器按需加载。
+   @import 必须放在本文件首行。 */
+@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css');
+@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');

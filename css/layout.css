@@ -3,53 +3,35 @@ body {
   line-height: 1.5;
   color: var(--text-main);
   background: var(--page-bg);
-  transition: background 0.4s ease, color 0.4s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .app-shell {
-  position: relative;
   min-height: 100vh;
   background: var(--page-bg);
-  transition: background 0.4s ease;
+  transition: background 0.3s ease;
 }
 
-/* 背景光斑：固定视口、彩色渐变，玻璃卡片 backdrop-filter 才能透过看到被模糊的色块 */
-.app-shell::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(640px circle at 12% 8%, var(--glow-blue), transparent 62%),
-    radial-gradient(720px circle at 88% 4%, var(--glow-violet), transparent 60%),
-    radial-gradient(560px circle at 72% 96%, var(--glow-orange), transparent 60%);
-  animation: glow-drift 26s ease-in-out infinite alternate;
+/* 页面容器：居中、限宽 */
+.container {
+  width: min(var(--maxw), calc(100% - 40px));
+  margin: 0 auto;
 }
 
 .page-shell {
-  position: relative;
-  z-index: 1;
-  width: min(var(--maxw), calc(100% - 40px));
-  margin: 0 auto;
-  padding: 0 0 32px;
+  padding: 0 0 40px;
 }
 
-/* 光斑缓慢漂浮：氛围动效，尊重系统「减少动态效果」 */
-@keyframes glow-drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(2%, 3%, 0) scale(1.06); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .app-shell::before { animation: none; }
-}
-
+/* 内容网格 */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 18px;
+  gap: 24px;
 }
 
 .panel-full { grid-column: span 12; }
 .panel-half { grid-column: span 6; }
+
+@media (max-width: 834px) {
+  .panel-half { grid-column: span 12; }
+}

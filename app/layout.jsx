@@ -1,5 +1,6 @@
-// app/layout.jsx 是 Next.js 的"全站外壳"——所有页面都套在它里面。
-// 顶部 head 里的内联脚本在首帧渲染前设置 data-theme（浅色/暗色），避免主题闪烁。
+// app/layout.jsx 是 Next.js 的"全站外壳"。
+// Nav 在此全局渲染（每个页面自动出现 sticky 顶部导航栏：logo 返回入口 + 导航 + 天气 + 主题 + CTA）。
+// 顶部 head 的内联脚本在首帧前设置 data-theme，避免主题闪烁。
 
 import "../css/fonts.css";
 import "../css/reset.css";
@@ -11,6 +12,7 @@ import "../css/cards.css";
 import "../css/widgets.css";
 import "../css/lab.css";
 import "../css/responsive.css";
+import Nav from "../components/Nav.jsx";
 
 export const metadata = {
   title: "zero to tech",
@@ -29,8 +31,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <Nav />
         <div className="app-shell">
-          <div className="page-shell">
+          <div className="page-shell container">
             <main className="page-content">{children}</main>
           </div>
         </div>

@@ -6,10 +6,10 @@
 
 | 端 | 技术 |
 |----|------|
-| 前端 | Next.js 15（App Router）、React 19、animejs v4、手写 CSS（玻璃拟态 · 浅色/暗色双模式） |
+| 前端 | Next.js 15（App Router）、React 19、animejs v4、手写 CSS（参考「李勃老师」站：霞鹜文楷 + 青绿主色 + 实色卡片 · 浅色/暗色双模式） |
 | 后端 | Python ≥3.13、FastAPI、SnowNLP、pypinyin、SQLite、uv |
 
-前端 `output: 'export'` 静态导出；animejs 用 v4 具名导入；中文字体 Noto Sans SC（`css/fonts.css`）。
+前端 `output: 'export'` 静态导出；animejs 用 v4 具名导入；中文字体霞鹜文楷 LXGW WenKai（简体，`css/fonts.css`）。
 
 ## 快速开始
 
@@ -33,7 +33,7 @@ npm run dev
 ```
 zero-to-full/
 ├── app/          # 路由页：/、/text-lab、/about、/blog、/works
-├── components/   # 页面与交互组件
+├── components/   # 页面与交互组件（含 Nav 顶栏 / WeatherWidget 天气 / ThemeToggle 主题 / WorksGrid 作品网格）
 ├── data/         # 静态文案与打底数据（site.js、quotes.js）
 ├── css/          # 手写样式
 ├── backend/      # FastAPI 服务：main.py（接口层）、storage.py（SQLite 层）、weather.py（天气）
@@ -58,7 +58,8 @@ zero-to-full/
 - CORS 允许 `http://localhost:3000`；改动前端端口需同步 `backend/main.py` 的 `allow_origins`。
 - 后端不可用时前端回退 `data/site.js` 打底数据，页面不崩。
 - `/api/analyze` 尚未校验空字符串 / 超长文本。
-- 界面为玻璃拟态风格，支持浅色/暗色双模式：右上角切换，默认跟随系统偏好、记忆用户选择。
+- 界面参考「李勃老师」站设计：霞鹜文楷字体、米白背景 + 青绿主色、实色卡片（无玻璃拟态）；支持浅色/暗色双模式（顶部导航切换，默认跟随系统偏好、记忆用户选择）。
+- 天气卡片在全站顶部导航常驻：首次进入自动获取，点击卡片可刷新，悬停/聚焦展开湿度/风向/更新时间。
 - 天气依赖高德开放平台：key 写在 `backend/.env`（已 gitignore），后端启动时自动加载；本地/无法定位的 IP 会回退到服务器出口定位；未配置或定位失败时接口返回 4xx/503，前端静默隐藏天气。
 
 ## 文档维护

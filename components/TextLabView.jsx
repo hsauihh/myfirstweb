@@ -1,10 +1,7 @@
 "use client";
 
-// 文字实验室页。这一节多了一件事：把历史记录显示出来。
-// 历史放在弹窗里（而不是再加一张卡），点结果卡右上角的按钮才打开——
-// 也是打开的那一刻才去请求 /api/history，没必要每次进页面都拉一遍。
+// 文字实验室页：居中 hero + 输入卡片 + 结果卡片 + 历史弹窗。
 import { useState } from "react";
-import Nav from "./Nav.jsx";
 import PageHeading from "./PageHeading.jsx";
 import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
 import InputCard from "./InputCard.jsx";
@@ -31,10 +28,13 @@ export default function TextLabView() {
 
   return (
     <AnimatedCardGrid className="dashboard-grid">
-      <article className="hero-stage panel-full">
-        <Nav />
-        <PageHeading title={textLab.heroTitle} subtitle={textLab.heroSubtitle} />
-      </article>
+      <div className="panel-full">
+        <PageHeading
+          eyebrow="文字实验室"
+          title={textLab.heroTitle}
+          subtitle={textLab.heroSubtitle}
+        />
+      </div>
 
       <InputCard onResult={setResult} />
       <ResultCard result={result} onOpenHistory={openHistory} />

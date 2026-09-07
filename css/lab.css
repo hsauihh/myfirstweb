@@ -1,15 +1,17 @@
+/* 文字实验室：输入卡片 / 结果卡片 / 历史弹窗（实色） */
+
 .panel-heading {
   margin-bottom: 20px;
 }
 
 .panel-heading h3 {
-  font-size: 28px;
-  line-height: 1.14;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.18;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
-.lab-panel { min-height: 340px; }
+.lab-panel { min-height: 320px; }
 
 .lab-form {
   display: grid;
@@ -18,24 +20,23 @@
 
 .lab-form label {
   color: var(--text-soft);
-  font-size: 17px;
-  line-height: 1.47;
-  letter-spacing: -0.37px;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .lab-form textarea {
   width: 100%;
-  min-height: 220px;
-  padding: 18px 20px;
+  min-height: 200px;
+  padding: 16px 18px;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-soft);
   background: var(--surface-soft);
   color: var(--text-main);
   resize: vertical;
   outline: none;
-  font-size: 17px;
-  line-height: 1.47;
-  letter-spacing: -0.37px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: inherit;
 }
 
 .lab-form textarea:focus {
@@ -50,11 +51,8 @@
 .lab-count {
   color: var(--text-muted);
   font-size: 13px;
-  line-height: 1.3;
-  letter-spacing: -0.12px;
 }
 
-/* 分析请求失败时的提示文案（这一节新增） */
 .lab-error {
   color: var(--danger);
   font-size: 14px;
@@ -64,19 +62,21 @@
 .primary-button {
   justify-self: start;
   min-width: 128px;
-  padding: 8px 16px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--brand);
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
-  font-size: 17px;
-  line-height: 1.41;
-  transition: opacity 0.2s;
+  font-size: 16px;
+  line-height: 1.4;
+  font-family: inherit;
+  transition: background 0.2s;
 }
 
-.primary-button:hover { opacity: 0.86; }
+.primary-button:hover { background: var(--brand-hover); }
 
+/* 结果区 */
 .result-stack {
   display: grid;
   gap: 14px;
@@ -84,7 +84,7 @@
 
 .result-item,
 .result-badge {
-  padding: 20px;
+  padding: 18px 20px;
   border-radius: var(--radius-soft);
   background: var(--surface-soft);
 }
@@ -95,15 +95,14 @@
   margin-bottom: 8px;
   color: var(--text-muted);
   font-size: 12px;
-  line-height: 1.33;
-  letter-spacing: -0.12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .result-item p {
   color: var(--text-main);
-  font-size: 17px;
-  line-height: 1.47;
-  letter-spacing: -0.37px;
+  font-size: 16px;
+  line-height: 1.5;
   word-break: break-word;
 }
 
@@ -114,15 +113,13 @@
 }
 
 .result-badge strong {
-  font-size: 28px;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
   color: var(--text-main);
 }
 
-/* ── 历史记录：结果卡右上角的按钮 ＋ 弹窗（这一节新增） ── */
-
+/* 历史记录 */
 .panel-heading-row {
   display: flex;
   align-items: flex-start;
@@ -132,14 +129,15 @@
 
 .ghost-button {
   flex-shrink: 0;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   font-size: 14px;
-  line-height: 1.4;
+  font-family: inherit;
+  line-height: 1.3;
   transition: border-color 0.2s, color 0.2s;
 }
 
@@ -156,7 +154,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .modal-panel {
@@ -165,12 +163,10 @@
   display: flex;
   flex-direction: column;
   padding: 28px;
-  border: 1px solid var(--border-glass);
   border-radius: var(--radius-panel);
-  background: var(--surface-strong);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: blur(var(--blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow);
 }
 
 .modal-heading {
@@ -182,22 +178,22 @@
 }
 
 .modal-heading h3 {
-  font-size: 28px;
-  line-height: 1.14;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.18;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .modal-close {
   flex-shrink: 0;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   font-size: 14px;
-  line-height: 1.4;
+  font-family: inherit;
 }
 
 .modal-close:hover {
@@ -220,7 +216,7 @@
 .history-text {
   color: var(--text-main);
   font-size: 16px;
-  line-height: 1.45;
+  line-height: 1.5;
   word-break: break-word;
 }
 
@@ -229,12 +225,14 @@
   margin-top: 6px;
   color: var(--text-muted);
   font-size: 12px;
-  line-height: 1.33;
-  letter-spacing: -0.12px;
 }
 
 .history-empty {
   color: var(--text-muted);
   font-size: 15px;
-  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .result-grid { grid-template-columns: 1fr; }
+  .panel-heading-row { flex-direction: column; }
 }
