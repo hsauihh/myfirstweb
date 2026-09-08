@@ -7,7 +7,7 @@ from pypinyin import lazy_pinyin, Style
 from snownlp import SnowNLP
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from storage import init_db, save_record, get_history
+from storage import init_db, save_record, get_history, clear_history
 from weather import get_weather_for_ip
 
 load_dotenv()
@@ -19,7 +19,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_credentials=True, 
 )
 
@@ -83,6 +83,13 @@ def analyze(req: AnalyzeRequest, request: Request, response: Response):
 def history(request: Request, response: Response, limit: int = 10):
     sid = get_session_id(request, response)
     return get_history(sid, limit)    # 只回这个会话自己的
+
+
+@app.delete("/api/history")
+def clear_history_endpoint(request: Request, response: Response):
+    """清空当前会话的全部历史记录，返回被删除的条数。"""
+    sid = get_session_id(request, response)
+    return {"cleared": clear_history(sid)}
 
 
 AMAP_KEY = os.environ.get("AMAP_KEY", "")

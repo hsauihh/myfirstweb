@@ -54,3 +54,14 @@ def get_history(session_id, limit):
     for row in rows:
         records.append(dict(row))
     return records
+
+
+def clear_history(session_id: str) -> int:
+    """删除某会话的全部历史记录，返回被删除的条数。"""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM history WHERE session_id = ?", [session_id])
+    conn.commit()
+    deleted = cur.rowcount
+    conn.close()
+    return deleted

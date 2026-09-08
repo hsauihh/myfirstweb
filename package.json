@@ -1,11 +1,12 @@
 {
-  "name": "zero-to-tech-4-5",
+  "name": "zero-to-tech",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "back": "cd backend && uv run fastapi dev --port 8001"
   },
   "dependencies": {
     "animejs": "^4.4.1",

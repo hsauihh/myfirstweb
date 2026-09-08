@@ -16,7 +16,7 @@ function formatTime(iso) {
   });
 }
 
-export default function HistoryModal({ open, items, onClose }) {
+export default function HistoryModal({ open, items, onClose, onClear }) {
   // 按 Esc 关闭
   useEffect(() => {
     if (!open) return;
@@ -26,6 +26,13 @@ export default function HistoryModal({ open, items, onClose }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // 清空是不可逆操作，先确认再动手
+  function handleClear() {
+    if (window.confirm("确定清空全部历史记录吗？此操作不可恢复。")) {
+      onClear();
+    }
+  }
 
   if (!open) return null;
 
@@ -38,9 +45,20 @@ export default function HistoryModal({ open, items, onClose }) {
             <p className="section-kicker">历史记录</p>
             <h3>最近的分析</h3>
           </div>
-          <button type="button" className="modal-close" onClick={onClose}>
-            关闭
-          </button>
+          <div className="modal-actions">
+            {items.length > 0 && (
+              <button
+                type="button"
+                className="ghost-button danger"
+                onClick={handleClear}
+              >
+                清空
+              </button>
+            )}
+            <button type="button" className="modal-close" onClick={onClose}>
+              关闭
+            </button>
+          </div>
         </div>
 
         {items.length === 0 ? (

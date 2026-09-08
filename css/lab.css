@@ -184,6 +184,12 @@
   color: var(--text-main);
 }
 
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .modal-close {
   flex-shrink: 0;
   padding: 8px 16px;
@@ -199,6 +205,18 @@
 .modal-close:hover {
   border-color: var(--brand);
   color: var(--brand);
+}
+
+/* 危险操作（如清空历史）：临时改为警示色 */
+.ghost-button.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.ghost-button.danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(192, 57, 43, 0.08);
 }
 
 .history-list {
