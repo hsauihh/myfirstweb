@@ -4,3 +4,12 @@
 @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css');
 @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+
+/* 原神游戏内字体（本地 genshin.ttf），聊天用 */
+@font-face {
+  font-family: "Genshin";
+  font-weight: 400;
+  font-style: normal;
+  src: url("/fonts/genshin.ttf") format("truetype");
+  font-display: swap;
+}

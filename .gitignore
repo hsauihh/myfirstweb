@@ -1,43 +1,64 @@
-# dependencies
+# ===== 依赖 =====
 node_modules/
 
-# next.js
+# ===== 构建产物 =====
 .next/
 out/
-
-# production
 build/
 dist/
 
-# editor
-.vscode
-!.vscode/extensions.json
-.vscode/*
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
 
-# misc
-*.log
-.env*
-
-
-backend/.venv
-backend/__pycache__
-*.pyc
-
+# ===== 本地数据（含用户与聊天记录，绝不入库）=====
 history.json
 history.db
+*.db
+*.sqlite
+*.sqlite3
+backend/avatars/
 
-.mcp.json
+# ===== 环境变量与密钥（防止 API 泄露）=====
+.env*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.*
+credentials.*
 
-.pi
-pifile
+# ===== 日志 =====
+*.log
 
-AGENTS.md
+# ===== 编辑器 =====
+.vscode/*
+!.vscode/extensions.json
+.idea/
 
-backend/.pytest_cache
+# ===== 操作系统元数据（Windows / macOS）=====
+*Zone.Identifier
+.DS_Store
+Thumbs.db
+desktop.ini
 
-backend/tests
+# ===== 大文件 / 模型归档 =====
+*.tar.gz
+*.zip
 
-struct.md
-
-backend/avatars
+# ===== 知识库原始资料 =====
 RAGdata/
+
+# ===== 本地工具与中间文件 =====
+.mcp.json
+.pi/
+pifile/
+
+# ===== 项目内部文档与测试（按原约定不入库）=====
+AGENTS.md
+struct.md
+backend/tests/

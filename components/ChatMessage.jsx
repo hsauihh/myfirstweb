@@ -2,11 +2,12 @@
 // streaming 为 true 时在末尾显示光标。
 import Markdown from "./Markdown.jsx";
 
-export default function ChatMessage({ role, content, streaming = false }) {
+export default function ChatMessage({ role, content, streaming = false, selfName }) {
   const isUser = role === "user";
+  const label = isUser ? selfName || "我" : "助手";
   return (
     <div className={"chat-message" + (isUser ? " is-user" : " is-assistant")}>
-      <span className="chat-role">{isUser ? "我" : "助手"}</span>
+      <span className="chat-role">{label}</span>
       {isUser ? (
         <p className="chat-bubble">
           {content}

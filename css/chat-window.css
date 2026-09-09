@@ -2,18 +2,10 @@
 
 :root {
   --chat-bg: #ededed;
-  --bubble-mine: #95ec69;
-  --bubble-mine-text: #151613;
-  --bubble-theirs: #ffffff;
-  --bubble-theirs-text: #151613;
 }
 
 [data-theme="dark"] {
   --chat-bg: #141715;
-  --bubble-mine: #2e6b45;
-  --bubble-mine-text: #eef7f0;
-  --bubble-theirs: #1e2320;
-  --bubble-theirs-text: #edecea;
 }
 
 .chat-window {
@@ -22,6 +14,7 @@
   min-height: 560px;
   background: var(--chat-bg);
   overflow: hidden;
+  font-family: "Genshin", var(--font);
 }
 
 .chat-window--empty {
@@ -83,22 +76,42 @@
 
 .chat-row.is-mine { flex-direction: row-reverse; }
 
+.chat-row-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  max-width: 68%;
+}
+
+.chat-row.is-mine .chat-row-body { align-items: flex-end; }
+
+.chat-row-body .chat-bubble { max-width: 100%; }
+
+.chat-name {
+  padding: 0 6px;
+  font-family: "Genshin", var(--font);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 .chat-bubble {
   max-width: 68%;
   margin: 0;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--bubble-theirs);
-  color: var(--bubble-theirs-text);
+  padding: 12px 16px;
+  border-radius: var(--bubble-radius);
+  background: var(--bubble-other-bg);
+  color: var(--bubble-other-color);
+  font-family: "Genshin", var(--font);
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .chat-row.is-mine .chat-bubble {
-  background: var(--bubble-mine);
-  color: var(--bubble-mine-text);
+  background: var(--bubble-self-bg);
+  color: var(--bubble-self-color);
 }
 
 .chat-window-input {

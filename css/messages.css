@@ -109,7 +109,7 @@
 
 .messages-combined {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   align-items: stretch;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-panel);

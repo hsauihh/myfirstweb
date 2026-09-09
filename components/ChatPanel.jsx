@@ -44,6 +44,7 @@ export default function ChatPanel() {
         messages={chat.messages}
         streamingText={chat.streamingText}
         listRef={listRef}
+        selfName={auth.user?.username}
       />
       {chat.error && <p className="lab-error chat-error">{chat.error}</p>}
       <ChatComposer

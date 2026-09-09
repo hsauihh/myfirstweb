@@ -93,24 +93,17 @@
 
 .chat-role {
   color: var(--text-muted);
+  font-family: "Genshin", var(--font);
   font-size: 12px;
 }
 
-.chat-bubble {
-  margin: 0;
-  padding: 12px 16px;
-  border-radius: var(--radius-soft);
-  background: var(--surface-soft);
-  color: var(--text-main);
-  font-size: 16px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+/* 聊天气泡：胶囊形统一样式在 chat-window.css 的 .chat-bubble（对方暗色），
+   这里只覆盖 AI 对话的宽度与「我」的奶油色。 */
+.chat-message .chat-bubble { max-width: 100%; }
 
 .chat-message.is-user .chat-bubble {
-  background: var(--brand);
-  color: #fff;
+  background: var(--bubble-self-bg);
+  color: var(--bubble-self-color);
 }
 
 .chat-cursor {
@@ -144,6 +137,7 @@
   color: var(--text-main);
   resize: vertical;
   outline: none;
+  font-family: "Genshin", var(--font);
   font-size: 16px;
   line-height: 1.5;
   font-family: inherit;

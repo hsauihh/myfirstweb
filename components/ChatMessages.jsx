@@ -1,7 +1,7 @@
 // 消息列表：历史消息 + 正在流式生成的回复。
 import ChatMessage from "./ChatMessage.jsx";
 
-export default function ChatMessages({ messages, streamingText, listRef }) {
+export default function ChatMessages({ messages, streamingText, listRef, selfName }) {
   const isEmpty = messages.length === 0 && !streamingText;
   return (
     <div className="chat-messages" ref={listRef}>
@@ -11,10 +11,11 @@ export default function ChatMessages({ messages, streamingText, listRef }) {
           key={message.id}
           role={message.role}
           content={message.content}
+          selfName={selfName}
         />
       ))}
       {streamingText && (
-        <ChatMessage role="assistant" content={streamingText} streaming />
+        <ChatMessage role="assistant" content={streamingText} streaming selfName={selfName} />
       )}
     </div>
   );

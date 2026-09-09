@@ -76,8 +76,11 @@ export default function ChatWindow({
         {messages.length === 0 && (
           <p className="messages-empty">还没有消息，打个招呼吧。</p>
         )}
-        {messages.map((message) => {
+        {messages.map((message, index) => {
           const mine = message.sender_id === selfId;
+          const prev = messages[index - 1];
+          const showName = !prev || prev.sender_id !== message.sender_id;
+          const name = mine ? selfName : friend.username;
           return (
             <div key={message.id} className={"chat-row" + (mine ? " is-mine" : "")}>
               <Avatar
@@ -85,7 +88,10 @@ export default function ChatWindow({
                 src={mine ? selfAvatar : friend.avatar}
                 size={36}
               />
-              <p className="chat-bubble">{message.content}</p>
+              <div className="chat-row-body">
+                {showName && <span className="chat-name">{name}</span>}
+                <p className="chat-bubble">{message.content}</p>
+              </div>
             </div>
           );
         })}

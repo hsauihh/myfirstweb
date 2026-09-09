@@ -155,7 +155,9 @@ zero-to-full/
 - 公告发布读取 `backend/.env` 的 `ANNOUNCE_KEY`；该接口只校验密钥、不依赖登录态，供 `announce.py` 调用。
 - RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
+- 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体 `public/fonts/genshin.ttf`；消息上方显示发送者用户名。
 
 ## 文档维护
 
 - `AGENTS.md` 给 AI 编码助手（硬约束与约定），`README.md` 给人类。项目结构、接口、技术栈或职责变动时二者同步更新。
+- 上线部署见 `DEPLOY.md`；一键脚本 `deploy/deploy.sh`，配置模板 `deploy/nginx.conf`、`deploy/zero-to-full.service`。

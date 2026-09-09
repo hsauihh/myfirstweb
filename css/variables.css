@@ -28,6 +28,13 @@
   --maxw: 980px;
   --font: "LXGW WenKai", "Noto Sans SC", -apple-system, BlinkMacSystemFont,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  /* 聊天气泡（胶囊形：自己奶油色、对方暗色半透明） */
+  --bubble-radius: 22px;
+  --bubble-self-bg: #f3eedd;
+  --bubble-self-color: #33322e;
+  --bubble-other-bg: rgba(40, 42, 55, 0.82);
+  --bubble-other-color: #f4f4f1;
 }
 
 [data-theme="dark"] {
@@ -44,4 +51,9 @@
   --danger: #e07b6d;
   --border-soft: #2a302c;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  --bubble-self-bg: #343833;
+  --bubble-self-color: #ecebe7;
+  --bubble-other-bg: rgba(15, 17, 15, 0.85);
+  --bubble-other-color: #e8e8e4;
 }
