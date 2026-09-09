@@ -11,8 +11,16 @@ import "../css/nav.css";
 import "../css/cards.css";
 import "../css/widgets.css";
 import "../css/lab.css";
+import "../css/chat.css";
+import "../css/auth.css";
+import "../css/messages.css";
+import "../css/messages-panels.css";
+import "../css/chat-window.css";
 import "../css/responsive.css";
 import Nav from "../components/Nav.jsx";
+import AddFriendModal from "../components/AddFriendModal.jsx";
+import { AuthProvider } from "../components/AuthContext.jsx";
+import { MessagesProvider } from "../components/MessagesContext.jsx";
 
 export const metadata = {
   title: "zero to tech",
@@ -31,12 +39,17 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <Nav />
-        <div className="app-shell">
-          <div className="page-shell container">
-            <main className="page-content">{children}</main>
-          </div>
-        </div>
+        <AuthProvider>
+          <MessagesProvider>
+            <Nav />
+            <AddFriendModal />
+            <div className="app-shell">
+              <div className="page-shell container">
+                <main className="page-content">{children}</main>
+              </div>
+            </div>
+          </MessagesProvider>
+        </AuthProvider>
       </body>
     </html>
   );

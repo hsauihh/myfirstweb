@@ -8,7 +8,9 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "bcrypt>=4",
     "fastapi[standard]>=0.141.1",
+    "openai>=1.60",
     "pypinyin>=0.55.0",
     "python-dotenv>=1.0",
     "requests>=2.34.2",

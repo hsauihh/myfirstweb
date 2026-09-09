@@ -34,6 +34,7 @@
 }
 
 .nav-link {
+  position: relative;
   color: var(--text-muted);
   font-size: 16px;
   line-height: 1.4;
@@ -49,6 +50,21 @@
 .nav-link.active,
 .nav-link:focus-visible {
   color: var(--text-main);
+}
+
+/* 「消息」未读红点 */
+.nav-badge {
+  position: absolute;
+  top: -8px;
+  right: -14px;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 /* 更多下拉 */

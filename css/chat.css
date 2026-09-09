@@ -1,0 +1,214 @@
+/* AI 对话：模式 Tab、会话栏、消息气泡、输入区 */
+
+/* 模式切换 Tab */
+.lab-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.lab-tab {
+  padding: 8px 18px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.lab-tab:hover {
+  color: var(--text-main);
+  border-color: var(--brand);
+}
+
+.lab-tab.is-active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+/* 两个面板都挂载，靠 display 切换；contents 让卡片仍是网格子项 */
+.tab-panel { display: contents; }
+.tab-panel.is-hidden { display: none !important; }
+
+/* 会话操作栏 */
+.chat-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-select {
+  max-width: 220px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.chat-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* 消息区 */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 420px;
+  min-height: 180px;
+  padding: 4px;
+  overflow-y: auto;
+}
+
+.chat-empty {
+  color: var(--text-muted);
+  font-size: 15px;
+  text-align: center;
+  padding: 48px 0;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 82%;
+}
+
+.chat-message.is-user { align-self: flex-end; align-items: flex-end; }
+.chat-message.is-assistant { align-self: flex-start; }
+
+.chat-role {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chat-bubble {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-message.is-user .chat-bubble {
+  background: var(--brand);
+  color: #fff;
+}
+
+.chat-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: chat-cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes chat-cursor-blink {
+  50% { opacity: 0; }
+}
+
+/* 输入区 */
+.chat-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.chat-form textarea {
+  width: 100%;
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  resize: vertical;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.chat-form textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.chat-form textarea::placeholder { color: var(--text-muted); }
+.chat-form textarea:disabled { opacity: 0.6; }
+
+.chat-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chat-form-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-quota {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.chat-quota-link {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.chat-error { margin-top: 12px; }
+
+/* 分析模式下的 AI 聊天引导条 */
+.chat-promo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chat-promo h3 {
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--text-main);
+}
+
+.chat-promo .section-subtitle {
+  margin-top: 6px;
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .chat-message { max-width: 94%; }
+  .chat-select { max-width: 100%; width: 100%; }
+  .chat-actions { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-cursor { animation: none; }
+}

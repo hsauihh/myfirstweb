@@ -1,0 +1,21 @@
+// 消息列表：历史消息 + 正在流式生成的回复。
+import ChatMessage from "./ChatMessage.jsx";
+
+export default function ChatMessages({ messages, streamingText, listRef }) {
+  const isEmpty = messages.length === 0 && !streamingText;
+  return (
+    <div className="chat-messages" ref={listRef}>
+      {isEmpty && <p className="chat-empty">还没有消息，说点什么吧。</p>}
+      {messages.map((message) => (
+        <ChatMessage
+          key={message.id}
+          role={message.role}
+          content={message.content}
+        />
+      ))}
+      {streamingText && (
+        <ChatMessage role="assistant" content={streamingText} streaming />
+      )}
+    </div>
+  );
+}

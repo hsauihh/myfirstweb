@@ -1,0 +1,110 @@
+/* 消息中心面板：好友申请、设置行、开关、添加好友弹窗 */
+
+/* 好友申请 */
+.request-list { display: grid; gap: 4px; }
+
+.request-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.request-item:last-child { border-bottom: none; }
+.request-name { color: var(--text-main); font-size: 15px; }
+.request-actions { display: flex; gap: 8px; }
+
+/* 设置行与开关 */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.setting-row:last-of-type { border-bottom: none; }
+.setting-title { color: var(--text-main); font-size: 16px; }
+
+.setting-desc {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: var(--border-soft);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.switch.is-on { background: var(--brand); }
+
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.switch.is-on .switch-knob { transform: translateX(20px); }
+
+/* 添加好友弹窗 */
+.add-friend-modal { width: min(440px, 100%); }
+.add-friend-body { display: grid; gap: 14px; }
+.add-friend-hint { color: var(--text-muted); font-size: 14px; }
+.add-tabs { display: flex; gap: 8px; }
+.add-row { display: flex; gap: 8px; }
+
+.add-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+}
+
+.add-row input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.add-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+}
+
+.add-relation { color: var(--text-muted); font-size: 13px; }
+
+.invite-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+}

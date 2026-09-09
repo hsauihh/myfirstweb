@@ -6,11 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { moreLinks } from "../data/site.js";
+import NavAuth from "./NavAuth.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 import WeatherWidget from "./WeatherWidget.jsx";
+import { useMessages } from "./MessagesContext.jsx";
 
 export default function Nav() {
   const pathname = usePathname();
+  const { reminderEnabled, totalUnread } = useMessages();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
@@ -109,6 +112,19 @@ export default function Nav() {
         <div className="nav-actions">
           <WeatherWidget />
           <ThemeToggle />
+          <NavAuth>
+            <Link
+              href="/messages"
+              className={"nav-link" + (isActive("/messages") ? " active" : "")}
+            >
+              消息
+              {reminderEnabled && totalUnread > 0 && (
+                <span className="nav-badge">
+                  {totalUnread > 99 ? "99+" : totalUnread}
+                </span>
+              )}
+            </Link>
+          </NavAuth>
           <Link href="/text-lab" className="btn btn-primary">
             开始使用
           </Link>

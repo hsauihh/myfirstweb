@@ -1,0 +1,252 @@
+/* 消息中心：左侧导航 + 会话列表 + 内容面板（面板细节见 messages-panels.css） */
+
+/* 首字母头像 */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* 未登录引导卡 */
+.messages-guest {
+  max-width: 480px;
+  margin: 32px auto 0;
+  padding: 44px 32px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow);
+}
+
+.messages-title {
+  margin: 10px 0 0;
+  font-size: 28px;
+  line-height: 1.25;
+  color: var(--text-main);
+}
+
+.messages-guest .btn { margin-top: 24px; }
+
+/* 布局 */
+.messages-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 32px;
+}
+
+.messages-rail {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 560px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.messages-rail-top {
+  display: grid;
+  gap: 4px;
+}
+
+.rail-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-soft);
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+  text-align: left;
+}
+
+.rail-item:hover { background: var(--surface-soft); color: var(--text-main); }
+.rail-item.is-active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+
+.rail-badge {
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+}
+
+.messages-main { min-width: 0; }
+
+.messages-chats {
+  display: grid;
+  gap: 16px;
+}
+
+.messages-title-card {
+  padding: 16px 20px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.messages-combined {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  align-items: stretch;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* 会话列表 */
+.conversation-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--border-soft);
+}
+
+/* 列表为空时与右侧聊天空状态一样居中 */
+.conversation-pane .messages-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  text-align: center;
+}
+
+.conversation-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  flex: 1;
+  min-height: 0;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-soft);
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.conversation-item:hover { background: var(--surface-soft); }
+.conversation-item.is-active { background: var(--brand-soft); }
+
+.conversation-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.conversation-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.conversation-name {
+  color: var(--text-main);
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-time {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.conversation-preview {
+  color: var(--text-muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-badge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* 内容面板 */
+.messages-content {
+  display: grid;
+  gap: 18px;
+  padding: 24px 28px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.messages-content-heading h2 {
+  font-size: 22px;
+  color: var(--text-main);
+}
+
+.messages-content-desc {
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 15px;
+}
+
+.messages-empty {
+  color: var(--text-muted);
+  font-size: 15px;
+  padding: 16px 0;
+}
+
+@media (max-width: 834px) {
+  .messages-layout { grid-template-columns: 1fr; }
+  .messages-rail {
+    flex-direction: row;
+    align-items: center;
+    min-height: 0;
+  }
+  .messages-rail-top { display: flex; gap: 4px; }
+  .messages-combined { grid-template-columns: 1fr; }
+  .conversation-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .conversation-list { max-height: 40vh; }
+}

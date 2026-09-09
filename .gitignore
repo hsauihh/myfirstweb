@@ -36,3 +36,5 @@ AGENTS.md
 backend/.pytest_cache
 
 backend/tests
+
+struct.md

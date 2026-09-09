@@ -1,42 +1,22 @@
 "use client";
 
-// 文字实验室页：居中 hero + 输入卡片 + 结果卡片 + 历史弹窗。
+// 文字实验室页：居中 hero + 模式 Tab（分析 / AI 对话），默认进入分析。
+// 两个模式都保持挂载（用 CSS 隐藏），这样首屏的卡片入场动画能覆盖到全部卡片。
 import { useState } from "react";
 import PageHeading from "./PageHeading.jsx";
 import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
-import InputCard from "./InputCard.jsx";
-import ResultCard from "./ResultCard.jsx";
-import HistoryModal from "./HistoryModal.jsx";
+import AnalysisPanel from "./AnalysisPanel.jsx";
+import ChatPanel from "./ChatPanel.jsx";
+import ChatPromo from "./ChatPromo.jsx";
 import { textLab } from "../data/site.js";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const TABS = [
+  { id: "analysis", label: "分析" },
+  { id: "chat", label: "AI 对话" },
+];
 
 export default function TextLabView() {
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [historyOpen, setHistoryOpen] = useState(false);
-
-  async function openHistory() {
-    setHistoryOpen(true);
-    try {
-      const res = await fetch(`${API}/api/history`, { credentials: "include" });
-      setHistory(await res.json());
-    } catch {
-      // 后端没起来时不让页面崩掉，弹窗显示"还没有记录"
-    }
-  }
-
-  async function clearHistory() {
-    try {
-      await fetch(`${API}/api/history`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      setHistory([]);
-    } catch {
-      // 后端不可用时保留现有列表，不清空
-    }
-  }
+  const [tab, setTab] = useState("analysis");
 
   return (
     <AnimatedCardGrid className="dashboard-grid">
@@ -46,17 +26,29 @@ export default function TextLabView() {
           title={textLab.heroTitle}
           subtitle={textLab.heroSubtitle}
         />
+        <div className="lab-tabs" role="tablist" aria-label="模式切换">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              className={"lab-tab" + (tab === item.id ? " is-active" : "")}
+              onClick={() => setTab(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <InputCard onResult={setResult} />
-      <ResultCard result={result} onOpenHistory={openHistory} />
-
-      <HistoryModal
-        open={historyOpen}
-        items={history}
-        onClose={() => setHistoryOpen(false)}
-        onClear={clearHistory}
-      />
+      <div className={"tab-panel" + (tab === "chat" ? "" : " is-hidden")}>
+        <ChatPanel />
+      </div>
+      <div className={"tab-panel" + (tab === "analysis" ? "" : " is-hidden")}>
+        <AnalysisPanel />
+        <ChatPromo onSwitch={() => setTab("chat")} />
+      </div>
     </AnimatedCardGrid>
   );
 }
