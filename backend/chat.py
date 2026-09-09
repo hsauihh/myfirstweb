@@ -12,6 +12,10 @@ HISTORY_FETCH_LIMIT = 50        # 从库里取历史的上限，给上下文裁�
 DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
 DEFAULT_MODEL = "deepseek-chat"
 DEFAULT_SYSTEM_PROMPT = "你是文字实验室的中文助手，回答简洁、友好、口语化。"
+RAG_INSTRUCTION = (
+    "优先依据下面的「参考资料」回答；资料不足或与问题无关时直说没有相关资料，"
+    "不要编造。回答末尾标注来源文件名。\n\n参考资料：\n"
+)
 
 
 @dataclass(frozen=True)
@@ -29,8 +33,14 @@ def build_messages(
     user_text: str,
     *,
     max_turns: int = DEFAULT_MAX_TURNS,
+    context: str = "",
 ) -> list[dict]:
-    """拼装请求体：system 在首位，随后是最近 max_turns 条历史，最后是当前用户消息。"""
+    """拼装请求体：system 在首位，随后是最近 max_turns 条历史，最后是当前用户消息。
+
+    context 非空时作为知识库参考资料追加到 system 提示词。
+    """
+    if context:
+        system_prompt = f"{system_prompt}\n\n{RAG_INSTRUCTION}{context}"
     recent = history[-max_turns:] if max_turns > 0 else history
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend({"role": item["role"], "content": item["content"]} for item in recent)

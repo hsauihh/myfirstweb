@@ -130,6 +130,7 @@ def _request(row: sqlite3.Row) -> dict:
         "user": {
             "id": row["user_id"],
             "username": row["username"],
+            "avatar": row["avatar"],
             "created_at": row["user_created_at"],
         },
     }
@@ -140,7 +141,7 @@ def _list_requests(user_id: int, *, incoming: bool) -> list[dict]:
     user_column = "from_user_id" if incoming else "to_user_id"
     conn = db.get_conn()
     rows = conn.execute(
-        "SELECT r.id, r.created_at, u.id AS user_id, u.username,"
+        "SELECT r.id, r.created_at, u.id AS user_id, u.username, u.avatar,"
         " u.created_at AS user_created_at"
         f" FROM friend_requests r JOIN users u ON u.id = r.{user_column}"
         f" WHERE r.{owner_column} = ? ORDER BY r.id DESC",
@@ -230,7 +231,7 @@ def list_friends(user_id: int) -> list[dict]:
     """好友列表，带未读数、最后消息时间与内容；有消息的排前面，再按时间倒序。"""
     conn = db.get_conn()
     rows = conn.execute(
-        "SELECT u.id, u.username,"
+        "SELECT u.id, u.username, u.avatar,"
         " (SELECT COUNT(*) FROM direct_messages m"
         "   WHERE m.recipient_id = ? AND m.sender_id = u.id AND m.read_at IS NULL)"
         "   AS unread,"
@@ -258,6 +259,7 @@ def list_friends(user_id: int) -> list[dict]:
         {
             "id": row["id"],
             "username": row["username"],
+            "avatar": row["avatar"],
             "unread": row["unread"],
             "last_message_at": row["last_message_at"],
             "last_message": row["last_message"],

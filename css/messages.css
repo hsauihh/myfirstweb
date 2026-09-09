@@ -12,6 +12,8 @@
   line-height: 1;
 }
 
+.avatar--image { object-fit: cover; }
+
 /* 未登录引导卡 */
 .messages-guest {
   max-width: 480px;

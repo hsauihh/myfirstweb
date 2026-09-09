@@ -37,7 +37,7 @@ export default function MessagesRail({
         className={"rail-item" + (section === "settings" ? " is-active" : "")}
         onClick={() => onSelect("settings")}
       >
-        <span className="rail-label">消息设置</span>
+        <span className="rail-label">设置</span>
       </button>
     </nav>
   );

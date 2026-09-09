@@ -52,6 +52,10 @@ def init_db() -> None:
     _create_users(conn, cur)
     _create_friends(cur)
     _create_direct_messages(cur)
+    _create_announcements(cur)
+    _create_chat_daily_usage(cur)
+    _create_rag(cur)
+    _create_orders(cur)
     _create_anonymous_usage(cur)
     conn.commit()
     conn.close()
@@ -122,10 +126,14 @@ def _create_users(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
         username TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         friend_code TEXT,
+        avatar TEXT,
+        vip_expires_at TEXT,
         created_at TEXT NOT NULL
     )
     """)
     _ensure_column(conn, "users", "friend_code", ddl="TEXT")
+    _ensure_column(conn, "users", "avatar", ddl="TEXT")
+    _ensure_column(conn, "users", "vip_expires_at", ddl="TEXT")
     cur.execute(
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_friend_code "
         "ON users(friend_code)"
@@ -208,3 +216,79 @@ def _create_anonymous_usage(cur: sqlite3.Cursor) -> None:
         updated_at TEXT NOT NULL
     )
     """)
+
+
+def _create_chat_daily_usage(cur: sqlite3.Cursor) -> None:
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS chat_daily_usage (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        day TEXT NOT NULL,
+        used INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    )
+    """)
+
+
+def _create_rag(cur: sqlite3.Cursor) -> None:
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS documents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source TEXT NOT NULL,
+        chunk_index INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        embedding TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(source, chunk_index)
+    )
+    """)
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_documents_source ON documents(source)"
+    )
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS rag_daily_usage (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        day TEXT NOT NULL,
+        used INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, day)
+    )
+    """)
+
+
+def _create_orders(cur: sqlite3.Cursor) -> None:
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        product TEXT NOT NULL,
+        amount_cents INTEGER NOT NULL,
+        status TEXT NOT NULL CHECK(status IN ('pending', 'paid')),
+        created_at TEXT NOT NULL,
+        paid_at TEXT
+    )
+    """)
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id, id DESC)"
+    )
+
+
+def _create_announcements(cur: sqlite3.Cursor) -> None:
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS announcement_reads (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        announcement_id INTEGER NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
+        read_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, announcement_id)
+    )
+    """)
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_announcement_reads_user "
+        "ON announcement_reads(user_id)"
+    )

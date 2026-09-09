@@ -38,7 +38,7 @@ export default function ConversationList({ friends, activeId, selfId, onSelect }
                 }
                 onClick={() => onSelect(friend.id)}
               >
-                <Avatar name={friend.username} size={40} />
+                <Avatar name={friend.username} src={friend.avatar} size={40} />
                 <span className="conversation-body">
                   <span className="conversation-top">
                     <span className="conversation-name">{friend.username}</span>

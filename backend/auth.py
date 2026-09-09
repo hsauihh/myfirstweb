@@ -79,13 +79,20 @@ def resolve_owner(request: Request, response: Response) -> Owner:
     return Owner(user_id=None, session_id=get_session_id(request, response))
 
 
-def resolve_owner_for_stream(request: Request) -> tuple[Owner, str | None]:
-    """流式接口：返回 (归属, 需要新签发的 session_id 或 None)，Cookie 由调用方写入响应。"""
+def resolve_owner_for_stream(
+    request: Request,
+) -> tuple[Owner, dict | None, str | None]:
+    """流式接口：返回 (归属, 当前用户或 None, 需要新签发的 session_id 或 None)。"""
     user = get_current_user(request)
     if user is not None:
-        return Owner(
+        owner = Owner(
             user_id=user["id"],
             session_id=request.cookies.get(SESSION_COOKIE, ""),
-        ), None
+        )
+        return owner, user, None
     session_id, is_new = resolve_session_id(request)
-    return Owner(user_id=None, session_id=session_id), session_id if is_new else None
+    return (
+        Owner(user_id=None, session_id=session_id),
+        None,
+        session_id if is_new else None,
+    )

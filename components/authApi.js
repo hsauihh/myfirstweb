@@ -33,3 +33,9 @@ export function login(username, password) {
 export function logout() {
   return request("/api/auth/session", { method: "DELETE" });
 }
+
+export function uploadAvatar(file) {
+  const form = new FormData();
+  form.append("file", file);
+  return request("/api/auth/avatar", { method: "POST", body: form });
+}

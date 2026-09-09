@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import ChatWindow from "./ChatWindow.jsx";
 import ConversationList from "./ConversationList.jsx";
-import MessageSettings from "./MessageSettings.jsx";
 import MessagesRail from "./MessagesRail.jsx";
+import SettingsPanel from "./SettingsPanel.jsx";
 import SystemNotifications from "./SystemNotifications.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { useMessages } from "./MessagesContext.jsx";
@@ -48,7 +48,7 @@ export default function MessagesView() {
         section={section}
         onSelect={setSection}
         chatUnread={messages.chatUnread}
-        notificationCount={messages.requests.incoming.length}
+        notificationCount={messages.notificationCount}
       />
 
       <div className="messages-main">
@@ -68,6 +68,7 @@ export default function MessagesView() {
                 friend={activeFriend}
                 selfId={user.id}
                 selfName={user.username}
+                selfAvatar={user.avatar}
                 messages={messages.messages}
                 hasMore={messages.hasMore}
                 sending={messages.sending}
@@ -81,6 +82,8 @@ export default function MessagesView() {
 
         {section === "notifications" && (
           <SystemNotifications
+            announcements={messages.announcements}
+            onMarkRead={messages.markAnnouncementRead}
             requests={messages.requests}
             onAccept={messages.acceptRequest}
             onDelete={messages.deleteRequest}
@@ -88,7 +91,7 @@ export default function MessagesView() {
         )}
 
         {section === "settings" && (
-          <MessageSettings
+          <SettingsPanel
             reminderEnabled={messages.reminderEnabled}
             onToggleReminder={messages.setReminderEnabled}
             activeFriend={activeFriend}

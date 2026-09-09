@@ -1,26 +1,43 @@
 "use client";
 
-// 全站消息状态：好友列表、申请、当前会话、WebSocket 与提醒开关。
+// 全站消息状态：好友、公告、WebSocket 与提醒开关。
 // 导航栏红点、消息中心各面板都从这里取数据，保证只有一份连接与状态。
 import { createContext, useCallback, useContext, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import useAnnouncements from "./useAnnouncements.js";
 import useFriendSocket from "./useFriendSocket.js";
 import useFriends from "./useFriends.js";
 import useMessageReminder from "./useMessageReminder.js";
+import useVipBadge from "./useVipBadge.js";
 
 const MessagesContext = createContext(null);
 
 export function MessagesProvider({ children }) {
   const { user } = useAuth();
   const friends = useFriends({ enabled: Boolean(user) });
+  const announcements = useAnnouncements({ enabled: Boolean(user) });
   const { reminderEnabled, setReminderEnabled } = useMessageReminder();
+  const { vipBadgeEnabled, setVipBadgeEnabled } = useVipBadge();
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [presetCode, setPresetCode] = useState("");
 
+  const handleEvent = useCallback(
+    (event) => {
+      friends.handleSocketEvent(event);
+      announcements.applyEvent(event);
+    },
+    [friends.handleSocketEvent, announcements.applyEvent]
+  );
+
+  const handleReconnect = useCallback(() => {
+    friends.resync();
+    announcements.refresh();
+  }, [friends.resync, announcements.refresh]);
+
   useFriendSocket({
     enabled: Boolean(user),
-    onEvent: friends.handleSocketEvent,
-    onReconnect: friends.resync,
+    onEvent: handleEvent,
+    onReconnect: handleReconnect,
   });
 
   const openAddFriend = useCallback((code = "") => {
@@ -30,10 +47,22 @@ export function MessagesProvider({ children }) {
 
   const closeAddFriend = useCallback(() => setAddFriendOpen(false), []);
 
+  const notificationCount =
+    friends.requests.incoming.length + announcements.unreadCount;
+  const totalUnread = friends.chatUnread + notificationCount;
+
   const value = {
     ...friends,
+    announcements: announcements.items,
+    announcementUnread: announcements.unreadCount,
+    announcementError: announcements.error,
+    markAnnouncementRead: announcements.markRead,
+    notificationCount,
+    totalUnread,
     reminderEnabled,
     setReminderEnabled,
+    vipBadgeEnabled,
+    setVipBadgeEnabled,
     addFriendOpen,
     presetCode,
     openAddFriend,

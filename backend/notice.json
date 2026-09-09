@@ -1,0 +1,4 @@
+{
+  "title": "v1.3 更新公告",
+  "body": "本次更新内容：\n- 头像支持上传后裁剪\n- 新增公告发布脚本 backend/announce.py\n- 消息中心「设置」分为个人资料与消息设置\n\n使用方式：\n1. 修改本文件内容\n2. 在 backend 目录执行：uv run python announce.py notice.json"
+}

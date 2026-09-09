@@ -1,7 +1,7 @@
 "use client";
 
 // AI 对话面板：组合操作栏、消息区、输入区；数据与请求都在 useChat 里。
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatComposer from "./ChatComposer.jsx";
 import ChatMessages from "./ChatMessages.jsx";
 import ChatToolbar from "./ChatToolbar.jsx";
@@ -10,10 +10,12 @@ import { useAuth } from "./AuthContext.jsx";
 
 export default function ChatPanel() {
   const auth = useAuth();
-  const chat = useChat({ onQuota: auth.setQuota });
+  const chat = useChat({ onQuota: auth.applyQuota });
   const listRef = useRef(null);
-  const anonymous = auth.user === null;
-  const blocked = anonymous && (auth.quota?.remaining ?? 0) <= 0;
+  const [useRag, setUseRag] = useState(false);
+  const activeQuota = useRag ? auth.ragQuota : auth.quota;
+  const blocked =
+    !auth.loading && !auth.user?.vip && (activeQuota?.remaining ?? 0) <= 0;
 
   // 新消息或流式增量出现时滚到底部
   useEffect(() => {
@@ -47,7 +49,11 @@ export default function ChatPanel() {
       <ChatComposer
         sending={chat.sending}
         disabled={blocked}
-        quota={anonymous ? auth.quota : null}
+        quota={auth.quota}
+        ragQuota={auth.ragQuota}
+        user={auth.user}
+        useRag={useRag}
+        onToggleRag={setUseRag}
         onSend={chat.send}
         onStop={chat.stop}
       />

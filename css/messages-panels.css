@@ -13,6 +13,14 @@
 }
 
 .request-item:last-child { border-bottom: none; }
+
+.request-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .request-name { color: var(--text-main); font-size: 15px; }
 .request-actions { display: flex; gap: 8px; }
 
@@ -107,4 +115,125 @@
   gap: 10px;
   padding-top: 10px;
   border-top: 1px solid var(--border-soft);
+}
+
+/* 设置面板：个人资料 + 消息设置 */
+.settings-divider {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: none;
+  background: var(--border-soft);
+}
+
+.settings-subheading {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-info {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* 公告列表 */
+.announcement-list {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.announcement-item {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.announcement-item:hover { background: var(--brand-soft); }
+
+.announcement-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.announcement-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.announcement-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.announcement-time {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.announcement-body {
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 头像裁剪弹窗 */
+.crop-modal { width: min(420px, 100%); }
+
+.crop-stage {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius-soft);
+  overflow: hidden;
+  background: #000;
+}
+
+.crop-zoom {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
 }

@@ -51,6 +51,11 @@ class ConnectionManager:
         for friend_id in friends.friend_ids(user_id):
             await self.send(friend_id, event)
 
+    async def broadcast_all(self, event: dict) -> None:
+        """推给所有在线用户（公告用）。"""
+        for user_id in list(self._connections):
+            await self.send(user_id, event)
+
 
 manager = ConnectionManager()
 

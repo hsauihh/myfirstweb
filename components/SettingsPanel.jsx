@@ -1,15 +1,18 @@
 "use client";
 
-// 消息设置：提醒开关、清空当前会话、清空全部聊天记录。
+// 设置面板：个人资料（换头像）+ 消息设置（提醒开关、清空聊天记录）。
 import { useState } from "react";
+import ProfileSettings from "./ProfileSettings.jsx";
+import { useMessages } from "./MessagesContext.jsx";
 
-export default function MessageSettings({
+export default function SettingsPanel({
   reminderEnabled,
   onToggleReminder,
   activeFriend,
   onClearConversation,
   onClearAll,
 }) {
+  const { vipBadgeEnabled, setVipBadgeEnabled } = useMessages();
   const [message, setMessage] = useState("");
 
   async function clearCurrent() {
@@ -31,8 +34,14 @@ export default function MessageSettings({
   return (
     <div className="messages-content">
       <div className="messages-content-heading">
-        <h2>消息设置</h2>
+        <h2>设置</h2>
       </div>
+
+      <ProfileSettings />
+
+      <hr className="settings-divider" />
+
+      <h3 className="settings-subheading">消息设置</h3>
 
       <div className="setting-row">
         <div>
@@ -48,6 +57,25 @@ export default function MessageSettings({
           aria-label="消息提醒"
           className={"switch" + (reminderEnabled ? " is-on" : "")}
           onClick={() => onToggleReminder(!reminderEnabled)}
+        >
+          <span className="switch-knob" />
+        </button>
+      </div>
+
+      <div className="setting-row">
+        <div>
+          <p className="setting-title">头像 VIP 标识</p>
+          <p className="setting-desc">
+            开通 VIP 后，在头像右上角显示金色「VIP」小字。
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={vipBadgeEnabled}
+          aria-label="头像 VIP 标识"
+          className={"switch" + (vipBadgeEnabled ? " is-on" : "")}
+          onClick={() => setVipBadgeEnabled(!vipBadgeEnabled)}
         >
           <span className="switch-knob" />
         </button>

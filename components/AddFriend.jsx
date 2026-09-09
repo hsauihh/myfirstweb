@@ -2,6 +2,7 @@
 
 // 添加好友：用户名精确搜索 / 好友码；展示自己的好友码与邀请链接。
 import { useEffect, useState } from "react";
+import Avatar from "./Avatar.jsx";
 import { lookup, myCode } from "./friendsApi.js";
 
 const RELATION_LABELS = {
@@ -114,6 +115,7 @@ export default function AddFriend({ onAdd, presetCode }) {
 
       {found && (
         <div className="add-result">
+          <Avatar name={found.user.username} src={found.user.avatar} size={28} />
           <span className="request-name">{found.user.username}</span>
           <span className="add-relation">{RELATION_LABELS[found.relationship]}</span>
           {found.relationship === "none" && (

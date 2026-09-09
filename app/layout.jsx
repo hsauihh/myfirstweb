@@ -12,6 +12,7 @@ import "../css/cards.css";
 import "../css/widgets.css";
 import "../css/lab.css";
 import "../css/chat.css";
+import "../css/markdown.css";
 import "../css/auth.css";
 import "../css/messages.css";
 import "../css/messages-panels.css";

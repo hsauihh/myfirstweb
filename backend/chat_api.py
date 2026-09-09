@@ -10,7 +10,8 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-import users
+import quotas
+import rag
 from auth import resolve_owner, resolve_owner_for_stream
 from chat import (
     DEFAULT_BASE_URL,
@@ -33,19 +34,18 @@ from storage import (
     rename_conversation,
     touch_conversation,
 )
-from users import ANONYMOUS_CHAT_LIMIT
 
 DEFAULT_TITLE = "新对话"
 TITLE_MAX_LENGTH = 20
 MAX_CONTENT_LENGTH = 4000
 CONVERSATION_LIST_LIMIT = 20
-QUOTA_EXCEEDED_CODE = "chat_quota_exceeded"
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
 class MessageRequest(BaseModel):
     content: str = Field(min_length=1, max_length=MAX_CONTENT_LENGTH)
+    use_rag: bool = False
 
 
 def _chat_config() -> ChatConfig:
@@ -72,16 +72,53 @@ def _make_title(text: str) -> str:
     return text[:TITLE_MAX_LENGTH] + "…"
 
 
-def _anonymous_quota(owner: Owner) -> dict | None:
-    """匿名访客的额度快照；已登录返回 None。"""
-    if owner.user_id is not None:
-        return None
-    used = users.get_anonymous_used(owner.session_id)
-    return {
-        "used": used,
-        "limit": ANONYMOUS_CHAT_LIMIT,
-        "remaining": max(0, ANONYMOUS_CHAT_LIMIT - used),
-    }
+def _quota_message(owner: Owner) -> str:
+    if owner.user_id is None:
+        return "匿名对话次数已用完，请登录后继续"
+    return "今日免费次数已用完，开通 VIP 后不限量"
+
+
+def _quota_error(
+    owner: Owner, user: dict | None, use_rag: bool
+) -> JSONResponse:
+    detail = (
+        "知识库免费次数已用完，开通 VIP 后不限量"
+        if use_rag
+        else _quota_message(owner)
+    )
+    snapshot = (
+        quotas.snapshot_rag(owner, user)
+        if use_rag
+        else quotas.snapshot(owner, user)
+    )
+    return JSONResponse(
+        status_code=403,
+        content={
+            "detail": detail,
+            "code": quotas.QUOTA_EXCEEDED_CODE,
+            "quota": snapshot,
+        },
+    )
+
+
+def _check_quota(
+    owner: Owner, user: dict | None, use_rag: bool
+) -> tuple[dict | None, JSONResponse | None]:
+    """返回 (额度快照, 错误响应)；额度足够时错误响应为 None。"""
+    if use_rag:
+        if owner.user_id is None:
+            raise HTTPException(status_code=403, detail="登录后可使用知识库")
+        if not rag.is_ready():
+            raise HTTPException(
+                status_code=409, detail="知识库为空，请先运行 ingest.py"
+            )
+        if not quotas.consume_rag(owner, user):
+            return quotas.snapshot_rag(owner, user), _quota_error(owner, user, True)
+        return quotas.snapshot_rag(owner, user), None
+
+    if not quotas.consume(owner, user):
+        return quotas.snapshot(owner, user), _quota_error(owner, user, False)
+    return quotas.snapshot(owner, user), None
 
 
 def _sse(event: str, data: dict) -> str:
@@ -130,25 +167,17 @@ def send_message_endpoint(
     if not config.api_key:
         raise HTTPException(status_code=503, detail="未配置 CHAT_API_KEY")
 
-    owner, new_session_id = resolve_owner_for_stream(request)
+    owner, user, new_session_id = resolve_owner_for_stream(request)
     _require_conversation(owner, conversation_id)
 
     content = req.content.strip()
     if not content:
         raise HTTPException(status_code=422, detail="消息不能为空")
 
-    if owner.user_id is None and not users.consume_anonymous_quota(
-        owner.session_id, ANONYMOUS_CHAT_LIMIT
-    ):
-        return JSONResponse(
-            status_code=403,
-            content={
-                "detail": "匿名对话次数已用完，请登录后继续",
-                "code": QUOTA_EXCEEDED_CODE,
-                "quota": _anonymous_quota(owner),
-            },
-        )
-    quota = _anonymous_quota(owner)
+    quota, error = _check_quota(owner, user, req.use_rag)
+    if error is not None:
+        return error
+    context = rag.build_context(rag.search(content)) if req.use_rag else ""
 
     history = get_messages(conversation_id, HISTORY_FETCH_LIMIT)
     add_message(conversation_id, "user", content)
@@ -156,7 +185,7 @@ def send_message_endpoint(
     if conversation["title"] == DEFAULT_TITLE:
         rename_conversation(conversation_id, _make_title(content))
 
-    messages = build_messages(config.system_prompt, history, content)
+    messages = build_messages(config.system_prompt, history, content, context=context)
     stream = StreamingResponse(
         _stream(config, conversation_id, messages, quota=quota),
         media_type="text/event-stream",

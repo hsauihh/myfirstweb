@@ -1,9 +1,8 @@
-"""用户、登录态与匿名额度的存储层。"""
+"""用户、登录态、VIP 与额度的存储层。"""
 import sqlite3
+from datetime import datetime, timedelta, timezone
 
 import db
-
-ANONYMOUS_CHAT_LIMIT = 3        # 匿名访客可发送的用户消息条数上限
 
 
 # ---------- 用户 ----------
@@ -13,8 +12,16 @@ def _user(row: sqlite3.Row) -> dict:
         "id": row["id"],
         "username": row["username"],
         "password_hash": row["password_hash"],
+        "avatar": row["avatar"],
+        "vip_expires_at": row["vip_expires_at"],
         "created_at": row["created_at"],
     }
+
+
+def is_vip(user: dict) -> bool:
+    """VIP 是否在有效期内。"""
+    expires = user.get("vip_expires_at")
+    return bool(expires) and expires > db.now_iso()
 
 
 def public_user(user: dict) -> dict:
@@ -22,6 +29,9 @@ def public_user(user: dict) -> dict:
     return {
         "id": user["id"],
         "username": user["username"],
+        "avatar": user.get("avatar"),
+        "vip": is_vip(user),
+        "vip_expires_at": user.get("vip_expires_at"),
         "created_at": user["created_at"],
     }
 
@@ -36,7 +46,49 @@ def create_user(username: str, password_hash: str) -> dict:
     conn.commit()
     user_id = cur.lastrowid
     conn.close()
-    return {"id": user_id, "username": username, "created_at": now}
+    return {
+        "id": user_id,
+        "username": username,
+        "avatar": None,
+        "vip_expires_at": None,
+        "created_at": now,
+    }
+
+
+def activate_vip(user_id: int, days: int) -> dict | None:
+    """开通/续费 VIP：从 max(现在, 当前到期) 起加 days 天。"""
+    conn = db.get_conn()
+    row = conn.execute(
+        "SELECT vip_expires_at FROM users WHERE id = ?", [user_id]
+    ).fetchone()
+    if row is None:
+        conn.close()
+        return None
+    now = datetime.now(timezone.utc)
+    base = now
+    if row["vip_expires_at"]:
+        try:
+            existing = datetime.fromisoformat(row["vip_expires_at"])
+            if existing > now:
+                base = existing
+        except ValueError:
+            pass
+    expires = (base + timedelta(days=days)).isoformat()
+    conn.execute(
+        "UPDATE users SET vip_expires_at = ? WHERE id = ?", [expires, user_id]
+    )
+    conn.commit()
+    conn.close()
+    return get_user(user_id)
+
+
+def set_avatar(user_id: int, path: str) -> dict | None:
+    """更新头像路径并返回更新后的用户。"""
+    conn = db.get_conn()
+    conn.execute("UPDATE users SET avatar = ? WHERE id = ?", [path, user_id])
+    conn.commit()
+    conn.close()
+    return get_user(user_id)
 
 
 def get_user_by_username(username: str) -> dict | None:
@@ -127,6 +179,56 @@ def consume_anonymous_quota(session_id: str, limit: int) -> bool:
         " used = used + 1, updated_at = excluded.updated_at"
         " WHERE anonymous_usage.used < ?",
         [session_id, db.now_iso(), limit],
+    )
+    conn.commit()
+    consumed = cur.rowcount == 1
+    conn.close()
+    return consumed
+
+
+def get_daily_used(user_id: int, day: str) -> int:
+    conn = db.get_conn()
+    row = conn.execute(
+        "SELECT used FROM chat_daily_usage WHERE user_id = ? AND day = ?",
+        [user_id, day],
+    ).fetchone()
+    conn.close()
+    return row["used"] if row else 0
+
+
+def consume_daily_quota(user_id: int, day: str, limit: int) -> bool:
+    """原子占用一次当日额度；额度已满返回 False。"""
+    conn = db.get_conn()
+    cur = conn.execute(
+        "INSERT INTO chat_daily_usage (user_id, day, used) VALUES (?, ?, 1)"
+        " ON CONFLICT(user_id, day) DO UPDATE SET used = used + 1"
+        " WHERE chat_daily_usage.used < ?",
+        [user_id, day, limit],
+    )
+    conn.commit()
+    consumed = cur.rowcount == 1
+    conn.close()
+    return consumed
+
+
+def get_rag_daily_used(user_id: int, day: str) -> int:
+    conn = db.get_conn()
+    row = conn.execute(
+        "SELECT used FROM rag_daily_usage WHERE user_id = ? AND day = ?",
+        [user_id, day],
+    ).fetchone()
+    conn.close()
+    return row["used"] if row else 0
+
+
+def consume_rag_daily_quota(user_id: int, day: str, limit: int) -> bool:
+    """原子占用一次知识库当日额度；额度已满返回 False。"""
+    conn = db.get_conn()
+    cur = conn.execute(
+        "INSERT INTO rag_daily_usage (user_id, day, used) VALUES (?, ?, 1)"
+        " ON CONFLICT(user_id, day) DO UPDATE SET used = used + 1"
+        " WHERE rag_daily_usage.used < ?",
+        [user_id, day, limit],
     )
     conn.commit()
     consumed = cur.rowcount == 1

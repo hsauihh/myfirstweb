@@ -1,11 +1,16 @@
 // 好友申请列表：收到的可接受/拒绝，发出的可撤回。
+import Avatar from "./Avatar.jsx";
+
 export default function FriendRequests({ requests, onAccept, onDelete }) {
   const { incoming, outgoing } = requests;
   return (
     <div className="request-list">
       {incoming.map((item) => (
         <div className="request-item" key={item.id}>
-          <span className="request-name">{item.user.username}</span>
+          <div className="request-user">
+            <Avatar name={item.user.username} src={item.user.avatar} size={32} />
+            <span className="request-name">{item.user.username}</span>
+          </div>
           <div className="request-actions">
             <button
               type="button"
@@ -26,7 +31,10 @@ export default function FriendRequests({ requests, onAccept, onDelete }) {
       ))}
       {outgoing.map((item) => (
         <div className="request-item" key={item.id}>
-          <span className="request-name">{item.user.username}（待通过）</span>
+          <div className="request-user">
+            <Avatar name={item.user.username} src={item.user.avatar} size={32} />
+            <span className="request-name">{item.user.username}（待通过）</span>
+          </div>
           <button
             type="button"
             className="ghost-button"

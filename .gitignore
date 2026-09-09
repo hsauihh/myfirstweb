@@ -38,3 +38,6 @@ backend/.pytest_cache
 backend/tests
 
 struct.md
+
+backend/avatars
+RAGdata/

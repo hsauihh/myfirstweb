@@ -119,6 +119,21 @@
   visibility: visible;
 }
 
+/* 头像右上角的金色 VIP 标识 */
+.vip-tag {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f6c945, #e0a500);
+  color: #4a3200;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
 @media (max-width: 640px) {
   .auth-card { padding: 24px 20px; }
   .auth-title { font-size: 26px; }

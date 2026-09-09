@@ -30,14 +30,18 @@ export function deleteConversation(conversationId) {
 }
 
 // 发送消息并消费 SSE 流：onDelta 收到每个文本增量，返回 done 事件的数据。
-export async function streamChat(conversationId, content, { onDelta, signal } = {}) {
+export async function streamChat(
+  conversationId,
+  content,
+  { onDelta, signal, useRag = false } = {}
+) {
   const res = await fetch(
     `${API}/api/chat/conversations/${conversationId}/messages`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, use_rag: useRag }),
       signal,
     }
   );

@@ -11,6 +11,7 @@ export default function ChatWindow({
   friend,
   selfId,
   selfName,
+  selfAvatar,
   messages,
   hasMore,
   sending,
@@ -79,7 +80,11 @@ export default function ChatWindow({
           const mine = message.sender_id === selfId;
           return (
             <div key={message.id} className={"chat-row" + (mine ? " is-mine" : "")}>
-              <Avatar name={mine ? selfName : friend.username} size={36} />
+              <Avatar
+                name={mine ? selfName : friend.username}
+                src={mine ? selfAvatar : friend.avatar}
+                size={36}
+              />
               <p className="chat-bubble">{message.content}</p>
             </div>
           );

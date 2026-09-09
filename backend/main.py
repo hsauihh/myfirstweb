@@ -2,13 +2,18 @@ import os
 from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pypinyin import lazy_pinyin, Style
 from snownlp import SnowNLP
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+import avatars
 from chat_api import router as chat_router
 from auth import resolve_owner
 from auth_api import router as auth_router
+from announcements_api import router as announcements_router
+from payments_api import router as payments_router
+from rag_api import router as rag_router
 from friends_api import router as friends_router
 from friends_ws import router as friends_ws_router
 from db import init_db
@@ -30,8 +35,14 @@ app.add_middleware(
 
 app.include_router(chat_router)
 app.include_router(auth_router)
+app.include_router(announcements_router)
+app.include_router(payments_router)
+app.include_router(rag_router)
 app.include_router(friends_router)
 app.include_router(friends_ws_router)
+
+avatars.ensure_dir()
+app.mount("/avatars", StaticFiles(directory=avatars.AVATAR_DIR), name="avatars")
 
 profile = {
     "heroTitle": "关于我",

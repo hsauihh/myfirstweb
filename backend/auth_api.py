@@ -1,13 +1,15 @@
 """认证接口：注册、登录、当前用户、登出。"""
 import re
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel, Field, field_validator
 
 import auth
+import avatars
+import quotas
 import users
+from db import Owner
 from session import SESSION_COOKIE
-from users import ANONYMOUS_CHAT_LIMIT
 
 USERNAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]{2,19}$")
 PASSWORD_LENGTH = 8
@@ -35,16 +37,13 @@ class Credentials(BaseModel):
         return value
 
 
-def _anonymous_quota(request: Request) -> dict | None:
-    """匿名访客的剩余额度；已登录返回 None。"""
-    if auth.get_current_user(request) is not None:
-        return None
-    session_id = request.cookies.get(SESSION_COOKIE, "")
-    used = users.get_anonymous_used(session_id) if session_id else 0
+def _auth_payload(user: dict) -> dict:
+    """登录/注册后的统一返回：用户 + 两种额度。"""
+    owner = Owner(user_id=user["id"], session_id="")
     return {
-        "used": used,
-        "limit": ANONYMOUS_CHAT_LIMIT,
-        "remaining": max(0, ANONYMOUS_CHAT_LIMIT - used),
+        "user": users.public_user(user),
+        "quota": quotas.snapshot(owner, user),
+        "rag_quota": quotas.snapshot_rag(owner, user),
     }
 
 
@@ -64,7 +63,7 @@ def register(req: Credentials, request: Request, response: Response) -> dict:
         raise HTTPException(status_code=409, detail="用户名已被占用")
     user = users.create_user(req.username, auth.hash_password(req.password))
     _start_session(request, response, user["id"])
-    return {"user": user, "quota": None}
+    return _auth_payload(users.get_user(user["id"]))
 
 
 @router.post("/login")
@@ -73,15 +72,34 @@ def login(req: Credentials, request: Request, response: Response) -> dict:
     if user is None or not auth.verify_password(req.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     _start_session(request, response, user["id"])
-    return {"user": users.public_user(user), "quota": None}
+    return _auth_payload(user)
 
 
 @router.get("/me")
 def me(request: Request) -> dict:
     user = auth.get_current_user(request)
-    if user is None:
-        return {"user": None, "quota": _anonymous_quota(request)}
-    return {"user": users.public_user(user), "quota": None}
+    owner = Owner(
+        user_id=user["id"] if user else None,
+        session_id=request.cookies.get(SESSION_COOKIE, ""),
+    )
+    return {
+        "user": users.public_user(user) if user else None,
+        "quota": quotas.snapshot(owner, user),
+        "rag_quota": quotas.snapshot_rag(owner, user),
+    }
+
+
+@router.post("/avatar")
+async def upload_avatar(request: Request, file: UploadFile = File(...)) -> dict:
+    """上传头像（jpg / png / webp，≤ 2MB），替换旧头像。"""
+    user = auth.require_user(request)
+    try:
+        path = await avatars.save_avatar(user["id"], file)
+    except avatars.AvatarError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    avatars.remove_avatar(user["avatar"])
+    updated = users.set_avatar(user["id"], path)
+    return {"user": users.public_user(updated)}
 
 
 @router.delete("/session")

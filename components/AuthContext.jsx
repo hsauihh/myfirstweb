@@ -9,6 +9,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [quota, setQuota] = useState(null);
+  const [ragQuota, setRagQuota] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -17,6 +18,7 @@ export function AuthProvider({ children }) {
       const data = await authApi.fetchMe();
       setUser(data.user);
       setQuota(data.quota);
+      setRagQuota(data.rag_quota);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -31,7 +33,13 @@ export function AuthProvider({ children }) {
   const applyAuth = useCallback((data) => {
     setUser(data.user);
     setQuota(data.quota);
+    setRagQuota(data.rag_quota);
     setError("");
+  }, []);
+
+  const applyQuota = useCallback((value) => {
+    if (value?.scope === "rag_daily") setRagQuota(value);
+    else setQuota(value);
   }, []);
 
   const register = useCallback(
@@ -54,15 +62,23 @@ export function AuthProvider({ children }) {
     await refresh();          // 取回匿名额度
   }, [refresh]);
 
+  const uploadAvatar = useCallback(async (file) => {
+    const data = await authApi.uploadAvatar(file);
+    setUser(data.user);
+  }, []);
+
   const value = {
     user,
     quota,
+    ragQuota,
     loading,
     error,
     register,
     login,
     logout,
+    uploadAvatar,
     refresh,
+    applyQuota,
     setQuota,
   };
 
