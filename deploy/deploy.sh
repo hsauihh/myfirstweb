@@ -9,17 +9,9 @@
 set -euo pipefail
 
 # ============================== 配置 ==============================
-SITE_URL="http://8.133.217.95"       # 前端注入的 API 基址（含协议）
-SERVER_NAME="8.133.217.95"           # nginx server_name（域名或 IP）
-WEB_ROOT="/var/www/zero-to-full"     # 前端静态文件目录
-BACKEND_PORT="8001"                  # 后端监听端口（仅本机）
-MODEL="BAAI/bge-small-zh-v1.5"       # RAG 本地向量模型
-
-# ============================== 路径 ==============================
+# 站点地址、目录、端口等共享配置在 deploy/config.sh，换域名/路径只改那里
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-BACKEND_DIR="$PROJECT_DIR/backend"
-RUN_USER="${SUDO_USER:-$USER}"
+source "$SCRIPT_DIR/config.sh"
 
 log() { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 
@@ -42,16 +34,17 @@ install_deps() {
     apt-get install -y -qq nodejs
   fi
 
-  if ! command -v uv >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/uv" ]; then
-    log "安装 uv"
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+  # uv 必须装在部署用户下：venv 由该用户创建，否则 .venv/bin/python 会指向 root 的 Python
+  if ! sudo -u "$RUN_USER" bash -lc 'command -v uv >/dev/null 2>&1'; then
+    log "为 $RUN_USER 安装 uv"
+    sudo -u "$RUN_USER" bash -lc 'curl -LsSf https://astral.sh/uv/install.sh | sh'
   fi
-  export PATH="$HOME/.local/bin:$PATH"
 }
 
 setup_backend() {
-  log "同步后端依赖（uv sync）"
-  ( cd "$BACKEND_DIR" && uv sync )
+  log "同步后端依赖（以 $RUN_USER 身份 uv sync）"
+  sudo -u "$RUN_USER" bash -lc \
+    "export PATH=\"\$HOME/.local/bin:\$PATH\"; cd '$BACKEND_DIR' && uv sync"
 
   if [ ! -f "$BACKEND_DIR/.env" ]; then
     log "未找到 .env，已生成模板，请填写后重新运行"

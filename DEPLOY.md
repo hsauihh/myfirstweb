@@ -147,13 +147,20 @@ sudo systemctl enable --now certbot.timer   # 自动续期
 
 ## 9. 后续更新
 
+一行命令（自动按改动范围重建后端/前端，无变化则跳过）：
+
 ```bash
-cd /opt/zero-to-full
-git pull
+cd ~/zero-to-full && sudo bash deploy/update.sh
+```
+
+手动方式（了解细节时参考）：
+
+```bash
+cd ~/zero-to-full && git pull
 # 后端
 cd backend && uv sync && sudo systemctl restart zero-to-full
 # 前端
-cd .. && npm ci && NEXT_PUBLIC_API_BASE_URL=https://YOUR_DOMAIN npm run build
+cd .. && npm ci && NEXT_PUBLIC_API_BASE_URL=http://8.133.217.95 npm run build
 sudo rsync -a --delete out/ /var/www/zero-to-full/
 ```
 
@@ -163,3 +170,30 @@ sudo rsync -a --delete out/ /var/www/zero-to-full/
 - **Cookie**：目前 `httponly + samesite=lax`。上 HTTPS 后可给 `backend/session.py`、`backend/auth.py` 的 `set_cookie` 加 `secure=True` 加固（可选）。
 - **备份**：定期备份 `backend/history.db` 与 `backend/avatars/`，它们承载全部用户与聊天数据。
 - **公告发布**：服务器上用 `ANNOUNCE_KEY` 调 `backend/announce.py` 发布公告。
+
+## 11. 常见问题
+
+**后端起不来：`.venv/bin/python: bad interpreter: Permission denied`**
+
+原因：`uv sync` 以 root 身份跑，`.venv/bin/python` 指向了 `/root/.local/...` 的 Python，而服务以普通用户运行、无权访问。
+
+修复（用部署用户重建 venv，不要 sudo）：
+
+```bash
+cd ~/zero-to-full/backend
+rm -rf .venv
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+uv sync
+sudo systemctl restart zero-to-full
+```
+
+（`deploy/deploy.sh` 已修正：uv 装在部署用户下，`uv sync` 也以该用户执行。）
+
+**排查命令**
+
+```bash
+sudo systemctl status zero-to-full --no-pager -l
+sudo journalctl -u zero-to-full -n 80 --no-pager
+curl -s http://127.0.0.1:8001/api/rag/status
+```
