@@ -13,6 +13,8 @@ import "../css/widgets.css";
 import "../css/lab.css";
 import "../css/chat.css";
 import "../css/markdown.css";
+import "../css/blog.css";
+import "../css/blog-manage.css";
 import "../css/auth.css";
 import "../css/messages.css";
 import "../css/messages-panels.css";

@@ -37,11 +37,16 @@ class Credentials(BaseModel):
         return value
 
 
+def _user_payload(user: dict) -> dict:
+    """对外用户结构：public_user + 是否管理员。"""
+    return {**users.public_user(user), "is_admin": users.is_admin(user)}
+
+
 def _auth_payload(user: dict) -> dict:
     """登录/注册后的统一返回：用户 + 两种额度。"""
     owner = Owner(user_id=user["id"], session_id="")
     return {
-        "user": users.public_user(user),
+        "user": _user_payload(user),
         "quota": quotas.snapshot(owner, user),
         "rag_quota": quotas.snapshot_rag(owner, user),
     }
@@ -83,7 +88,7 @@ def me(request: Request) -> dict:
         session_id=request.cookies.get(SESSION_COOKIE, ""),
     )
     return {
-        "user": users.public_user(user) if user else None,
+        "user": _user_payload(user) if user else None,
         "quota": quotas.snapshot(owner, user),
         "rag_quota": quotas.snapshot_rag(owner, user),
     }

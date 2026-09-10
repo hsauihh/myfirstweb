@@ -1,11 +1,18 @@
 """RAG 检索层：本地向量化 + 余弦检索 + 上下文拼装。
 
-模型懒加载（首次使用才下载/加载），测试里可 monkeypatch embed_texts 避开模型；
+模型懒加载（首次使用才加载），测试里可 monkeypatch embed_texts 避开模型；
 numpy 也在函数内导入，避免依赖未装好时整个服务起不来。
+
+注意：fastembed 默认把模型放在系统临时目录（`/tmp/fastembed_cache`），重启/清理即丢，
+丢失后会转去联网下载（国内访问 HuggingFace 会一直卡住、接口无响应）。
+因此这里固定用持久目录 `~/.cache/fastembed`，并优先离线加载本地缓存。
 """
+import os
+
 import rag_store
 
 MODEL_NAME = "BAAI/bge-small-zh-v1.5"
+CACHE_DIR = os.environ.get("FASTEMBED_CACHE_DIR") or os.path.expanduser("~/.cache/fastembed")
 DEFAULT_K = 4
 DEFAULT_THRESHOLD = 0.3
 
@@ -17,7 +24,14 @@ def _get_model():
     if _model is None:
         from fastembed import TextEmbedding
 
-        _model = TextEmbedding(model_name=MODEL_NAME)
+        try:
+            # 优先用本地缓存离线加载，避免联网校验卡住
+            _model = TextEmbedding(
+                MODEL_NAME, cache_dir=CACHE_DIR, local_files_only=True
+            )
+        except Exception:
+            # 缓存缺失时才允许联网下载（首次部署可配 HF_ENDPOINT 镜像）
+            _model = TextEmbedding(MODEL_NAME, cache_dir=CACHE_DIR)
     return _model
 
 

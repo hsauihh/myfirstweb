@@ -82,6 +82,7 @@ CHAT_API_KEY=你的模型Key
 CHAT_MODEL=deepseek-chat
 CHAT_SYSTEM_PROMPT=你是「零到全栈」站点的 AI 助手。
 ANNOUNCE_KEY=随机字符串
+ADMIN_USERNAMES=ryaich
 EOF
 
 # 3.3 迁移数据（含用户、RAG 向量）：从本地把 history.db 与 avatars/ 传上来
@@ -91,7 +92,8 @@ EOF
 # 说明：不传 history.db 会新建空库（用户与知识库全空）；RAGdata/ 无需上传。
 
 # 3.4 预热本地向量模型（约 100MB，下到 ~/.cache/fastembed，需联网一次）
-.venv/bin/python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-zh-v1.5')"
+#     必须显式指定 cache_dir：否则会落到 /tmp，重启即丢，之后加载会联网卡死
+.venv/bin/python -c "import os; from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-zh-v1.5', cache_dir=os.path.expanduser('~/.cache/fastembed'))"
 ```
 
 ## 4. 后端常驻（systemd）

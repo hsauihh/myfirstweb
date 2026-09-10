@@ -11,6 +11,7 @@ import avatars
 from chat_api import router as chat_router
 from auth import resolve_owner
 from auth_api import router as auth_router
+from blog_api import router as blog_router
 from announcements_api import router as announcements_router
 from payments_api import router as payments_router
 from rag_api import router as rag_router
@@ -29,12 +30,13 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_credentials=True, 
 )
 
 app.include_router(chat_router)
 app.include_router(auth_router)
+app.include_router(blog_router)
 app.include_router(announcements_router)
 app.include_router(payments_router)
 app.include_router(rag_router)

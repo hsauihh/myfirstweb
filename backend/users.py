@@ -1,4 +1,5 @@
 """用户、登录态、VIP 与额度的存储层。"""
+import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
@@ -22,6 +23,14 @@ def is_vip(user: dict) -> bool:
     """VIP 是否在有效期内。"""
     expires = user.get("vip_expires_at")
     return bool(expires) and expires > db.now_iso()
+
+
+def is_admin(user: dict | None) -> bool:
+    """管理员：用户名出现在 ADMIN_USERNAMES（逗号分隔）里。"""
+    if not user:
+        return False
+    names = os.environ.get("ADMIN_USERNAMES", "")
+    return user["username"] in {name.strip() for name in names.split(",") if name.strip()}
 
 
 def public_user(user: dict) -> dict:

@@ -1,6 +1,6 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」和「AI 对话」两种模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态；导航栏头像卡片悬停显示用户名、点击弹出添加好友，收到新消息时「消息」右上角显示红点（可在设置里关闭）。系统通知里可看公告（由独立脚本发布）与好友申请。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」和「AI 对话」两种模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态；导航栏头像卡片悬停显示用户名、点击弹出添加好友，收到新消息时「消息」右上角显示红点（可在设置里关闭）。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
@@ -53,7 +53,7 @@ uv run python ingest.py ../RAGdata --rebuild   # 首次或重建
 uv run python ingest.py ../RAGdata             # 增量（按文件整篇替换）
 ```
 
-- 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），首次运行自动下载到 `~/.cache/fastembed/`。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。
+- 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），代码显式固定缓存目录 `~/.cache/fastembed/`，优先离线加载。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。
 - 入库后 `GET /api/rag/status` 返回 `ready:true`；在 AI 对话里打开「使用知识库」即可基于资料提问。
 
 ## 目录结构
@@ -69,8 +69,11 @@ zero-to-full/
 │                 #  AnnouncementList / SettingsPanel / ProfileSettings / AvatarCropModal /
 │                 #  AddFriendModal / ChatWindow / AddFriend / FriendRequests / EmojiPicker /
 │                 #  MessagesContext / useFriends / useFriendSocket / useMessageReminder /
-│                 #  useAnnouncements / friendsApi / announcementsApi / cropImage）
+│                 #  useAnnouncements / friendsApi / announcementsApi / cropImage / BlogView /
+│                 #  BlogPostView / BlogManageView / BlogEditor / BlogLikeButton / blogApi / blogDate）
 ├── data/         # 静态文案与打底数据（site.js、quotes.js）
+├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
+│                 #  + system-architecture.json（生成用规格）与 visual-check 证据
 ├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，
 │                 #  messages.css / messages-panels.css 消息中心，chat-window.css 微信式聊天窗口）
 ├── backend/      # FastAPI 服务：main.py（接口层）、auth_api.py（认证与头像）、chat_api.py（AI 对话）、
@@ -80,7 +83,7 @@ zero-to-full/
 │                 #  friends_api.py（好友接口）、friends_ws.py（好友 WebSocket）、auth.py（密码与登录态）、
 │                 #  chat.py（模型层）、friends.py（好友关系）、friend_codes.py（好友码）、
 │                 #  direct_messages.py（私聊消息）、announcements.py（公告存储）、avatars.py（头像文件）、
-│                 #  db.py（连接/建表/归属）、users.py（用户与额度）、session.py（匿名 Cookie）、
+│                 #  db.py（连接/归属）、schema.py（建表与迁移）、blog.py / blog_api.py（博客）、users.py（用户与额度）、session.py（匿名 Cookie）、
 │                 #  storage.py（数据层）、weather.py（天气）
 ├── next.config.mjs
 └── .env.local
@@ -126,6 +129,13 @@ zero-to-full/
 | POST | `/api/pay/orders` | `{ product }` | 创建订单（vip_month，1 分），返回 `{ order }` |
 | POST | `/api/pay/orders/{id}/confirm` | — | 模拟支付成功并开通/续费 VIP，返回 `{ order, user }` |
 | GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents }` |
+| GET  | `/api/blog/posts` | `?limit=10&offset=0&sort=published` | 公开文章列表 `{ items, has_more }`（无需登录；`sort` 可选 `likes`） |
+| GET  | `/api/blog/posts/{id}` | — | 文章详情；草稿 / 仅自己可见仅作者可见，其余 404 |
+| GET  | `/api/blog/me/posts` | — | 我的全部文章（含草稿，需登录） |
+| POST | `/api/blog/posts` | `{ title, content, visibility }` | 新建文章（visibility：draft/private/public） |
+| PATCH | `/api/blog/posts/{id}` | `{ title?, content?, visibility? }` | 修改自己的文章；非作者 404 |
+| DELETE | `/api/blog/posts/{id}` | — | 删除自己的文章；管理员可删除任意公开文章 |
+| POST | `/api/blog/posts/{id}/like` | — | 切换点赞，返回 `{ liked, like_count }` |
 
 - 情感判定：score ≥ 0.6 偏积极，≤ 0.4 偏消极，其余中性。
 - 数据归属：已登录按账号（`user_id`），匿名按 `session_id` Cookie（有效期 30 天）；接口只读写当前归属的数据，越权访问返回 404。登录/注册时把该浏览器的匿名对话与历史绑到账号。
@@ -156,6 +166,16 @@ zero-to-full/
 - RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
 - 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体 `public/fonts/genshin.ttf`；消息上方显示发送者用户名。
+- 博客：所有登录用户可写；`visibility` 三态——`draft`（草稿，未发布，在草稿箱）/ `private`（已发布，仅自己可见）/ `public`（已发布，公开）；正文按 Markdown 渲染（GFM），详情走 `/blog/post?id=`（静态导出不支持动态路由）；`/blog` 可按「最新发布 / 最多点赞」排序；点赞为登录用户每人每篇一次、可取消。
+- 管理员：`backend/.env` 的 `ADMIN_USERNAMES`（逗号分隔，默认 `ryaich`）命中的用户名即为管理员，可在 `/blog` 列表直接删除任意公开文章（不能删草稿 / 仅自己可见）；`/api/auth/me` 返回 `user.is_admin`。
+- `css/markdown.css` 已改为跟随主题（浅色面板 / 暗色面板），暗色聊天气泡的浅色文字在 `.chat-bubble--markdown` 作用域内覆盖。
+
+## 开发避坑（踩过的坑）
+
+- **不要同时跑 `npm run dev` 和 `npm run build`**：两者共用 `.next` 目录，会互相覆盖，报 `missing required error components, refreshing...` 或 `ENOENT: no such file or directory ... .next/server/app/blog/page.js`。要打包先停 dev，打包后再重启 dev；遇到该报错重启 dev 即可恢复。
+- **同一项目只保留一个 `next dev`**：多个实例共用同一个 `.next`，会互相删掉对方编译产物（同样是上面的 `ENOENT`）。用 `fuser -k 3000/tcp` 关掉占用端口的实例后再启动。
+- **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
+- **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
 
 ## 文档维护
 

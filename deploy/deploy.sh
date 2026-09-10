@@ -55,6 +55,7 @@ CHAT_API_KEY=
 CHAT_MODEL=deepseek-chat
 CHAT_SYSTEM_PROMPT=你是「零到全栈」站点的 AI 助手。
 ANNOUNCE_KEY=
+ADMIN_USERNAMES=ryaich
 EOF
     chown "$RUN_USER" "$BACKEND_DIR/.env"
     echo "请填写 $BACKEND_DIR/.env 后重新运行本脚本。" >&2
@@ -101,10 +102,10 @@ fix_owner() {
 }
 
 warm_model() {
-  log "预热向量模型（失败不影响启动）"
+  log "预热向量模型到 ~/.cache/fastembed（失败不影响启动）"
   sudo -u "$RUN_USER" bash -lc \
-    "cd '$BACKEND_DIR' && .venv/bin/python -c \"from fastembed import TextEmbedding; TextEmbedding('$MODEL')\"" \
-    || echo "模型预热失败，首次使用知识库时会自动重试下载。"
+    "cd '$BACKEND_DIR' && .venv/bin/python -c \"import os; from fastembed import TextEmbedding; TextEmbedding('$MODEL', cache_dir=os.path.expanduser('~/.cache/fastembed'))\"" \
+    || echo "模型预热失败：可手动把模型放到 ~/.cache/fastembed/ 后重启服务。"
 }
 
 start_services() {
