@@ -86,6 +86,7 @@
   flex-direction: column;
   gap: 6px;
   max-width: 82%;
+  min-width: 0;
 }
 
 .chat-message.is-user { align-self: flex-end; align-items: flex-end; }

@@ -82,6 +82,7 @@
   align-items: flex-start;
   gap: 3px;
   max-width: 68%;
+  min-width: 0;
 }
 
 .chat-row.is-mine .chat-row-body { align-items: flex-end; }
@@ -107,6 +108,7 @@
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .chat-row.is-mine .chat-bubble {
@@ -162,7 +164,7 @@
   bottom: 40px;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 4px;
   width: 260px;
   padding: 10px;

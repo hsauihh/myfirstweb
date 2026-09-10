@@ -181,3 +181,4 @@ zero-to-full/
 
 - `AGENTS.md` 给 AI 编码助手（硬约束与约定），`README.md` 给人类。项目结构、接口、技术栈或职责变动时二者同步更新。
 - 上线部署见 `DEPLOY.md`；一键脚本 `deploy/deploy.sh`，配置模板 `deploy/nginx.conf`、`deploy/zero-to-full.service`。
+- 实现新的模块时更新系统架构图
