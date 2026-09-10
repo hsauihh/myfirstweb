@@ -85,17 +85,24 @@ summary() {
 main() {
   require_root
 
-  local before after changed
-  before="$(git_head)"
+  local after base changed
   pull_code
   after="$(git_head)"
+  base="$(read_deployed)"
 
-  if [ "$before" = "$after" ]; then
-    log "代码无变化，无需更新"
+  if [ "$after" = "$base" ]; then
+    log "代码无变化且已发布，无需更新"
     return 0
   fi
 
-  changed="$(sudo -u "$RUN_USER" git -C "$PROJECT_DIR" diff --name-only "$before" "$after")"
+  # 以「上次成功发布」为基准算差异；没有记录（首次）就全量重建。
+  # 这样上次中途被 Ctrl+C 时，重跑会把没做完的部分补上。
+  if [ -n "$base" ]; then
+    changed="$(sudo -u "$RUN_USER" git -C "$PROJECT_DIR" diff --name-only "$base" "$after")"
+  else
+    log "没有发布记录，按全量处理"
+    changed="$(sudo -u "$RUN_USER" git -C "$PROJECT_DIR" ls-files)"
+  fi
   echo "$changed" | sed 's/^/  /'
 
   BACKEND_CHANGED=0
@@ -103,6 +110,7 @@ main() {
   update_backend "$changed"
   update_frontend "$changed"
   restart_services
+  mark_deployed
   summary
 }
 

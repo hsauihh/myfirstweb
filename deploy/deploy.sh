@@ -139,6 +139,7 @@ main() {
   fix_owner
   warm_model
   start_services
+  mark_deployed
   summary
 }
 

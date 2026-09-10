@@ -53,6 +53,9 @@ desktop.ini
 # ===== 架构图发布产物（由 npm run sync:arch 从 docs/ 生成）=====
 /public/architecture.html
 
+# ===== 部署状态（记录上次成功发布的 commit）=====
+/.deploy-state
+
 # ===== 知识库原始资料 =====
 RAGdata/
 

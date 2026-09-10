@@ -155,6 +155,8 @@ sudo systemctl enable --now certbot.timer   # 自动续期
 cd ~/zero-to-full && sudo bash deploy/update.sh
 ```
 
+脚本会在项目根写 `.deploy-state` 记录**上次成功发布的 commit**：所以即使上次跑到一半被中断（例如卡在 `npm ci`），**重跑会接着把没做完的部分补上**，不会被“代码无变化”跳过。
+
 手动方式（了解细节时参考）：
 
 ```bash
