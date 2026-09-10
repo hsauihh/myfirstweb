@@ -41,10 +41,20 @@ update_backend() {
 }
 
 update_frontend() {
-  grep -qE '^(app/|components/|css/|data/|docs/|public/|scripts/|package\.json|package-lock\.json|next\.config)' <<< "$1" \
+  local changed="$1"
+  grep -qE '^(app/|components/|css/|data/|docs/|public/|scripts/|package\.json|package-lock\.json|next\.config)' <<< "$changed" \
     || return 0
   log "前端有改动：构建并发布"
-  run_as_user "cd '$PROJECT_DIR' && npm ci --no-audit --no-fund"
+
+  # 只在依赖锁变化、或还没装过依赖时才重装（npm ci 最慢，且国内访问 registry 容易长时间无输出）
+  if grep -q '^package-lock\.json$' <<< "$changed" || [ ! -d "$PROJECT_DIR/node_modules" ]; then
+    echo "    安装依赖：npm ci（可能 1-2 分钟无输出，属正常；若卡超过 3 分钟可换 registry.npmmirror.com）"
+    run_as_user "cd '$PROJECT_DIR' && npm ci --no-audit --no-fund --prefer-offline"
+  else
+    echo "    依赖锁未变，跳过 npm ci"
+  fi
+
+  echo "    构建：npm run build（可能需要 1-2 分钟）"
   run_as_user "cd '$PROJECT_DIR' && NEXT_PUBLIC_API_BASE_URL='$SITE_URL' npm run build"
   mkdir -p "$WEB_ROOT"
   find "$WEB_ROOT" -mindepth 1 -delete

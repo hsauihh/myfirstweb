@@ -192,6 +192,23 @@ sudo systemctl restart zero-to-full
 
 （`deploy/deploy.sh` 已修正：uv 装在部署用户下，`uv sync` 也以该用户执行。）
 
+**`update.sh` 卡在「前端有改动：构建并发布」**
+
+那是 `npm ci` 在联网拉包（终端里的 `⠇` 是 npm 的进度指示）。国内访问 `registry.npmjs.org` 常很慢甚至超时，看起来像卡死。
+
+先 `Ctrl+C`，改用国内镜像手动跑完前端：
+
+```bash
+cd ~/zero-to-full
+npm config set registry https://registry.npmmirror.com
+npm ci --no-audit --no-fund --prefer-offline
+NEXT_PUBLIC_API_BASE_URL=http://8.133.217.95 npm run build
+sudo rsync -a --delete out/ /var/www/zero-to-full/
+sudo systemctl reload nginx
+```
+
+（`update.sh` 已优化：`package-lock.json` 未变时跳过 `npm ci`，只重新构建。）
+
 **排查命令**
 
 ```bash
