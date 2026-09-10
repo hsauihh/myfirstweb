@@ -42,9 +42,12 @@ update_backend() {
 
 update_frontend() {
   local changed="$1"
-  grep -qE '^(app/|components/|css/|data/|docs/|public/|scripts/|package\.json|package-lock\.json|next\.config)' <<< "$changed" \
-    || return 0
-  log "前端有改动：构建并发布"
+  # 没有前端相关改动，且发布目录里已有产物 → 跳过；发布目录缺失则无论如何都重建
+  if ! grep -qE '^(app/|components/|css/|data/|docs/|public/|scripts/|deploy/config\.sh|package\.json|package-lock\.json|next\.config)' <<< "$changed" \
+     && [ -f "$WEB_ROOT/index.html" ]; then
+    return 0
+  fi
+  log "前端有改动或发布目录缺失：构建并发布"
 
   # 只在依赖锁变化、或还没装过依赖时才重装（npm ci 最慢，且国内访问 registry 容易长时间无输出）
   if grep -q '^package-lock\.json$' <<< "$changed" || [ ! -d "$PROJECT_DIR/node_modules" ]; then
@@ -110,7 +113,13 @@ main() {
   update_backend "$changed"
   update_frontend "$changed"
   restart_services
-  mark_deployed
+
+  # 只在发布目录确实有产物时才标记“已发布”，避免把没发完的状态记下来
+  if [ -f "$WEB_ROOT/index.html" ]; then
+    mark_deployed
+  else
+    log "警告：$WEB_ROOT/index.html 不存在，未标记为已发布（下次重跑会重做）"
+  fi
   summary
 }
 

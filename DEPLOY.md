@@ -141,6 +141,10 @@ sudo certbot --nginx -d YOUR_DOMAIN
 sudo systemctl enable --now certbot.timer   # 自动续期
 ```
 
+> ⚠️ certbot 会改写 nginx 配置加上 443。之后**不要再跑 `deploy/deploy.sh`**（它会用模板重新生成纯 HTTP 配置、覆盖掉证书配置）——日常更新用 `deploy/update.sh`。
+
+**换域名的正确顺序**：先改 `deploy/config.sh` 的 `SITE_URL`/`SERVER_NAME` 并 `git push` → 服务器 `git pull` → （若 nginx 里还是旧 `server_name`）`sudo bash deploy/deploy.sh` 重建 nginx 与前端 → 验证 HTTP 同源 → `certbot --nginx` 上 HTTPS → 把 `SITE_URL` 改成 `https://…` 再 `git push` → 服务器 `sudo bash deploy/update.sh` 重建前端。
+
 ## 8. 验证
 
 - 浏览器打开 `https://YOUR_DOMAIN`，逐页点开 `/text-lab`、`/messages`、`/login`。
