@@ -11,6 +11,8 @@ import SystemNotifications from "./SystemNotifications.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { useMessages } from "./MessagesContext.jsx";
 
+const SECTION_IDS = ["chats", "notifications", "settings"];
+
 export default function MessagesView() {
   const { user, loading } = useAuth();
   const messages = useMessages();
@@ -23,6 +25,13 @@ export default function MessagesView() {
     const code = new URLSearchParams(window.location.search).get("code");
     if (code) openAddFriend(code);
   }, [user, openAddFriend]);
+
+  // 深链 /messages?section=settings（导航头像菜单的「个人资料」用它直达设置分区）
+  useEffect(() => {
+    if (!user) return;
+    const target = new URLSearchParams(window.location.search).get("section");
+    if (SECTION_IDS.includes(target)) setSection(target);
+  }, [user]);
 
   if (loading) return null;
 

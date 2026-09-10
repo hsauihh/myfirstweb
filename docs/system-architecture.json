@@ -8,7 +8,7 @@
     "quality_profile": "showcase",
     "repository": {
       "url": "https://github.com/hsauihh/myfirstweb",
-      "revision": "6a28063c0144b6193977371176c318836f9542ae"
+      "revision": "273e6025d2b795d85877534b7eb9fde7a2ace1ab"
     },
     "views": [
       { "id": "request-path", "label": "请求主链路", "focus": ["browser", "nginx", "api", "sqlite"], "note": "浏览器请求经 nginx 反代进入 FastAPI，落到 SQLite。" },
@@ -19,8 +19,8 @@
   "components": [
     { "id": "browser", "type": "external", "label": "用户浏览器", "sublabel": "Next.js 静态站点", "pos": [40, 246], "size": [150, 72], "sources": [{ "path": "components/chatApi.js", "label": "SSE 流式客户端" }] },
     { "id": "nginx", "type": "security", "label": "nginx", "sublabel": "静态托管 + 反向代理", "pos": [270, 246], "size": [160, 72], "sources": [{ "path": "deploy/nginx.conf", "label": "站点与代理配置" }] },
-    { "id": "api", "type": "backend", "label": "FastAPI · 单 worker", "sublabel": "backend/main.py 组装路由", "pos": [630, 240], "size": [180, 84], "sources": [{ "path": "backend/main.py", "label": "应用入口" }] },
-    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "backend/history.db", "pos": [1000, 246], "size": [170, 72], "sources": [{ "path": "backend/db.py", "label": "连接与数据归属" }] },
+    { "id": "api", "type": "backend", "label": "FastAPI · 单 worker", "sublabel": "backend/main.py 组装路由", "pos": [630, 240], "size": [180, 84], "sources": [{ "path": "backend/main.py", "label": "应用入口" }, { "path": "backend/blog_api.py", "label": "博客与点赞接口" }] },
+    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "backend/history.db", "pos": [1000, 246], "size": [170, 72], "sources": [{ "path": "backend/schema.py", "label": "连接与建表" }] },
     { "id": "llm", "type": "external", "label": "大模型服务", "sublabel": "OpenAI 兼容 · DeepSeek", "pos": [630, 60], "size": [180, 72], "sources": [{ "path": "backend/chat.py", "label": "模型层与上下文拼装" }] },
     { "id": "amap", "type": "external", "label": "高德开放平台", "sublabel": "IP 定位 + 实况天气", "pos": [1000, 60], "size": [170, 72], "sources": [{ "path": "backend/weather.py", "label": "天气接口" }] },
     { "id": "ws", "type": "messagebus", "label": "WebSocket /ws/friends", "sublabel": "内存连接表", "pos": [270, 400], "size": [170, 72], "sources": [{ "path": "backend/friends_ws.py", "label": "实时推送" }] },
@@ -42,7 +42,7 @@
   ],
   "cards": [
     { "dot": "cyan", "title": "运行形态", "items": ["前端 Next.js 静态导出，nginx 托管 out/", "后端 FastAPI + uvicorn 单 worker", "单 worker 的原因：好友连接表在进程内存"] },
-    { "dot": "emerald", "title": "数据与 AI", "items": ["对话走 OpenAI 兼容接口，换厂商只改 .env", "知识库用本地 fastembed 向量 + numpy 余弦", "账号、对话、好友与向量都落在同一个 SQLite"] },
-    { "dot": "rose", "title": "边界与入口", "items": ["登录态是 HttpOnly Cookie + auth_sessions", "匿名 3 句 / 每日 20 条 / 知识库 5 条 / VIP 不限", "公告由 announce.py 带 X-Announce-Key 发布"] }
+    { "dot": "emerald", "title": "数据与内容", "items": ["对话走 OpenAI 兼容接口，换厂商只改 .env", "知识库用本地 fastembed 向量 + numpy 余弦", "博客三态（草稿 / 仅自己 / 公开）与账号对话同库"] },
+    { "dot": "rose", "title": "边界与入口", "items": ["登录态是 HttpOnly Cookie + auth_sessions", "匿名 3 句 / 每日 20 条 / 知识库 5 条 / VIP 不限", "管理员（ADMIN_USERNAMES）可删任意公开文章"] }
   ]
 }

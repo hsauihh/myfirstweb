@@ -25,11 +25,13 @@ export const textLab = {
   heroSubtitle: "拼音和情绪，挖掘中文里的细节",
 };
 
-// 右上角「更多」下拉菜单里的预设页面入口（当前为占位页，后续再补内容）。
-export const moreLinks = [
-  { href: "/about", label: "关于" },
+// 顶部主导航：五项全部一级平铺，不放二级下拉。
+export const navLinks = [
+  { href: "/", label: "首页" },
+  { href: "/text-lab", label: "文字实验室" },
   { href: "/blog", label: "博客" },
   { href: "/works", label: "作品" },
+  { href: "/about", label: "关于" },
 ];
 
 // 主页「作品」模块的轮播数据（前端本地列表，不动后端 /api/profile）。

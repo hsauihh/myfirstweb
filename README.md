@@ -1,6 +1,6 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」和「AI 对话」两种模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态；导航栏头像卡片悬停显示用户名、点击弹出添加好友，收到新消息时「消息」右上角显示红点（可在设置里关闭）。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」和「AI 对话」两种模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏主导航平铺五项（首页 / 文字实验室 / 博客 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
@@ -151,7 +151,7 @@ zero-to-full/
 - 消息中心 `/messages`：左侧「我的消息」（会话列表 + 微信式聊天）/「系统通知」（公告 + 好友申请）/「设置」（个人资料换头像 + 消息设置）；好友、公告与 WebSocket 由 `MessagesProvider` 全站共享，只有一份连接。
 - 头像：登录后可在「设置 → 个人资料」选图 → 裁剪 → 上传。前端用 `react-easy-crop` 拖拽缩放，输出 256×256 JPEG；后端限制 jpg/png/webp 且 ≤2MB，存 `backend/avatars/`（gitignore），访问路径 `/avatars/xxx`；换新头像会删旧文件。
 - 公告：`announce.py` 读取 JSON 文件（`title` 必填、`body` 可选）发布；未读按用户记，点开标题标记已读；发布时通过 WebSocket 广播给所有在线用户。
-- 导航栏头像卡片悬停显示用户名，点击弹出添加好友弹窗（用户名 / 好友码 / 邀请链接）；「我的消息」只用于收发消息。收到新消息时「消息」右上角红点数字，开关存浏览器 `localStorage`（默认开，只影响该红点）。
+- 导航：主导航平铺「首页 / 文字实验室 / 博客 / 作品 / 关于」；右侧为天气（窄屏隐藏）、主题切换与账号区——未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），其中「个人资料」直达 `/messages?section=settings`。有未读时头像右上角红点、菜单「消息」行显示数字，开关存浏览器 `localStorage`（默认开，只影响这些提示）。窄屏（≤900px）折叠为汉堡菜单，导航与账号操作都收进菜单。
 
 ## 说明
 
@@ -177,8 +177,27 @@ zero-to-full/
 - **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
 
+## 架构图维护
+
+架构图（`docs/system-architecture.html`）是项目的**总纲**：
+
+- **新增功能、重构、优化之前**，先对照架构图想清楚改动落在哪个组件、哪条链路上；**改完必须回写架构图**，让它始终代表项目最新全貌。
+- 只改源文件 `docs/system-architecture.json`（archify 规格），**不要手改 `system-architecture.html`**——HTML 由它生成。
+- 生成与校验（archify 技能在 `~/.pi/agent/skills/archify/`）：
+
+  ```bash
+  A=~/.pi/agent/skills/archify/bin/archify.mjs
+  node $A validate architecture docs/system-architecture.json --quality showcase --repo-root .
+  node $A deliver  architecture docs/system-architecture.json docs/system-architecture.html --quality showcase --repo-root .
+  ARCHIFY_CHROME=$(ls ~/.cache/ms-playwright/chromium-*/chrome-linux64/chrome | head -1) \
+    node $A visual-check docs/system-architecture.html --json
+  ```
+
+- **必须更新**：新增独立组件或外部服务（加节点）、新增数据表或链路（补连线 / 卡片）、部署形态变化（改 boundary）。
+- **粒度约定**：架构图是基础设施级全貌；聊天 / 好友 / 认证 / 博客这类**功能级模块不单独画节点**，归到 `api` + `sqlite`，需要点出时写进底部卡片。
+- 提交时把 `docs/` 下的 json、html、visual-check 证据一起带上。
+
 ## 文档维护
 
 - `AGENTS.md` 给 AI 编码助手（硬约束与约定），`README.md` 给人类。项目结构、接口、技术栈或职责变动时二者同步更新。
 - 上线部署见 `DEPLOY.md`；一键脚本 `deploy/deploy.sh`，配置模板 `deploy/nginx.conf`、`deploy/zero-to-full.service`。
-- 实现新的模块时更新系统架构图

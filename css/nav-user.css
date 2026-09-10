@@ -1,0 +1,153 @@
+/* 导航栏用户区：桌面「头像 + 下拉菜单」，窄屏「整行列表」（收进汉堡菜单）。
+   在 nav.css 之后加载。 */
+
+.nav-user {
+  position: relative;
+}
+
+.user-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.user-card:hover,
+.user-card[aria-expanded="true"] {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.user-card:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* 有未读消息时头像右上角的小红点 */
+.user-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+/* 头像右上角的金色 VIP 标识 */
+.vip-tag {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f6c945, #e0a500);
+  color: #4a3200;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.user-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 50;
+  min-width: 176px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  box-shadow: var(--shadow);
+}
+
+.user-panel-name {
+  margin-bottom: 4px;
+  padding: 6px 12px 8px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-panel-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.user-panel-link:hover,
+.user-panel-link:focus-visible {
+  background: var(--brand-soft);
+  color: var(--brand);
+  outline: none;
+}
+
+/* ===== 窄屏用户块（桌面隐藏，≤900px 显示在汉堡菜单里） ===== */
+.nav-user-mobile-item { display: none; }
+
+.nav-user-mobile { display: none; }
+
+.nav-user-name {
+  margin: 0;
+  padding: 4px 4px 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.nav-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+  background: none;
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-user-row:hover,
+.nav-user-row:focus-visible {
+  color: var(--text-main);
+}
+
+@media (max-width: 900px) {
+  .nav-user-mobile-item { display: block; }
+  .nav-user-mobile { display: block; margin-top: 8px; }
+  .nav-user-mobile .nav-user-row:last-child { border-bottom: 0; }
+}

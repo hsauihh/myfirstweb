@@ -8,6 +8,7 @@ import "../css/variables.css";
 import "../css/layout.css";
 import "../css/hero.css";
 import "../css/nav.css";
+import "../css/nav-user.css";
 import "../css/cards.css";
 import "../css/widgets.css";
 import "../css/lab.css";

@@ -1,4 +1,4 @@
-/* 登录 / 注册页与导航登录态 */
+/* 登录 / 注册页（导航登录态的样式在 nav.css） */
 
 .auth-card {
   max-width: 420px;
@@ -67,71 +67,6 @@
 .auth-form .primary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* 导航登录态 */
-.nav-user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 头像卡片：点击进消息中心，悬停显示用户名 */
-.user-card {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--border-soft);
-  border-radius: 50%;
-  background: var(--surface);
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.user-card:hover {
-  border-color: var(--brand);
-  background: var(--brand-soft);
-}
-
-.user-card::after {
-  content: attr(data-name);
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 60;
-  padding: 5px 10px;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-main);
-  font-size: 13px;
-  white-space: nowrap;
-  box-shadow: var(--shadow);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.15s;
-}
-
-.user-card:hover::after,
-.user-card:focus-visible::after {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* 头像右上角的金色 VIP 标识 */
-.vip-tag {
-  position: absolute;
-  top: -4px;
-  right: -8px;
-  padding: 1px 5px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f6c945, #e0a500);
-  color: #4a3200;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
 }
 
 @media (max-width: 640px) {
