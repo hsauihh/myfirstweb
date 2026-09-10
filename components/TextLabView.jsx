@@ -13,6 +13,7 @@ import { textLab } from "../data/site.js";
 const TABS = [
   { id: "analysis", label: "分析" },
   { id: "chat", label: "AI 对话" },
+  { id: "rag", label: "知识库问答" },
 ];
 
 export default function TextLabView() {
@@ -43,7 +44,10 @@ export default function TextLabView() {
       </div>
 
       <div className={"tab-panel" + (tab === "chat" ? "" : " is-hidden")}>
-        <ChatPanel />
+        <ChatPanel kind="chat" />
+      </div>
+      <div className={"tab-panel" + (tab === "rag" ? "" : " is-hidden")}>
+        <ChatPanel kind="rag" forceRag />
       </div>
       <div className={"tab-panel" + (tab === "analysis" ? "" : " is-hidden")}>
         <AnalysisPanel />

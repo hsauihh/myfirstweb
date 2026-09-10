@@ -5,6 +5,7 @@
 import json
 import os
 from collections.abc import Iterator
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -39,6 +40,7 @@ DEFAULT_TITLE = "新对话"
 TITLE_MAX_LENGTH = 20
 MAX_CONTENT_LENGTH = 4000
 CONVERSATION_LIST_LIMIT = 20
+ConversationKind = Literal["chat", "rag"]
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -126,17 +128,22 @@ def _sse(event: str, data: dict) -> str:
 
 
 @router.post("/conversations")
-def create_conversation_endpoint(request: Request, response: Response) -> dict:
+def create_conversation_endpoint(
+    request: Request, response: Response, kind: ConversationKind = "chat"
+) -> dict:
     owner = resolve_owner(request, response)
-    return create_conversation(owner, DEFAULT_TITLE)
+    return create_conversation(owner, DEFAULT_TITLE, kind)
 
 
 @router.get("/conversations")
 def list_conversations_endpoint(
-    request: Request, response: Response, limit: int = CONVERSATION_LIST_LIMIT
+    request: Request,
+    response: Response,
+    limit: int = CONVERSATION_LIST_LIMIT,
+    kind: ConversationKind = "chat",
 ) -> list[dict]:
     owner = resolve_owner(request, response)
-    return list_conversations(owner, limit)
+    return list_conversations(owner, limit, kind)
 
 
 @router.get("/conversations/{conversation_id}/messages")

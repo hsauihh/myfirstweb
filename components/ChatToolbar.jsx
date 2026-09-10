@@ -2,6 +2,8 @@
 
 // 会话操作栏：切换会话、新建、删除。
 export default function ChatToolbar({
+  kicker = "AI 对话",
+  title = "和助手聊聊",
   conversations,
   activeId,
   sending,
@@ -12,8 +14,8 @@ export default function ChatToolbar({
   return (
     <div className="panel-heading chat-heading">
       <div>
-        <p className="section-kicker">AI 对话</p>
-        <h3>和助手聊聊</h3>
+        <p className="section-kicker">{kicker}</p>
+        <h3>{title}</h3>
       </div>
       <div className="chat-actions">
         <select

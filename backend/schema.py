@@ -62,11 +62,13 @@ def _create_conversations(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None
         session_id TEXT NOT NULL,
         user_id INTEGER,
         title TEXT NOT NULL,
+        kind TEXT NOT NULL DEFAULT 'chat',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
     )
     """)
     _ensure_column(conn, "conversations", "user_id", ddl="INTEGER")
+    _ensure_column(conn, "conversations", "kind", ddl="TEXT NOT NULL DEFAULT 'chat'")
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_conversations_session "
         "ON conversations(session_id, updated_at DESC)"

@@ -13,12 +13,12 @@ async function request(path, options = {}) {
   return res.json();
 }
 
-export function listConversations() {
-  return request("/api/chat/conversations");
+export function listConversations(kind = "chat") {
+  return request(`/api/chat/conversations?kind=${kind}`);
 }
 
-export function createConversation() {
-  return request("/api/chat/conversations", { method: "POST" });
+export function createConversation(kind = "chat") {
+  return request(`/api/chat/conversations?kind=${kind}`, { method: "POST" });
 }
 
 export function listMessages(conversationId) {

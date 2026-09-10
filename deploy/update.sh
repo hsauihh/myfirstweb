@@ -41,7 +41,7 @@ update_backend() {
 }
 
 update_frontend() {
-  grep -qE '^(app/|components/|css/|data/|public/|package\.json|package-lock\.json|next\.config)' <<< "$1" \
+  grep -qE '^(app/|components/|css/|data/|docs/|public/|scripts/|package\.json|package-lock\.json|next\.config)' <<< "$1" \
     || return 0
   log "前端有改动：构建并发布"
   run_as_user "cd '$PROJECT_DIR' && npm ci --no-audit --no-fund"

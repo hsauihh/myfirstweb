@@ -15,7 +15,7 @@ function upsertConversation(list, conversation) {
   return [conversation, ...list.filter((item) => item.id !== conversation.id)];
 }
 
-export default function useChat({ onQuota } = {}) {
+export default function useChat({ kind = "chat", onQuota } = {}) {
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -52,7 +52,7 @@ export default function useChat({ onQuota } = {}) {
   useEffect(() => {
     async function load() {
       try {
-        const items = await listConversations();
+        const items = await listConversations(kind);
         setConversations(items);
         if (items.length > 0) await selectConversation(items[0].id);
       } catch (err) {
@@ -60,12 +60,12 @@ export default function useChat({ onQuota } = {}) {
       }
     }
     load();
-  }, [selectConversation]);
+  }, [selectConversation, kind]);
 
   const newConversation = useCallback(async () => {
     setError("");
     try {
-      const conversation = await createConversation();
+      const conversation = await createConversation(kind);
       setConversations((prev) => upsertConversation(prev, conversation));
       setActiveId(conversation.id);
       setMessages([]);
@@ -75,7 +75,7 @@ export default function useChat({ onQuota } = {}) {
       setError(err.message);
       return null;
     }
-  }, []);
+  }, [kind]);
 
   const removeConversation = useCallback(
     async (id) => {

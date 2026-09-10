@@ -142,6 +142,14 @@
   .works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* === 关于页：架构图入口 === */
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
 @media (max-width: 640px) {
   .works-grid { grid-template-columns: 1fr; }
   .identity-panel { grid-template-columns: 1fr; }

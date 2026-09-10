@@ -1,6 +1,6 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」和「AI 对话」两种模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏主导航平铺五项（首页 / 文字实验室 / 博客 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」「知识库问答」三个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。知识库问答是独立面板（会话与 AI 对话分开）；AI 对话里也可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（知识库独立每天 5 条，VIP 不限量）。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏主导航平铺五项（首页 / 文字实验室 / 博客 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
@@ -103,8 +103,8 @@ zero-to-full/
 | GET  | `/api/auth/me` | — | 当前用户与匿名额度 `{ user, quota }` |
 | POST | `/api/auth/avatar` | `file`（multipart） | 上传头像（jpg/png/webp，≤2MB），返回 `{ user }` |
 | DELETE | `/api/auth/session` | — | 退出登录，返回 `{ "ok": true }` |
-| POST | `/api/chat/conversations` | — | 新建会话 |
-| GET  | `/api/chat/conversations` | `?limit=20` | 会话列表，按更新时间倒序 |
+| POST | `/api/chat/conversations` | `?kind=chat\|rag` | 新建会话（kind 默认 chat；rag = 知识库问答） |
+| GET  | `/api/chat/conversations` | `?limit=20&kind=chat\|rag` | 会话列表，按更新时间倒序；按 kind 隔离 |
 | GET  | `/api/chat/conversations/{id}/messages` | — | 会话消息（正序） |
 | DELETE | `/api/chat/conversations/{id}` | — | 删除会话及其消息，返回 `{ "deleted": N }` |
 | POST | `/api/chat/conversations/{id}/messages` | `{ content }` | SSE 流式回复；事件 `delta` / `done` / `error` |
@@ -151,7 +151,7 @@ zero-to-full/
 - 消息中心 `/messages`：左侧「我的消息」（会话列表 + 微信式聊天）/「系统通知」（公告 + 好友申请）/「设置」（个人资料换头像 + 消息设置）；好友、公告与 WebSocket 由 `MessagesProvider` 全站共享，只有一份连接。
 - 头像：登录后可在「设置 → 个人资料」选图 → 裁剪 → 上传。前端用 `react-easy-crop` 拖拽缩放，输出 256×256 JPEG；后端限制 jpg/png/webp 且 ≤2MB，存 `backend/avatars/`（gitignore），访问路径 `/avatars/xxx`；换新头像会删旧文件。
 - 公告：`announce.py` 读取 JSON 文件（`title` 必填、`body` 可选）发布；未读按用户记，点开标题标记已读；发布时通过 WebSocket 广播给所有在线用户。
-- 导航：主导航平铺「首页 / 文字实验室 / 博客 / 作品 / 关于」；右侧为天气（窄屏隐藏）、主题切换与账号区——未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），其中「个人资料」直达 `/messages?section=settings`。有未读时头像右上角红点、菜单「消息」行显示数字，开关存浏览器 `localStorage`（默认开，只影响这些提示）。窄屏（≤900px）折叠为汉堡菜单，导航与账号操作都收进菜单。
+- 导航：主导航平铺「首页 / 文字实验室 / 博客 / 作品 / 关于」；右侧为天气、主题切换与账号区——未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），其中「个人资料」直达 `/messages?section=settings`。有未读时头像右上角红点、菜单「消息」行显示数字，开关存浏览器 `localStorage`（默认开，只影响这些提示）。窄屏（≤900px）折叠为汉堡菜单，导航与账号操作都收进菜单；天气在各宽度常驻，≤480px 只留「城市+温度」、≤380px 只留温度。
 
 ## 说明
 
@@ -176,6 +176,7 @@ zero-to-full/
 - **同一项目只保留一个 `next dev`**：多个实例共用同一个 `.next`，会互相删掉对方编译产物（同样是上面的 `ENOENT`）。用 `fuser -k 3000/tcp` 关掉占用端口的实例后再启动。
 - **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
+- 「关于」页（`/about`）提供项目架构图入口，新标签打开 `/architecture.html`。
 
 ## 架构图维护
 
@@ -194,6 +195,7 @@ zero-to-full/
   ```
 
 - **必须更新**：新增独立组件或外部服务（加节点）、新增数据表或链路（补连线 / 卡片）、部署形态变化（改 boundary）。
+- **面向站点发布**：`npm run sync:arch`（`predev` / `prebuild` 自动执行）会把 `docs/system-architecture.html` 复制到 `public/architecture.html`，站点通过 `/architecture.html` 访问（「关于」页入口）；该产物已 gitignore。
 - **粒度约定**：架构图是基础设施级全貌；聊天 / 好友 / 认证 / 博客这类**功能级模块不单独画节点**，归到 `api` + `sqlite`，需要点出时写进底部卡片。
 - 提交时把 `docs/` 下的 json、html、visual-check 证据一起带上。
 

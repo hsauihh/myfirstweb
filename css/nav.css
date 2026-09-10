@@ -156,8 +156,7 @@
 @media (max-width: 900px) {
   .nav-toggle { display: inline-flex; }
 
-  /* 窄屏右侧只留 logo + 主题 + 汉堡 */
-  .nav-actions .weather-card { display: none; }
+  /* 窄屏右侧收起账号菜单（天气与主题保留常驻） */
   .nav-actions .nav-user { display: none; }
 
   .nav-menu {
@@ -183,4 +182,14 @@
 @media (max-width: 640px) {
   .navbar { padding: 0; }
   .navbar-brand { font-size: 18px; }
+  .nav-actions { gap: 8px; }
+}
+
+/* 极窄屏：天气只做降级（先去掉天气现象，再去掉城市），温度始终保留 */
+@media (max-width: 480px) {
+  .nav-actions .weather-cond { display: none; }
+}
+
+@media (max-width: 380px) {
+  .nav-actions .weather-city { display: none; }
 }

@@ -4,6 +4,10 @@ import sqlite3
 import db
 from db import Owner, owner_clause
 
+# 会话空间：chat = 普通 AI 对话；rag = 知识库问答（两者会话列表互相隔离）
+DEFAULT_KIND = "chat"
+RAG_KIND = "rag"
+
 
 # ---------- 分析历史 ----------
 
@@ -48,18 +52,19 @@ def _conversation(row: sqlite3.Row) -> dict:
     return {
         "id": row["id"],
         "title": row["title"],
+        "kind": row["kind"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
     }
 
 
-def create_conversation(owner: Owner, title: str) -> dict:
+def create_conversation(owner: Owner, title: str, kind: str = DEFAULT_KIND) -> dict:
     now = db.now_iso()
     conn = db.get_conn()
     cur = conn.execute(
-        "INSERT INTO conversations (session_id, user_id, title, created_at, updated_at)"
-        " VALUES (?, ?, ?, ?, ?)",
-        [owner.session_id, owner.user_id, title, now, now],
+        "INSERT INTO conversations (session_id, user_id, title, kind, created_at, updated_at)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
+        [owner.session_id, owner.user_id, title, kind, now, now],
     )
     conn.commit()
     conversation_id = cur.lastrowid
@@ -67,18 +72,21 @@ def create_conversation(owner: Owner, title: str) -> dict:
     return {
         "id": conversation_id,
         "title": title,
+        "kind": kind,
         "created_at": now,
         "updated_at": now,
     }
 
 
-def list_conversations(owner: Owner, limit: int) -> list[dict]:
+def list_conversations(
+    owner: Owner, limit: int, kind: str = DEFAULT_KIND
+) -> list[dict]:
     clause, params = owner_clause(owner)
     conn = db.get_conn()
     rows = conn.execute(
-        f"SELECT * FROM conversations WHERE {clause}"
+        f"SELECT * FROM conversations WHERE {clause} AND kind = ?"
         " ORDER BY updated_at DESC, id DESC LIMIT ?",
-        [*params, limit],
+        [*params, kind, limit],
     ).fetchall()
     conn.close()
     return [_conversation(row) for row in rows]

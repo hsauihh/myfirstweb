@@ -14,6 +14,7 @@ export default function ChatComposer({
   ragQuota,
   user,
   useRag,
+  showRagToggle = true,
   onToggleRag,
   onSend,
   onStop,
@@ -46,6 +47,7 @@ export default function ChatComposer({
     if (blocked) {
       return user ? "今日免费次数已用完，开通 VIP 继续" : "匿名额度已用完，登录后继续";
     }
+    if (useRag) return "向知识库提问…（Enter 发送，Shift+Enter 换行）";
     return "说点什么…（Enter 发送，Shift+Enter 换行）";
   }
 
@@ -67,17 +69,21 @@ export default function ChatComposer({
               {text.length}/{MAX_LENGTH}
             </span>
             <div className="rag-toggle">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={useRag}
-                aria-label="使用知识库"
-                className={"switch switch--sm" + (useRag ? " is-on" : "")}
-                onClick={() => onToggleRag(!useRag)}
-              >
-                <span className="switch-knob" />
-              </button>
-              <span className="rag-toggle-label">使用知识库</span>
+              {showRagToggle && (
+                <>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={useRag}
+                    aria-label="使用知识库"
+                    className={"switch switch--sm" + (useRag ? " is-on" : "")}
+                    onClick={() => onToggleRag(!useRag)}
+                  >
+                    <span className="switch-knob" />
+                  </button>
+                  <span className="rag-toggle-label">使用知识库</span>
+                </>
+              )}
             </div>
             <ChatQuotaHint
               user={user}

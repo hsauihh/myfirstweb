@@ -50,6 +50,9 @@ desktop.ini
 *.tar.gz
 *.zip
 
+# ===== 架构图发布产物（由 npm run sync:arch 从 docs/ 生成）=====
+/public/architecture.html
+
 # ===== 知识库原始资料 =====
 RAGdata/
 
