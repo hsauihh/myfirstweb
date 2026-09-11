@@ -11,6 +11,7 @@ export default function ChatMessages({ messages, streamingText, listRef, selfNam
           key={message.id}
           role={message.role}
           content={message.content}
+          sources={message.sources}
           selfName={selfName}
         />
       ))}

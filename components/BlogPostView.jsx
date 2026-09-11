@@ -49,6 +49,29 @@ export default function BlogPostView() {
     };
   }, [postId]);
 
+  // 引用跳转：/blog/post?id=N#小节 → 等文章渲染完再滚到该标题并短暂高亮
+  useEffect(() => {
+    if (!post) return undefined;
+    let timer = 0;
+    function jump() {
+      const id = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+      const target = id ? document.getElementById(id) : null;
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.classList.remove("is-cited");
+      void target.offsetWidth;              // 强制回流，让动画能重新播一次
+      target.classList.add("is-cited");
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => target.classList.remove("is-cited"), 2400);
+    }
+    jump();
+    window.addEventListener("hashchange", jump);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("hashchange", jump);
+    };
+  }, [post]);
+
   async function addToKnowledge() {
     setKbBusy(true);
     setKbError("");

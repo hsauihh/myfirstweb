@@ -374,3 +374,99 @@
 @media (prefers-reduced-motion: reduce) {
   .chat-cursor { animation: none; }
 }
+
+/* 引用角标：正文里的 [n]（点击弹出该来源） */
+.citation-mark {
+  margin: 0 1px;
+  padding: 0 5px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--brand);
+  font: inherit;
+  font-size: 0.82em;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.citation-mark:hover {
+  border-color: var(--brand);
+}
+
+/* 助手气泡下方的参考来源（按文章聚合，列出命中小节） */
+.chat-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  background: var(--surface-soft);
+}
+
+.chat-sources__title {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chat-source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-source-card__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.chat-source-card__icon { font-size: 13px; }
+.chat-source-card__title { color: var(--text-main); font-weight: 600; }
+.chat-source-card__author,
+.chat-source-card__count { color: var(--text-muted); font-size: 12px; }
+
+.chat-source-card__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chat-source-card__mark {
+  padding: 2px 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chat-source-card__mark:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* 站内公共资料的命中片段弹层 */
+.source-modal { width: min(680px, 100%); }
+
+.source-modal__path {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.source-modal__snippet {
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.7;
+}

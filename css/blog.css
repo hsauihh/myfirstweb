@@ -198,3 +198,28 @@
 .blog-back { color: var(--text-soft); font-size: 14px; }
 
 .blog-back:hover { color: var(--brand); }
+
+/* 引用跳转落点：滚动定位到小节标题并短暂高亮 */
+.blog-article__body .markdown-body :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 96px;
+}
+
+.blog-article__body .is-cited {
+  border-radius: 6px;
+  animation: cited-flash 2.2s ease-out;
+}
+
+@keyframes cited-flash {
+  0% {
+    background: var(--brand-soft);
+    box-shadow: 0 0 0 6px var(--brand-soft);
+  }
+  100% {
+    background: transparent;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-article__body .is-cited { animation: none; }
+}

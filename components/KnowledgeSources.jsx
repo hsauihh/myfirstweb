@@ -208,7 +208,11 @@ export default function KnowledgeSources({ onChanged }) {
                     disabled={item.in_kb || busyId === item.post_id}
                     onClick={() => add(item.post_id)}
                   >
-                    {item.in_kb ? "已加入" : "加入"}
+                    {item.in_kb
+                      ? "已加入"
+                      : busyId === item.post_id
+                        ? "加入中…"
+                        : "加入"}
                   </button>
                 </div>
               </div>
