@@ -1,6 +1,6 @@
 // 聊天接口封装：会话 CRUD + SSE 流式解析。
 // 所有请求都带 credentials，让后端的 session_id Cookie 生效。
-import { apiError } from "./apiError.js";
+import { apiError } from "./apiError";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

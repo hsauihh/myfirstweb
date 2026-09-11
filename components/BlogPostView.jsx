@@ -5,13 +5,13 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import BlogLikeButton from "./BlogLikeButton.jsx";
-import Markdown from "./Markdown.jsx";
-import { formatDate } from "./blogDate.js";
-import { useAuth } from "./AuthContext.jsx";
-import * as blogApi from "./blogApi.js";
-import * as kbApi from "./kbApi.js";
+import Avatar from "./Avatar";
+import BlogLikeButton from "./BlogLikeButton";
+import Markdown from "./Markdown";
+import { formatDate } from "./blogDate";
+import { useAuth } from "./AuthContext";
+import * as blogApi from "./blogApi";
+import * as kbApi from "./kbApi";
 
 export default function BlogPostView() {
   const { user } = useAuth();

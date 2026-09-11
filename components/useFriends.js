@@ -2,7 +2,7 @@
 
 // 好友页的状态与动作：好友列表、申请、当前会话消息、实时事件处理。
 import { useCallback, useEffect, useRef, useState } from "react";
-import * as api from "./friendsApi.js";
+import * as api from "./friendsApi";
 
 function appendUnique(list, message) {
   if (list.some((item) => item.id === message.id)) return list;

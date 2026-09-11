@@ -3,8 +3,8 @@
 // 登录页视图：登录 / 注册 Tab + 表单；成功后回到文字实验室。
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import AuthForm from "./AuthForm.jsx";
-import { useAuth } from "./AuthContext.jsx";
+import AuthForm from "./AuthForm";
+import { useAuth } from "./AuthContext";
 
 const MODES = [
   { id: "login", label: "登录", submitLabel: "登录" },

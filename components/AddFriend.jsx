@@ -2,8 +2,8 @@
 
 // 添加好友：用户名精确搜索 / 好友码；展示自己的好友码与邀请链接。
 import { useEffect, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import { lookup, myCode } from "./friendsApi.js";
+import Avatar from "./Avatar";
+import { lookup, myCode } from "./friendsApi";
 
 const RELATION_LABELS = {
   self: "这是你自己",

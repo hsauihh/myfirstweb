@@ -3,12 +3,12 @@
 // 全站消息状态：好友、公告、WebSocket 与提醒开关。
 // 导航栏红点、消息中心各面板都从这里取数据，保证只有一份连接与状态。
 import { createContext, useCallback, useContext, useState } from "react";
-import { useAuth } from "./AuthContext.jsx";
-import useAnnouncements from "./useAnnouncements.js";
-import useFriendSocket from "./useFriendSocket.js";
-import useFriends from "./useFriends.js";
-import useMessageReminder from "./useMessageReminder.js";
-import useVipBadge from "./useVipBadge.js";
+import { useAuth } from "./AuthContext";
+import useAnnouncements from "./useAnnouncements";
+import useFriendSocket from "./useFriendSocket";
+import useFriends from "./useFriends";
+import useMessageReminder from "./useMessageReminder";
+import useVipBadge from "./useVipBadge";
 
 const MessagesContext = createContext(null);
 

@@ -1,6 +1,6 @@
 // app/messages/page.jsx → 网站路径 "/messages"
 import "../../css/genshin-font.css";
-import MessagesView from "../../components/MessagesView.jsx";
+import MessagesView from "../../components/MessagesView";
 
 export const metadata = {
   title: "消息 · zero to tech",

@@ -3,12 +3,12 @@
 // 普通 AI 对话面板：会话列表 + 消息区 + 输入区（含「文字实验室」常用提示词）。
 // 知识库问答已移到 /knowledge，这里不涉及知识库。
 import { useEffect, useRef } from "react";
-import ChatComposer from "./ChatComposer.jsx";
-import ChatMessages from "./ChatMessages.jsx";
-import ChatToolbar from "./ChatToolbar.jsx";
-import useChat from "./useChat.js";
-import { useAuth } from "./AuthContext.jsx";
-import { textLabPrompts } from "../data/site.js";
+import ChatComposer from "./ChatComposer";
+import ChatMessages from "./ChatMessages";
+import ChatToolbar from "./ChatToolbar";
+import useChat from "./useChat";
+import { useAuth } from "./AuthContext";
+import { textLabPrompts } from "../data/site";
 
 export default function ChatPanel() {
   const auth = useAuth();

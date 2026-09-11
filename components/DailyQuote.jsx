@@ -5,7 +5,7 @@
 // 引文切换用 CSS 淡入（widgets.css 里 key 变化触发 animation），
 // prefers-reduced-motion 下会禁用动画（见 widgets.css）。
 import { useEffect, useState } from "react";
-import { quotes } from "../data/quotes.js";
+import { quotes } from "../data/quotes";
 
 const ArrowLeft = (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

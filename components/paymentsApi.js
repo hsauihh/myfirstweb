@@ -1,5 +1,5 @@
 // 模拟支付接口封装：下单、确认支付、订单列表。
-import { apiError } from "./apiError.js";
+import { apiError } from "./apiError";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

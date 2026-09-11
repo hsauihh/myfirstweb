@@ -9,7 +9,7 @@ import {
   listConversations,
   listMessages,
   streamChat,
-} from "./chatApi.js";
+} from "./chatApi";
 
 function upsertConversation(list, conversation) {
   return [conversation, ...list.filter((item) => item.id !== conversation.id)];

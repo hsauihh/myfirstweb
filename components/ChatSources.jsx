@@ -4,7 +4,7 @@
 // 每篇文章下面列出命中的小节（角标编号与正文里的 [n] 一致）。
 // 个人文章点击直达原文对应小节；站内公共资料没有网页，点击弹出命中片段。
 import Link from "next/link";
-import { headingSlug, lastSection } from "./slug.js";
+import { headingSlug, lastSection } from "./slug";
 
 function groupSources(sources) {
   const groups = new Map();

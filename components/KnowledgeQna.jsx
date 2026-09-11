@@ -3,11 +3,11 @@
 // 知识库问答面板：rag 会话 + 「问答 / 上下文」模式 + 「使用系统知识库」开关。
 // 两个选项都是每条消息的参数，随消息发送。
 import { useEffect, useRef, useState } from "react";
-import ChatComposer from "./ChatComposer.jsx";
-import ChatMessages from "./ChatMessages.jsx";
-import ChatToolbar from "./ChatToolbar.jsx";
-import useChat from "./useChat.js";
-import { useAuth } from "./AuthContext.jsx";
+import ChatComposer from "./ChatComposer";
+import ChatMessages from "./ChatMessages";
+import ChatToolbar from "./ChatToolbar";
+import useChat from "./useChat";
+import { useAuth } from "./AuthContext";
 
 const MODES = [
   { id: "qa", label: "问答" },

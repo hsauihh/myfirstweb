@@ -4,9 +4,9 @@
 // 未登录显示「登录」。消息未读数在提醒开启时展示（桌面为头像红点 + 菜单数字）。
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import { useAuth } from "./AuthContext.jsx";
-import { useMessages } from "./MessagesContext.jsx";
+import Avatar from "./Avatar";
+import { useAuth } from "./AuthContext";
+import { useMessages } from "./MessagesContext";
 
 function rowClass(variant) {
   return variant === "mobile" ? "nav-user-row" : "user-panel-link";

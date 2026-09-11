@@ -1,5 +1,5 @@
 // 博客接口封装：公开列表/详情、我的文章增删改、点赞。
-import { apiError } from "./apiError.js";
+import { apiError } from "./apiError";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

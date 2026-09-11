@@ -3,9 +3,9 @@
 // 单条聊天消息气泡；助手消息渲染 Markdown 与参考来源，用户消息保持纯文本。
 // streaming 为 true 时在末尾显示光标（此时还没有结构化来源，卡片在流结束后出现）。
 import { useState } from "react";
-import ChatSources from "./ChatSources.jsx";
-import Markdown from "./Markdown.jsx";
-import SourceSnippetModal from "./SourceSnippetModal.jsx";
+import ChatSources from "./ChatSources";
+import Markdown from "./Markdown";
+import SourceSnippetModal from "./SourceSnippetModal";
 
 export default function ChatMessage({
   role,

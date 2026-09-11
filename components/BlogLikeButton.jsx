@@ -3,8 +3,8 @@
 // 点赞按钮：登录用户每人每篇一次、可取消；未登录点击去登录。
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAuth } from "./AuthContext.jsx";
-import * as blogApi from "./blogApi.js";
+import { useAuth } from "./AuthContext";
+import * as blogApi from "./blogApi";
 
 export default function BlogLikeButton({ postId, count, liked }) {
   const { user } = useAuth();

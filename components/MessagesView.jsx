@@ -3,13 +3,13 @@
 // 消息中心：左侧导航（我的消息 / 系统通知 / 消息设置）+ 右侧内容。
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import ChatWindow from "./ChatWindow.jsx";
-import ConversationList from "./ConversationList.jsx";
-import MessagesRail from "./MessagesRail.jsx";
-import SettingsPanel from "./SettingsPanel.jsx";
-import SystemNotifications from "./SystemNotifications.jsx";
-import { useAuth } from "./AuthContext.jsx";
-import { useMessages } from "./MessagesContext.jsx";
+import ChatWindow from "./ChatWindow";
+import ConversationList from "./ConversationList";
+import MessagesRail from "./MessagesRail";
+import SettingsPanel from "./SettingsPanel";
+import SystemNotifications from "./SystemNotifications";
+import { useAuth } from "./AuthContext";
+import { useMessages } from "./MessagesContext";
 
 const SECTION_IDS = ["chats", "notifications", "settings"];
 

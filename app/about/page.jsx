@@ -1,7 +1,7 @@
 // app/about/page.jsx → 网站路径 "/about"
 // 关于页：站点简介 + 项目架构图入口。
 // 架构图由 scripts/sync-architecture.mjs（predev/prebuild）从 docs/ 发布到 /architecture.html。
-import PageHeading from "../../components/PageHeading.jsx";
+import PageHeading from "../../components/PageHeading";
 
 export const metadata = {
   title: "关于 · zero to tech",

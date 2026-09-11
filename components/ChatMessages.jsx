@@ -1,5 +1,5 @@
 // 消息列表：历史消息 + 正在流式生成的回复。
-import ChatMessage from "./ChatMessage.jsx";
+import ChatMessage from "./ChatMessage";
 
 export default function ChatMessages({ messages, streamingText, listRef, selfName }) {
   const isEmpty = messages.length === 0 && !streamingText;

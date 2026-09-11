@@ -2,8 +2,8 @@
 
 // 微信式聊天窗口：对方消息左侧、自己消息右侧，底部输入区带表情。
 import { useEffect, useRef, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import EmojiPicker from "./EmojiPicker.jsx";
+import Avatar from "./Avatar";
+import EmojiPicker from "./EmojiPicker";
 
 const MAX_LENGTH = 2000;
 

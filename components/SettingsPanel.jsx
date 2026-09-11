@@ -2,8 +2,8 @@
 
 // 设置面板：个人资料（换头像）+ 消息设置（提醒开关、清空聊天记录）。
 import { useState } from "react";
-import ProfileSettings from "./ProfileSettings.jsx";
-import { useMessages } from "./MessagesContext.jsx";
+import ProfileSettings from "./ProfileSettings";
+import { useMessages } from "./MessagesContext";
 
 export default function SettingsPanel({
   reminderEnabled,

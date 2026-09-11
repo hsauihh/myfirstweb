@@ -1,5 +1,5 @@
 // app/blog/page.jsx → 网站路径 "/blog"（公开文章列表）
-import BlogView from "../../components/BlogView.jsx";
+import BlogView from "../../components/BlogView";
 
 export const metadata = {
   title: "博客 · zero to tech",

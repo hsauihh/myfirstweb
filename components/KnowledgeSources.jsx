@@ -3,9 +3,9 @@
 // 来源管理：站内公共资料（只读）+ 我添加的文章 + 从可读文章里挑选添加。
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import { useAuth } from "./AuthContext.jsx";
-import * as kbApi from "./kbApi.js";
+import Avatar from "./Avatar";
+import { useAuth } from "./AuthContext";
+import * as kbApi from "./kbApi";
 
 const SEARCH_DEBOUNCE_MS = 250;
 

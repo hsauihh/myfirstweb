@@ -1,7 +1,7 @@
 // 占位页视图：居中 hero（eyebrow + 标题 + 副标题）+「内容建设中」卡片。
 // 纯展示、无交互，服务端组件；内部用到的 Nav / AnimatedCardGrid 是客户端组件。
-import PageHeading from "./PageHeading.jsx";
-import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
+import PageHeading from "./PageHeading";
+import AnimatedCardGrid from "./AnimatedCardGrid";
 
 export default function PlaceholderView({ eyebrow, title, subtitle }) {
   return (

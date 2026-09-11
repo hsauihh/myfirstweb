@@ -2,8 +2,8 @@
 
 // 全站添加好友弹窗：由导航栏头像卡片触发，状态在 MessagesContext 里。
 import { useEffect } from "react";
-import AddFriend from "./AddFriend.jsx";
-import { useMessages } from "./MessagesContext.jsx";
+import AddFriend from "./AddFriend";
+import { useMessages } from "./MessagesContext";
 
 export default function AddFriendModal() {
   const { addFriendOpen, presetCode, closeAddFriend, addFriend } = useMessages();

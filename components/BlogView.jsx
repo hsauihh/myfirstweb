@@ -4,11 +4,11 @@
 // 管理员（user.is_admin）可在卡片上直接删除公开文章。
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import PageHeading from "./PageHeading.jsx";
-import { useAuth } from "./AuthContext.jsx";
-import { formatDate } from "./blogDate.js";
-import * as blogApi from "./blogApi.js";
+import Avatar from "./Avatar";
+import PageHeading from "./PageHeading";
+import { useAuth } from "./AuthContext";
+import { formatDate } from "./blogDate";
+import * as blogApi from "./blogApi";
 
 const PAGE_SIZE = 10;
 const SORTS = [

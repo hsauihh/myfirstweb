@@ -4,11 +4,11 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import BlogEditor from "./BlogEditor.jsx";
-import PageHeading from "./PageHeading.jsx";
-import { useAuth } from "./AuthContext.jsx";
-import { formatDateTime } from "./blogDate.js";
-import * as blogApi from "./blogApi.js";
+import BlogEditor from "./BlogEditor";
+import PageHeading from "./PageHeading";
+import { useAuth } from "./AuthContext";
+import { formatDateTime } from "./blogDate";
+import * as blogApi from "./blogApi";
 
 const TAGS = {
   public: { text: "公开", className: "blog-tag--public" },

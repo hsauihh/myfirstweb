@@ -1,5 +1,5 @@
 // app/login/page.jsx → 网站路径 "/login"
-import AuthView from "../../components/AuthView.jsx";
+import AuthView from "../../components/AuthView";
 
 export const metadata = {
   title: "登录 · zero to tech",

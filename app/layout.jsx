@@ -22,10 +22,10 @@ import "../css/messages.css";
 import "../css/messages-panels.css";
 import "../css/chat-window.css";
 import "../css/responsive.css";
-import Nav from "../components/Nav.jsx";
-import AddFriendModal from "../components/AddFriendModal.jsx";
-import { AuthProvider } from "../components/AuthContext.jsx";
-import { MessagesProvider } from "../components/MessagesContext.jsx";
+import Nav from "../components/Nav";
+import AddFriendModal from "../components/AddFriendModal";
+import { AuthProvider } from "../components/AuthContext";
+import { MessagesProvider } from "../components/MessagesContext";
 
 export const metadata = {
   title: "zero to tech",

@@ -2,8 +2,8 @@
 
 // 模拟支付弹窗：点微信 / 支付宝即视为支付成功并开通 VIP。
 import { useEffect, useState } from "react";
-import { useAuth } from "./AuthContext.jsx";
-import { confirmOrder, createOrder } from "./paymentsApi.js";
+import { useAuth } from "./AuthContext";
+import { confirmOrder, createOrder } from "./paymentsApi";
 
 const PRICE_YUAN = "999";
 

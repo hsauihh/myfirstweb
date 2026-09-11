@@ -2,9 +2,9 @@
 
 // 文字实验室的「分析」模式：输入卡 + 结果卡 + 历史弹窗，逻辑与拆分前一致。
 import { useState } from "react";
-import InputCard from "./InputCard.jsx";
-import ResultCard from "./ResultCard.jsx";
-import HistoryModal from "./HistoryModal.jsx";
+import InputCard from "./InputCard";
+import ResultCard from "./ResultCard";
+import HistoryModal from "./HistoryModal";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

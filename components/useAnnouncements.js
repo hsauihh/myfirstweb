@@ -2,7 +2,7 @@
 
 // 公告状态：列表、未读数、标记已读，以及 WebSocket 新公告事件。
 import { useCallback, useEffect, useState } from "react";
-import * as api from "./announcementsApi.js";
+import * as api from "./announcementsApi";
 
 export default function useAnnouncements({ enabled = true } = {}) {
   const [items, setItems] = useState([]);

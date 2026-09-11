@@ -3,7 +3,7 @@
 // 作品区：静态卡片网格（参考站「课程系列」卡片式），用 data/site.js 的 featuredWorks。
 // 卡片带 badge + 标题 + 描述 + 底部跳转按钮，网格响应式（3 / 2 / 1 列）。
 import Link from "next/link";
-import { featuredWorks } from "../data/site.js";
+import { featuredWorks } from "../data/site";
 
 export default function WorksGrid() {
   return (

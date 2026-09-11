@@ -2,7 +2,7 @@
 
 // 全站登录态：挂载时拉 /api/auth/me，暴露 user / quota 与注册、登录、登出。
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import * as authApi from "./authApi.js";
+import * as authApi from "./authApi";
 
 const AuthContext = createContext(null);
 

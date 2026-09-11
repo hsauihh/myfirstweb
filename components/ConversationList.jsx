@@ -1,7 +1,7 @@
 "use client";
 
 // 会话列表：微信式条目（头像 + 用户名 + 最后消息 + 时间 + 未读）。
-import Avatar from "./Avatar.jsx";
+import Avatar from "./Avatar";
 
 function formatTime(iso) {
   if (!iso) return "";

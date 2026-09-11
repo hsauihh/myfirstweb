@@ -3,12 +3,12 @@
 // 个人主页。结构向参考站靠拢：居中 hero（eyebrow + 标题 + 副标题 + CTA）→
 // 作品卡片网格（带 section-heading）→ 身份面板（每日一句 + 正在学习）。
 import { useEffect, useState } from "react";
-import PageHeading from "./PageHeading.jsx";
-import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
-import DailyQuote from "./DailyQuote.jsx";
-import CloudButton from "./CloudButton.jsx";
-import WorksGrid from "./WorksGrid.jsx";
-import { home } from "../data/site.js";
+import PageHeading from "./PageHeading";
+import AnimatedCardGrid from "./AnimatedCardGrid";
+import DailyQuote from "./DailyQuote";
+import CloudButton from "./CloudButton";
+import WorksGrid from "./WorksGrid";
+import { home } from "../data/site";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

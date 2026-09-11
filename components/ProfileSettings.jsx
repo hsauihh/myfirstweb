@@ -2,9 +2,9 @@
 
 // 个人资料：选图后先裁剪（输出 256×256）再上传。
 import { useRef, useState } from "react";
-import Avatar from "./Avatar.jsx";
-import AvatarCropModal from "./AvatarCropModal.jsx";
-import { useAuth } from "./AuthContext.jsx";
+import Avatar from "./Avatar";
+import AvatarCropModal from "./AvatarCropModal";
+import { useAuth } from "./AuthContext";
 
 const MAX_SOURCE_MB = 10;
 

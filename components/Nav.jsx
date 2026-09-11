@@ -5,10 +5,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { navLinks } from "../data/site.js";
-import NavUser from "./NavUser.jsx";
-import ThemeToggle from "./ThemeToggle.jsx";
-import WeatherWidget from "./WeatherWidget.jsx";
+import { navLinks } from "../data/site";
+import NavUser from "./NavUser";
+import ThemeToggle from "./ThemeToggle";
+import WeatherWidget from "./WeatherWidget";
 
 export default function Nav() {
   const pathname = usePathname();

@@ -1,5 +1,5 @@
 // 好友申请列表：收到的可接受/拒绝，发出的可撤回。
-import Avatar from "./Avatar.jsx";
+import Avatar from "./Avatar";
 
 export default function FriendRequests({ requests, onAccept, onDelete }) {
   const { incoming, outgoing } = requests;

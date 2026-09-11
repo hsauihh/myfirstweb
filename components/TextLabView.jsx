@@ -3,12 +3,12 @@
 // 文字实验室页：居中 hero + 模式 Tab（分析 / AI 对话），默认进入分析。
 // 两个模式都保持挂载（用 CSS 隐藏），这样首屏的卡片入场动画能覆盖到全部卡片。
 import { useState } from "react";
-import PageHeading from "./PageHeading.jsx";
-import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
-import AnalysisPanel from "./AnalysisPanel.jsx";
-import ChatPanel from "./ChatPanel.jsx";
-import ChatPromo from "./ChatPromo.jsx";
-import { textLab } from "../data/site.js";
+import PageHeading from "./PageHeading";
+import AnimatedCardGrid from "./AnimatedCardGrid";
+import AnalysisPanel from "./AnalysisPanel";
+import ChatPanel from "./ChatPanel";
+import ChatPromo from "./ChatPromo";
+import { textLab } from "../data/site";
 
 const TABS = [
   { id: "analysis", label: "分析" },

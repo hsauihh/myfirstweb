@@ -3,8 +3,8 @@
 // 通用输入区：Enter 发送、Shift+Enter 换行。
 // prompts 非空时在输入框上方渲染常用提示词（点击填入）；controls 是 footer 里的自定义控件插槽。
 import { useRef, useState } from "react";
-import ChatQuotaHint from "./ChatQuotaHint.jsx";
-import VipModal from "./VipModal.jsx";
+import ChatQuotaHint from "./ChatQuotaHint";
+import VipModal from "./VipModal";
 
 const MAX_LENGTH = 4000;
 

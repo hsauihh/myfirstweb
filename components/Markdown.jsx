@@ -6,8 +6,8 @@
 import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import remarkCitations from "./remarkCitations.js";
-import { headingSlug, nodeText } from "./slug.js";
+import remarkCitations from "./remarkCitations";
+import { headingSlug, nodeText } from "./slug";
 
 const CITATION_PREFIX = "#cite-";
 

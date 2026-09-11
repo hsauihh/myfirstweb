@@ -3,7 +3,7 @@
 // 站内公共资料的引用弹层：RAGdata 原文不随站点发布（没有网页可跳），
 // 所以这里只展示命中片段本身。
 import { useEffect } from "react";
-import { lastSection } from "./slug.js";
+import { lastSection } from "./slug";
 
 export default function SourceSnippetModal({ source, onClose }) {
   useEffect(() => {

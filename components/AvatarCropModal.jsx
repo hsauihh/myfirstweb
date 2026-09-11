@@ -3,7 +3,7 @@
 // 头像裁剪弹窗：拖拽 + 缩放，确认后输出裁剪后的 Blob。
 import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
-import cropImage from "./cropImage.js";
+import cropImage from "./cropImage";
 
 export default function AvatarCropModal({ src, busy, onCancel, onConfirm }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });

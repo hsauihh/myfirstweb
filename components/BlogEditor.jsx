@@ -4,8 +4,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Markdown from "./Markdown.jsx";
-import * as blogApi from "./blogApi.js";
+import Markdown from "./Markdown";
+import * as blogApi from "./blogApi";
 
 const TITLE_MAX_LENGTH = 100;
 

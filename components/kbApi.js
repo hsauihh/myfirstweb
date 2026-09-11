@@ -1,5 +1,5 @@
 // 个人知识库接口封装：来源列表、候选文章、增删与同步。
-import { apiError } from "./apiError.js";
+import { apiError } from "./apiError";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 

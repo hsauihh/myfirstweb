@@ -1,8 +1,8 @@
 "use client";
 
 // 系统通知：公告 + 好友申请。
-import AnnouncementList from "./AnnouncementList.jsx";
-import FriendRequests from "./FriendRequests.jsx";
+import AnnouncementList from "./AnnouncementList";
+import FriendRequests from "./FriendRequests";
 
 export default function SystemNotifications({
   announcements,
