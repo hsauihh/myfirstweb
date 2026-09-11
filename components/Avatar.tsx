@@ -1,12 +1,18 @@
 // 头像：有图片地址显示图片，否则回退首字母圆形。
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
-function resolveSrc(src) {
+function resolveSrc(src: string | null | undefined): string {
   if (!src) return "";
   return src.startsWith("http") ? src : `${API}${src}`;
 }
 
-export default function Avatar({ name, src, size = 36 }) {
+interface AvatarProps {
+  name: string;
+  src?: string | null;
+  size?: number;
+}
+
+export default function Avatar({ name, src, size = 36 }: AvatarProps) {
   const url = resolveSrc(src);
 
   if (url) {

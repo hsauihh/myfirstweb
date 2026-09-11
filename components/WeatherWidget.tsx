@@ -6,12 +6,25 @@
 // 模块级缓存保存天气与更新时间：切换路由（客户端导航）时复用，卡片不消失、不重复请求。
 import { useCallback, useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+
+/** /api/weather 的返回（高德实况，字段都是字符串）。 */
+interface Weather {
+  city: string;
+  weather: string;
+  temperature: string;
+  humidity: string;
+  winddirection: string;
+  windpower: string;
+}
 
 // 模块级缓存：同一会话内跨页面共享，切换页面不重新请求，更新时间也不丢失
-let cache = { weather: null, updatedAt: null };
+let cache: { weather: Weather | null; updatedAt: Date | null } = {
+  weather: null,
+  updatedAt: null,
+};
 
-function formatTime(date) {
+function formatTime(date: Date | null): string {
   if (!date) return "";
   return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
 }
@@ -26,7 +39,7 @@ export default function WeatherWidget() {
     try {
       const res = await fetch(`${API}/api/weather`);
       if (!res.ok) return;
-      const data = await res.json();
+      const data = (await res.json()) as Weather;
       const now = new Date();
       cache = { weather: data, updatedAt: now };
       setWeather(data);
@@ -45,7 +58,7 @@ export default function WeatherWidget() {
 
   if (!weather) return null;
 
-  function onKeyDown(e) {
+  function onKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       refresh();

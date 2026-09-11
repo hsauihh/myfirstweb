@@ -2,16 +2,32 @@
 
 // 头像裁剪弹窗：拖拽 + 缩放，确认后输出裁剪后的 Blob。
 import { useCallback, useState } from "react";
-import Cropper from "react-easy-crop";
+import Cropper, { type Area, type Point } from "react-easy-crop";
+import { errorMessage } from "./apiError";
 import cropImage from "./cropImage";
 
-export default function AvatarCropModal({ src, busy, onCancel, onConfirm }) {
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+interface AvatarCropModalProps {
+  src: string;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: (blob: Blob) => Promise<void> | void;
+}
+
+export default function AvatarCropModal({
+  src,
+  busy,
+  onCancel,
+  onConfirm,
+}: AvatarCropModalProps) {
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [area, setArea] = useState(null);
+  const [area, setArea] = useState<Area | null>(null);
   const [error, setError] = useState("");
 
-  const handleCropComplete = useCallback((_, pixels) => setArea(pixels), []);
+  const handleCropComplete = useCallback(
+    (_croppedArea: Area, pixels: Area) => setArea(pixels),
+    []
+  );
 
   async function confirm() {
     if (!area) return;
@@ -19,7 +35,7 @@ export default function AvatarCropModal({ src, busy, onCancel, onConfirm }) {
     try {
       await onConfirm(await cropImage(src, area));
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     }
   }
 

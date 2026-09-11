@@ -18,11 +18,11 @@ const ArrowRight = (
   </svg>
 );
 
-export default function DailyQuote({ label = "每日一句", interval = 8000 }) {
+export default function DailyQuote({ label = "每日一句", interval = 8000 }: { label?: string; interval?: number }) {
   const [index, setIndex] = useState(0);
   const count = quotes.length;
 
-  const goTo = (i) => setIndex(((i % count) + count) % count);
+  const goTo = (i: number) => setIndex(((i % count) + count) % count);
   const next = () => goTo(index + 1);
   const prev = () => goTo(index - 1);
 
@@ -59,7 +59,7 @@ export default function DailyQuote({ label = "每日一句", interval = 8000 }) 
             “{quotes[index]}”
           </blockquote>
           <figcaption className="quote-dots" aria-hidden="true">
-            {quotes.map((_, i) => (
+            {quotes.map((_quote, i) => (
               <button
                 key={i}
                 type="button"

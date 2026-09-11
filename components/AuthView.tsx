@@ -9,14 +9,16 @@ import { useAuth } from "./AuthContext";
 const MODES = [
   { id: "login", label: "登录", submitLabel: "登录" },
   { id: "register", label: "注册", submitLabel: "注册并登录" },
-];
+] as const;
+
+type AuthMode = (typeof MODES)[number]["id"];
 
 export default function AuthView() {
   const router = useRouter();
   const auth = useAuth();
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState<AuthMode>("login");
 
-  async function handleSubmit(username, password) {
+  async function handleSubmit(username: string, password: string) {
     if (mode === "register") {
       await auth.register(username, password);
     } else {
@@ -25,7 +27,7 @@ export default function AuthView() {
     router.push("/text-lab");
   }
 
-  const current = MODES.find((item) => item.id === mode);
+  const current = MODES.find((item) => item.id === mode) ?? MODES[0];
 
   return (
     <div className="auth-card">

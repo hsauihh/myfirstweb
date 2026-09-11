@@ -19,7 +19,7 @@ export default function Nav() {
     setMenuOpen(false);
   }, [pathname]);
 
-  function isActive(href) {
+  function isActive(href: string) {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   }

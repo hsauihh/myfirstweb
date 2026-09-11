@@ -1,12 +1,13 @@
 "use client";
 
 // 登录 / 注册表单：先做本地校验，再交给上层提交。
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { errorMessage } from "./apiError";
 
 const PASSWORD_LENGTH = 8;
 const USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9_]{2,19}$/;
 
-function validate(username, password) {
+function validate(username: string, password: string) {
   if (!USERNAME_PATTERN.test(username)) {
     return "用户名需为 3-20 位字母、数字或下划线，且以字母开头";
   }
@@ -19,13 +20,19 @@ function validate(username, password) {
   return "";
 }
 
-export default function AuthForm({ mode, submitLabel, onSubmit }) {
+interface AuthFormProps {
+  mode: "login" | "register";
+  submitLabel: string;
+  onSubmit: (username: string, password: string) => Promise<void>;
+}
+
+export default function AuthForm({ mode, submitLabel, onSubmit }: AuthFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const message = validate(username, password);
     if (message) {
@@ -37,7 +44,7 @@ export default function AuthForm({ mode, submitLabel, onSubmit }) {
     try {
       await onSubmit(username, password);
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setBusy(false);
     }

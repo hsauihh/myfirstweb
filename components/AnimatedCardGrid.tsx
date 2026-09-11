@@ -3,14 +3,16 @@
 // 用法：<AnimatedCardGrid className="dashboard-grid">… hero + 几张卡片 …</AnimatedCardGrid>
 // 和 4.4 一字未改——同一份"卡片飞入"动画。
 // 因为用了 useEffect / anime.js，要在浏览器里跑，所以顶上标了 "use client"。
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { animate, stagger } from "animejs";
 
-export default function AnimatedCardGrid({ className, children }) {
-  const ref = useRef(null);
+export default function AnimatedCardGrid({ className, children }: { className?: string; children: ReactNode }) {
+  const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const cards = ref.current.querySelectorAll(".card");
+    const root = ref.current;
+    if (!root) return;
+    const cards = root.querySelectorAll<HTMLElement>(".card");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       // 尊重系统「减少动态效果」：直接呈现最终状态，不播动画

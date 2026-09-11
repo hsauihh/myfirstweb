@@ -3,7 +3,13 @@
 import PageHeading from "./PageHeading";
 import AnimatedCardGrid from "./AnimatedCardGrid";
 
-export default function PlaceholderView({ eyebrow, title, subtitle }) {
+interface PlaceholderViewProps {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+}
+
+export default function PlaceholderView({ eyebrow, title, subtitle }: PlaceholderViewProps) {
   return (
     <AnimatedCardGrid className="dashboard-grid">
       <div className="panel-full">

@@ -18,7 +18,7 @@ const MoonIcon = (
 );
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState<string>("light");
 
   useEffect(() => {
     setTheme(document.documentElement.getAttribute("data-theme") || "light");

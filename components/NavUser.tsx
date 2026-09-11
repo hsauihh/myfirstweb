@@ -8,23 +8,28 @@ import Avatar from "./Avatar";
 import { useAuth } from "./AuthContext";
 import { useMessages } from "./MessagesContext";
 
-function rowClass(variant) {
+interface NavUserProps {
+  variant?: "desktop" | "mobile";
+  onNavigate?: () => void;
+}
+
+function rowClass(variant: NavUserProps["variant"]) {
   return variant === "mobile" ? "nav-user-row" : "user-panel-link";
 }
 
-export default function NavUser({ variant = "desktop", onNavigate }) {
+export default function NavUser({ variant = "desktop", onNavigate }: NavUserProps) {
   const { user, loading, logout } = useAuth();
   const { openAddFriend, vipBadgeEnabled, reminderEnabled, totalUnread } = useMessages();
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   // 点击外部 / 按 Escape 关闭下拉
   useEffect(() => {
     if (!open) return undefined;
-    function onDocClick(event) {
-      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
+    function onDocClick(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
     }
-    function onKey(event) {
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
     document.addEventListener("mousedown", onDocClick);
@@ -71,7 +76,7 @@ export default function NavUser({ variant = "desktop", onNavigate }) {
     );
   }
 
-  const itemProps = variant === "desktop" ? { role: "menuitem" } : {};
+  const itemProps: { role?: "menuitem" } = variant === "desktop" ? { role: "menuitem" } : {};
 
   const items = (
     <>

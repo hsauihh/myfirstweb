@@ -1,7 +1,8 @@
 "use client";
 
 // 个人资料：选图后先裁剪（输出 256×256）再上传。
-import { useRef, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { errorMessage } from "./apiError";
 import Avatar from "./Avatar";
 import AvatarCropModal from "./AvatarCropModal";
 import { useAuth } from "./AuthContext";
@@ -10,12 +11,12 @@ const MAX_SOURCE_MB = 10;
 
 export default function ProfileSettings() {
   const { user, uploadAvatar } = useAuth();
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [imageSrc, setImageSrc] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  function handleFile(event) {
+  function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
@@ -32,7 +33,7 @@ export default function ProfileSettings() {
     setImageSrc("");
   }
 
-  async function handleConfirm(blob) {
+  async function handleConfirm(blob: Blob) {
     setBusy(true);
     setMessage("");
     try {
@@ -41,11 +42,14 @@ export default function ProfileSettings() {
       setMessage("头像已更新");
       closeCrop();
     } catch (err) {
-      setMessage(err.message);
+      setMessage(errorMessage(err));
     } finally {
       setBusy(false);
     }
   }
+
+  // 这个面板只在登录后的消息中心里出现；未登录时后端也拿不到头像
+  if (!user) return null;
 
   return (
     <div className="profile-row">
