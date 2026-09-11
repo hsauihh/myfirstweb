@@ -19,6 +19,7 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       setQuota(data.quota);
       setRagQuota(data.rag_quota);
+      setError("");
     } catch (err) {
       setError(err.message);
     } finally {

@@ -15,7 +15,7 @@ const TABS = [
 ];
 
 export default function KnowledgeView() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, error: authError, refresh } = useAuth();
   const [tab, setTab] = useState("qna");
   const [status, setStatus] = useState(null);
 
@@ -42,6 +42,25 @@ export default function KnowledgeView() {
   }
 
   if (!user) {
+    // 接口连不上时不要伪装成「未登录」，直接说清楚是后端问题
+    if (authError) {
+      return (
+        <section className="dashboard-grid">
+          <div className="panel panel-full">
+            <PageHeading
+              eyebrow="知识库"
+              title="后端未连接"
+              subtitle={`读取登录态失败（${authError}）。请先启动后端：npm run back`}
+            />
+            <p style={{ marginTop: 20 }}>
+              <button type="button" className="btn btn-primary" onClick={refresh}>
+                重试
+              </button>
+            </p>
+          </div>
+        </section>
+      );
+    }
     return (
       <section className="dashboard-grid">
         <div className="panel panel-full">
