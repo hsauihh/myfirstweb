@@ -5,6 +5,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { errorMessage } from "./apiError";
+import { headingSlug } from "./slug";
+import type { BlogPostDetail } from "./types";
 import Avatar from "./Avatar";
 import BlogLikeButton from "./BlogLikeButton";
 import Markdown from "./Markdown";
@@ -16,7 +19,7 @@ import * as kbApi from "./kbApi";
 export default function BlogPostView() {
   const { user } = useAuth();
   const postId = useSearchParams().get("id");
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<BlogPostDetail | null>(null);
   const [inKb, setInKb] = useState(false);
   const [kbBusy, setKbBusy] = useState(false);
   const [kbError, setKbError] = useState("");
@@ -39,7 +42,7 @@ export default function BlogPostView() {
         setInKb(Boolean(data.in_kb));
       })
       .catch((err) => {
-        if (alive) setError(err.message);
+        if (alive) setError(errorMessage(err));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -73,13 +76,14 @@ export default function BlogPostView() {
   }, [post]);
 
   async function addToKnowledge() {
+    if (!post) return;
     setKbBusy(true);
     setKbError("");
     try {
       await kbApi.addSource(post.id);
       setInKb(true);
     } catch (err) {
-      setKbError(err.message);
+      setKbError(errorMessage(err));
     } finally {
       setKbBusy(false);
     }

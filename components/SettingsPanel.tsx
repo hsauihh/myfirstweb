@@ -4,6 +4,16 @@
 import { useState } from "react";
 import ProfileSettings from "./ProfileSettings";
 import { useMessages } from "./MessagesContext";
+import type { Friend } from "./types";
+import type { PerformResult } from "./useFriends";
+
+interface SettingsPanelProps {
+  reminderEnabled: boolean;
+  onToggleReminder: (value: boolean) => void;
+  activeFriend: Friend | null;
+  onClearConversation: (friendId: number) => Promise<PerformResult<unknown>>;
+  onClearAll: () => Promise<PerformResult<unknown>>;
+}
 
 export default function SettingsPanel({
   reminderEnabled,
@@ -11,7 +21,7 @@ export default function SettingsPanel({
   activeFriend,
   onClearConversation,
   onClearAll,
-}) {
+}: SettingsPanelProps) {
   const { vipBadgeEnabled, setVipBadgeEnabled } = useMessages();
   const [message, setMessage] = useState("");
 

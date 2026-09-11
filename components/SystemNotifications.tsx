@@ -3,6 +3,15 @@
 // 系统通知：公告 + 好友申请。
 import AnnouncementList from "./AnnouncementList";
 import FriendRequests from "./FriendRequests";
+import type { Announcement, FriendRequests as FriendRequestsData } from "./types";
+
+interface SystemNotificationsProps {
+  announcements: Announcement[];
+  onMarkRead: (announcementId: number) => void;
+  requests: FriendRequestsData;
+  onAccept: (requestId: number) => void;
+  onDelete: (requestId: number) => void;
+}
 
 export default function SystemNotifications({
   announcements,
@@ -10,7 +19,7 @@ export default function SystemNotifications({
   requests,
   onAccept,
   onDelete,
-}) {
+}: SystemNotificationsProps) {
   const hasRequests =
     requests.incoming.length > 0 || requests.outgoing.length > 0;
 

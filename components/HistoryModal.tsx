@@ -4,10 +4,11 @@
 // 拿到的数组逐条列出来。用弹窗而不是再加一张卡，是为了不把页面撑得太长。
 // 它只管"把拿到的数组画出来"——这个数组是全站的、还是某个访客自己的，它不关心。
 import { useEffect } from "react";
+import type { HistoryEntry } from "./types";
 
 // 后端存的是 UTC 时间（6.3 立的规矩：存 UTC，显示时再转本地）。
 // 这里就是"转本地"的那一步——浏览器知道用户在哪个时区，交给它换算。
-function formatTime(iso) {
+function formatTime(iso: string) {
   return new Date(iso).toLocaleString("zh-CN", {
     month: "2-digit",
     day: "2-digit",
@@ -16,11 +17,23 @@ function formatTime(iso) {
   });
 }
 
-export default function HistoryModal({ open, items, onClose, onClear }) {
+interface HistoryModalProps {
+  open: boolean;
+  items: HistoryEntry[];
+  onClose: () => void;
+  onClear: () => void;
+}
+
+export default function HistoryModal({
+  open,
+  items,
+  onClose,
+  onClear,
+}: HistoryModalProps) {
   // 按 Esc 关闭
   useEffect(() => {
-    if (!open) return;
-    function onKey(e) {
+    if (!open) return undefined;
+    function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
     document.addEventListener("keydown", onKey);

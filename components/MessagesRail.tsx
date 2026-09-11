@@ -4,17 +4,29 @@
 const TOP_SECTIONS = [
   { id: "chats", label: "我的消息", badge: "chats" },
   { id: "notifications", label: "系统通知", badge: "notifications" },
-];
+] as const;
+
+export type MessageSection = "chats" | "notifications" | "settings";
+
+interface MessagesRailProps {
+  section: MessageSection;
+  onSelect: (section: MessageSection) => void;
+  chatUnread: number;
+  notificationCount: number;
+}
 
 export default function MessagesRail({
   section,
   onSelect,
   chatUnread,
   notificationCount,
-}) {
-  const badges = { chats: chatUnread, notifications: notificationCount };
+}: MessagesRailProps) {
+  const badges: Record<(typeof TOP_SECTIONS)[number]["badge"], number> = {
+    chats: chatUnread,
+    notifications: notificationCount,
+  };
 
-  function renderItem(item) {
+  function renderItem(item: (typeof TOP_SECTIONS)[number]) {
     const count = badges[item.badge];
     return (
       <button

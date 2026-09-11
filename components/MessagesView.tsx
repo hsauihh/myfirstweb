@@ -5,19 +5,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import ChatWindow from "./ChatWindow";
 import ConversationList from "./ConversationList";
-import MessagesRail from "./MessagesRail";
+import MessagesRail, { type MessageSection } from "./MessagesRail";
 import SettingsPanel from "./SettingsPanel";
 import SystemNotifications from "./SystemNotifications";
 import { useAuth } from "./AuthContext";
 import { useMessages } from "./MessagesContext";
 
-const SECTION_IDS = ["chats", "notifications", "settings"];
+const SECTION_IDS: MessageSection[] = ["chats", "notifications", "settings"];
 
 export default function MessagesView() {
   const { user, loading } = useAuth();
   const messages = useMessages();
   const { openAddFriend } = messages;
-  const [section, setSection] = useState("chats");
+  const [section, setSection] = useState<MessageSection>("chats");
 
   // 邀请链接 /messages?code=XXXX：登录后自动弹出添加好友弹窗
   useEffect(() => {
@@ -30,7 +30,9 @@ export default function MessagesView() {
   useEffect(() => {
     if (!user) return;
     const target = new URLSearchParams(window.location.search).get("section");
-    if (SECTION_IDS.includes(target)) setSection(target);
+    if (target && (SECTION_IDS as string[]).includes(target)) {
+      setSection(target as MessageSection);
+    }
   }, [user]);
 
   if (loading) return null;

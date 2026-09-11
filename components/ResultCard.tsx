@@ -4,10 +4,16 @@
 // 点它会让父组件把历史弹窗打开——这张卡自己不管历史长什么样。
 import { useEffect, useRef } from "react";
 import { animate, scrambleText } from "animejs";
+import type { AnalysisResult } from "./types";
 
-export default function ResultCard({ result, onOpenHistory }) {
-  const cardRef = useRef(null);
-  const scoreRef = useRef(null);
+interface ResultCardProps {
+  result: AnalysisResult | null;
+  onOpenHistory: () => void;
+}
+
+export default function ResultCard({ result, onOpenHistory }: ResultCardProps) {
+  const cardRef = useRef<HTMLElement | null>(null);
+  const scoreRef = useRef<HTMLElement | null>(null);
 
   const original = result
     ? result.text
@@ -17,24 +23,28 @@ export default function ResultCard({ result, onOpenHistory }) {
   const label = result ? result.label : "偏积极";
 
   useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      cardRef.current.style.opacity = "1";
-      cardRef.current.style.transform = "none";
+      card.style.opacity = "1";
+      card.style.transform = "none";
       return;
     }
     // 卡片自己淡入：.card 默认 opacity:0，这张卡负责把自己显出来
-    animate(cardRef.current, {
+    animate(card, {
       opacity: [0, 1],
       translateY: [24, 0],
       duration: 700,
       ease: "outBack",
     });
     // 情感分数滚动归位
-    animate(scoreRef.current, {
-      innerHTML: scrambleText({ chars: "0-9" }),
-      duration: 1500,
-    });
+    if (scoreRef.current) {
+      animate(scoreRef.current, {
+        innerHTML: scrambleText({ chars: "0-9" }),
+        duration: 1500,
+      });
+    }
   }, []);
 
   return (

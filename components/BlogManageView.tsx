@@ -7,20 +7,24 @@ import { useCallback, useEffect, useState } from "react";
 import BlogEditor from "./BlogEditor";
 import PageHeading from "./PageHeading";
 import { useAuth } from "./AuthContext";
+import { errorMessage } from "./apiError";
 import { formatDateTime } from "./blogDate";
 import * as blogApi from "./blogApi";
+import type { BlogCard, Visibility } from "./types";
 
-const TAGS = {
+const TAGS: Record<Visibility, { text: string; className: string }> = {
   public: { text: "公开", className: "blog-tag--public" },
   private: { text: "仅自己可见", className: "blog-tag--private" },
   draft: { text: "草稿", className: "blog-tag--private" },
 };
 
+type ManageTab = "published" | "draft";
+
 export default function BlogManageView() {
   const { user, loading: authLoading } = useAuth();
-  const editParam = useSearchParams().get("edit");
-  const [tab, setTab] = useState("published");
-  const [items, setItems] = useState([]);
+  const editParam = useSearchParams()?.get("edit") ?? null;
+  const [tab, setTab] = useState<ManageTab>("published");
+  const [items, setItems] = useState<BlogCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -31,7 +35,7 @@ export default function BlogManageView() {
       setItems(data.items);
       setError("");
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -41,13 +45,13 @@ export default function BlogManageView() {
     if (user && editParam === null) refresh();
   }, [user, editParam, refresh]);
 
-  async function remove(post) {
+  async function remove(post: BlogCard) {
     if (!window.confirm(`确定删除《${post.title}》？`)) return;
     try {
       await blogApi.deletePost(post.id);
       refresh();
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     }
   }
 
@@ -76,7 +80,10 @@ export default function BlogManageView() {
 
   const drafts = items.filter((post) => post.visibility === "draft");
   const published = items.filter((post) => post.visibility !== "draft");
-  const counts = { published: published.length, draft: drafts.length };
+  const counts: Record<ManageTab, number> = {
+    published: published.length,
+    draft: drafts.length,
+  };
   const visible = tab === "draft" ? drafts : published;
 
   return (
@@ -97,10 +104,12 @@ export default function BlogManageView() {
         {error && <p className="lab-error">{error}</p>}
 
         <div className="blog-tabs" role="tablist" aria-label="文章分类">
-          {[
-            { id: "published", label: "已发布" },
-            { id: "draft", label: "草稿箱" },
-          ].map((item) => (
+          {(
+            [
+              { id: "published", label: "已发布" },
+              { id: "draft", label: "草稿箱" },
+            ] as { id: ManageTab; label: string }[]
+          ).map((item) => (
             <button
               key={item.id}
               type="button"

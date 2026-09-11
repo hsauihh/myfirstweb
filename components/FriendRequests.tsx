@@ -1,7 +1,18 @@
 // 好友申请列表：收到的可接受/拒绝，发出的可撤回。
 import Avatar from "./Avatar";
+import type { FriendRequests as FriendRequestsData } from "./types";
 
-export default function FriendRequests({ requests, onAccept, onDelete }) {
+interface FriendRequestsProps {
+  requests: FriendRequestsData;
+  onAccept: (requestId: number) => void;
+  onDelete: (requestId: number) => void;
+}
+
+export default function FriendRequests({
+  requests,
+  onAccept,
+  onDelete,
+}: FriendRequestsProps) {
   const { incoming, outgoing } = requests;
   return (
     <div className="request-list">

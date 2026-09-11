@@ -2,22 +2,23 @@
 
 // 文字实验室的「分析」模式：输入卡 + 结果卡 + 历史弹窗，逻辑与拆分前一致。
 import { useState } from "react";
+import HistoryModal from "./HistoryModal";
 import InputCard from "./InputCard";
 import ResultCard from "./ResultCard";
-import HistoryModal from "./HistoryModal";
+import type { AnalysisResult, HistoryEntry } from "./types";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 export default function AnalysisPanel() {
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   async function openHistory() {
     setHistoryOpen(true);
     try {
       const res = await fetch(`${API}/api/history`, { credentials: "include" });
-      setHistory(await res.json());
+      setHistory((await res.json()) as HistoryEntry[]);
     } catch {
       // 后端没起来时不让页面崩掉，弹窗显示"还没有记录"
     }

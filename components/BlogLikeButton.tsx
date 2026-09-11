@@ -6,7 +6,13 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import * as blogApi from "./blogApi";
 
-export default function BlogLikeButton({ postId, count, liked }) {
+interface BlogLikeButtonProps {
+  postId: number;
+  count: number;
+  liked: boolean;
+}
+
+export default function BlogLikeButton({ postId, count, liked }: BlogLikeButtonProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [state, setState] = useState({ count, liked });

@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Markdown from "./Markdown";
 import * as blogApi from "./blogApi";
+import { errorMessage } from "./apiError";
+import type { Visibility } from "./types";
 
 const TITLE_MAX_LENGTH = 100;
 
-export default function BlogEditor({ postId }) {
+export default function BlogEditor({ postId }: { postId?: number | null }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -32,7 +34,7 @@ export default function BlogEditor({ postId }) {
         setContent(post.content);
       })
       .catch((err) => {
-        if (alive) setError(err.message);
+        if (alive) setError(errorMessage(err));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -42,7 +44,7 @@ export default function BlogEditor({ postId }) {
     };
   }, [postId]);
 
-  async function save(visibility) {
+  async function save(visibility: Visibility) {
     if (!title.trim() || !content.trim()) {
       setError("标题和正文都不能为空");
       return;
@@ -54,7 +56,7 @@ export default function BlogEditor({ postId }) {
       else await blogApi.createPost(payload);
       router.push("/blog/manage");
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -67,7 +69,7 @@ export default function BlogEditor({ postId }) {
       await blogApi.deletePost(postId);
       router.push("/blog/manage");
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setSaving(false);
     }

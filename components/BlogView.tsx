@@ -7,24 +7,28 @@ import { useCallback, useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import PageHeading from "./PageHeading";
 import { useAuth } from "./AuthContext";
+import { errorMessage } from "./apiError";
 import { formatDate } from "./blogDate";
 import * as blogApi from "./blogApi";
+import type { BlogCard } from "./types";
 
 const PAGE_SIZE = 10;
 const SORTS = [
   { id: "published", label: "最新发布" },
   { id: "likes", label: "最多点赞" },
-];
+] as const;
+
+type BlogSort = (typeof SORTS)[number]["id"];
 
 export default function BlogView() {
   const { user } = useAuth();
-  const [items, setItems] = useState([]);
-  const [sort, setSort] = useState("published");
+  const [items, setItems] = useState<BlogCard[]>([]);
+  const [sort, setSort] = useState<BlogSort>("published");
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = useCallback(async (offset, activeSort) => {
+  const load = useCallback(async (offset: number, activeSort: BlogSort) => {
     setLoading(true);
     try {
       const data = await blogApi.listPosts(offset, PAGE_SIZE, activeSort);
@@ -32,7 +36,7 @@ export default function BlogView() {
       setHasMore(data.has_more);
       setError("");
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -44,13 +48,13 @@ export default function BlogView() {
     load(0, sort);
   }, [sort, load]);
 
-  async function removePost(post) {
+  async function removePost(post: BlogCard) {
     if (!window.confirm(`删除《${post.title}》？`)) return;
     try {
       await blogApi.deletePost(post.id);
       load(0, sort);
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     }
   }
 

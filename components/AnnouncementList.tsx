@@ -2,8 +2,9 @@
 
 // 公告列表：点标题展开正文并标记已读。
 import { useState } from "react";
+import type { Announcement } from "./types";
 
-function formatTime(iso) {
+function formatTime(iso: string) {
   return new Date(iso).toLocaleString("zh-CN", {
     month: "2-digit",
     day: "2-digit",
@@ -12,14 +13,22 @@ function formatTime(iso) {
   });
 }
 
-export default function AnnouncementList({ announcements, onMarkRead }) {
-  const [openId, setOpenId] = useState(null);
+interface AnnouncementListProps {
+  announcements: Announcement[];
+  onMarkRead: (announcementId: number) => void;
+}
+
+export default function AnnouncementList({
+  announcements,
+  onMarkRead,
+}: AnnouncementListProps) {
+  const [openId, setOpenId] = useState<number | null>(null);
 
   if (announcements.length === 0) {
     return <p className="messages-empty">还没有公告。</p>;
   }
 
-  function toggle(item) {
+  function toggle(item: Announcement) {
     const next = openId === item.id ? null : item.id;
     setOpenId(next);
     if (next !== null && !item.read) onMarkRead(item.id);
