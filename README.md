@@ -183,6 +183,7 @@ zero-to-full/
 - **同一项目只保留一个 `next dev`**：多个实例共用同一个 `.next`，会互相删掉对方编译产物（同样是上面的 `ENOENT`）。用 `fuser -k 3000/tcp` 关掉占用端口的实例后再启动。
 - **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
+- **Tab 面板不要用 `display: contents`**：Safari/WebKit 对「作为网格子项的 `display: contents`」支持有缺陷，会让整个面板不参与布局，表现为「只看到 Tab、看不到内容」。面板容器要自己开一层 12 列网格（`.tab-panel { grid-column: span 12; display: grid; … }`），不要靠 `contents` 透传成网格子项。
 - 「关于」页（`/about`）提供项目架构图入口，新标签打开 `/architecture.html`。
 
 ## 架构图维护

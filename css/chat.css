@@ -30,8 +30,15 @@
   color: #fff;
 }
 
-/* 两个面板都挂载，靠 display 切换；contents 让卡片仍是网格子项 */
-.tab-panel { display: contents; }
+/* 两个面板都挂载，靠 display 切换。
+   这里自己开一层 12 列网格，而不用 display:contents —— Safari 对 contents 网格子项有兼容问题，
+   会导致整个面板不参与布局（表现为只看到 Tab、看不到内容）。 */
+.tab-panel {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+}
 .tab-panel.is-hidden { display: none !important; }
 
 /* 会话操作栏 */

@@ -4,6 +4,7 @@
   .container { width: calc(100% - 24px); }
   .page-shell { padding-bottom: 32px; }
   .dashboard-grid { gap: 18px; }
+  .tab-panel { gap: 18px; }
 
   .hero { padding: 48px 0 32px; }
   .hero-title { font-size: 34px; }

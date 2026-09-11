@@ -31,7 +31,15 @@ export default function KnowledgeView() {
     if (user) refreshStatus();
   }, [user, refreshStatus]);
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <section className="dashboard-grid">
+        <div className="panel-full">
+          <PageHeading eyebrow="知识库" title="我的知识库" subtitle="加载中…" />
+        </div>
+      </section>
+    );
+  }
 
   if (!user) {
     return (
