@@ -9,16 +9,19 @@ import KnowledgeSources from "./KnowledgeSources";
 import PageHeading from "./PageHeading";
 import { useAuth } from "./AuthContext";
 import * as ragApi from "./ragApi";
+import type { RagStatus } from "./types";
 
 const TABS = [
   { id: "qna", label: "知识库问答" },
   { id: "sources", label: "来源管理" },
-];
+] as const;
+
+type KnowledgeTab = (typeof TABS)[number]["id"];
 
 export default function KnowledgeView() {
   const { user, loading: authLoading, error: authError, refresh } = useAuth();
-  const [tab, setTab] = useState("qna");
-  const [status, setStatus] = useState(null);
+  const [tab, setTab] = useState<KnowledgeTab>("qna");
+  const [status, setStatus] = useState<RagStatus | null>(null);
 
   const refreshStatus = useCallback(async () => {
     try {

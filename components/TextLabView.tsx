@@ -13,10 +13,12 @@ import { textLab } from "../data/site";
 const TABS = [
   { id: "analysis", label: "分析" },
   { id: "chat", label: "AI 对话" },
-];
+] as const;
+
+type LabTab = (typeof TABS)[number]["id"];
 
 export default function TextLabView() {
-  const [tab, setTab] = useState("analysis");
+  const [tab, setTab] = useState<LabTab>("analysis");
 
   return (
     <AnimatedCardGrid className="dashboard-grid">

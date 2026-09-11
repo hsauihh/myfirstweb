@@ -13,7 +13,7 @@ import { textLabPrompts } from "../data/site";
 export default function ChatPanel() {
   const auth = useAuth();
   const chat = useChat({ kind: "chat", onQuota: auth.applyQuota });
-  const listRef = useRef(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
   const blocked =
     !auth.loading && !auth.user?.vip && (auth.quota?.remaining ?? 0) <= 0;
 
