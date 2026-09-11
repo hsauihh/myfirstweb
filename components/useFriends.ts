@@ -2,23 +2,39 @@
 
 // 好友页的状态与动作：好友列表、申请、当前会话消息、实时事件处理。
 import { useCallback, useEffect, useRef, useState } from "react";
+import { errorMessage } from "./apiError";
 import * as api from "./friendsApi";
+import type {
+  DirectMessage,
+  Friend,
+  FriendRequests,
+  FriendSocketEvent,
+} from "./types";
 
-function appendUnique(list, message) {
+/** perform 的结果：要么成功带返回值，要么失败带可读文案。 */
+export type PerformResult<T> = { ok: true; result: T } | { ok: false; message: string };
+
+function appendUnique(list: DirectMessage[], message: DirectMessage) {
   if (list.some((item) => item.id === message.id)) return list;
   return [...list, message];
 }
 
-export default function useFriends({ enabled = true } = {}) {
-  const [friends, setFriends] = useState([]);
-  const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
-  const [activeId, setActiveId] = useState(null);
-  const [messages, setMessages] = useState([]);
+const EMPTY_REQUESTS: FriendRequests = { incoming: [], outgoing: [] };
+
+interface UseFriendsOptions {
+  enabled?: boolean;
+}
+
+export default function useFriends({ enabled = true }: UseFriendsOptions = {}) {
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [requests, setRequests] = useState<FriendRequests>(EMPTY_REQUESTS);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const activeIdRef = useRef(null);
+  const activeIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     activeIdRef.current = activeId;
@@ -33,7 +49,7 @@ export default function useFriends({ enabled = true } = {}) {
       setFriends(friendList);
       setRequests(requestList);
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -42,7 +58,7 @@ export default function useFriends({ enabled = true } = {}) {
   useEffect(() => {
     if (!enabled) {
       setFriends([]);
-      setRequests({ incoming: [], outgoing: [] });
+      setRequests(EMPTY_REQUESTS);
       setActiveId(null);
       setMessages([]);
       setHasMore(false);
@@ -52,7 +68,7 @@ export default function useFriends({ enabled = true } = {}) {
     refresh();
   }, [enabled, refresh]);
 
-  const loadMessages = useCallback(async (id) => {
+  const loadMessages = useCallback(async (id: number) => {
     try {
       const data = await api.listMessages(id);
       setMessages(data.messages);
@@ -62,12 +78,12 @@ export default function useFriends({ enabled = true } = {}) {
         prev.map((item) => (item.id === id ? { ...item, unread: 0 } : item))
       );
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     }
   }, []);
 
   const selectFriend = useCallback(
-    async (id) => {
+    async (id: number) => {
       setActiveId(id);
       setError("");
       await loadMessages(id);
@@ -81,37 +97,39 @@ export default function useFriends({ enabled = true } = {}) {
   }, [refresh, loadMessages]);
 
   const perform = useCallback(
-    async (action) => {
+    async <T,>(action: () => Promise<T>): Promise<PerformResult<T>> => {
       setError("");
       try {
         const result = await action();
         await refresh();
         return { ok: true, result };
       } catch (err) {
-        setError(err.message);
-        return { ok: false, message: err.message };
+        const message = errorMessage(err);
+        setError(message);
+        return { ok: false, message };
       }
     },
     [refresh]
   );
 
   const addFriend = useCallback(
-    (payload) => perform(() => api.sendRequest(payload)),
+    (payload: { username?: string; code?: string }) =>
+      perform(() => api.sendRequest(payload)),
     [perform]
   );
 
   const acceptRequest = useCallback(
-    (id) => perform(() => api.acceptRequest(id)),
+    (id: number | string) => perform(() => api.acceptRequest(id)),
     [perform]
   );
 
   const deleteRequest = useCallback(
-    (id) => perform(() => api.deleteRequest(id)),
+    (id: number | string) => perform(() => api.deleteRequest(id)),
     [perform]
   );
 
   const removeFriend = useCallback(
-    async (id) => {
+    async (id: number) => {
       const outcome = await perform(() => api.removeFriend(id));
       if (outcome.ok && activeIdRef.current === id) {
         setActiveId(null);
@@ -124,7 +142,7 @@ export default function useFriends({ enabled = true } = {}) {
   );
 
   const send = useCallback(
-    async (text) => {
+    async (text: string) => {
       const content = text.trim();
       const targetId = activeIdRef.current;
       if (!content || targetId === null || sending) return;
@@ -135,7 +153,7 @@ export default function useFriends({ enabled = true } = {}) {
         setMessages((prev) => appendUnique(prev, message));
         await refresh();
       } catch (err) {
-        setError(err.message);
+        setError(errorMessage(err));
       } finally {
         setSending(false);
       }
@@ -147,20 +165,22 @@ export default function useFriends({ enabled = true } = {}) {
     const targetId = activeIdRef.current;
     if (targetId === null || !hasMore || messages.length === 0) return;
     try {
-      const data = await api.listMessages(targetId, { before: messages[0].id });
+      const data = await api.listMessages(targetId, { before: messages[0]!.id });
       setMessages((prev) => [...data.messages, ...prev]);
       setHasMore(data.has_more);
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     }
   }, [hasMore, messages]);
 
   const handleIncomingMessage = useCallback(
-    (message) => {
+    (message: DirectMessage) => {
       const active = activeIdRef.current;
       if (message.sender_id === active || message.recipient_id === active) {
         setMessages((prev) => appendUnique(prev, message));
-        if (message.sender_id === active) api.markRead(active).catch(() => {});
+        if (message.sender_id === active && active !== null) {
+          api.markRead(active).catch(() => {});
+        }
       }
       refresh();
     },
@@ -168,7 +188,7 @@ export default function useFriends({ enabled = true } = {}) {
   );
 
   const handleSocketEvent = useCallback(
-    (event) => {
+    (event: FriendSocketEvent) => {
       if (event.type === "message") {
         handleIncomingMessage(event.message);
         return;
@@ -187,7 +207,7 @@ export default function useFriends({ enabled = true } = {}) {
   );
 
   const clearConversation = useCallback(
-    async (friendId) => {
+    async (friendId: number) => {
       const outcome = await perform(() => api.clearConversation(friendId));
       if (outcome.ok && activeIdRef.current === friendId) {
         setMessages([]);

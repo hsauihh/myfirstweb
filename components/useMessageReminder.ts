@@ -17,7 +17,7 @@ export default function useMessageReminder() {
     }
   }, []);
 
-  const setReminderEnabled = useCallback((value) => {
+  const setReminderEnabled = useCallback((value: boolean) => {
     setEnabled(value);
     try {
       localStorage.setItem(STORAGE_KEY, String(value));

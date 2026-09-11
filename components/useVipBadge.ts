@@ -17,7 +17,7 @@ export default function useVipBadge() {
     }
   }, []);
 
-  const setVipBadgeEnabled = useCallback((value) => {
+  const setVipBadgeEnabled = useCallback((value: boolean) => {
     setEnabled(value);
     try {
       localStorage.setItem(STORAGE_KEY, String(value));

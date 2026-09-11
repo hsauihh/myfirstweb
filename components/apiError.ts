@@ -13,6 +13,11 @@ export class ApiError extends Error {
   }
 }
 
+/** 把 catch 到的 unknown 转成可展示文案。 */
+export function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 /** 把后端错误响应转成带可读文案的 ApiError，并保留 code / quota 供界面使用。 */
 export function apiError(body: unknown, fallback: string): ApiError {
   const payload = (body ?? {}) as ApiErrorBody;

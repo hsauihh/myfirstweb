@@ -263,6 +263,9 @@ export interface AnnouncementsResponse {
   unread: number;
 }
 
+/** WebSocket 新公告事件里的公告（刚创建，还没有 read 标记）。 */
+export type AnnouncementDraft = Omit<Announcement, "read">;
+
 export interface ReadResult {
   ok: boolean;
   unread: number;
@@ -288,13 +291,25 @@ export interface ApiErrorBody {
 
 // ---------- 实时事件 ----------
 
-/** 好友 WebSocket 事件；未列出的类型只需触发一次刷新。 */
+/** 好友 WebSocket 事件（与后端 manager.send 的载荷一一对应）。
+ *  未命中任何类型时前端只需拉起一次刷新；后端新增事件类型时在这里补一条即可。 */
 export type FriendSocketEvent =
   | { type: "pong" }
   | { type: "ready"; user: PublicUser }
   | { type: "message"; message: DirectMessage }
   | { type: "presence"; user_id: number; online: boolean }
-  | { type: string };
+  | { type: "announcement"; announcement: AnnouncementDraft }
+  | { type: "friend_request"; request: PushedFriendRequest }
+  | { type: "friend_accepted"; friend: PublicUser }
+  | { type: "friend_request_removed"; request_id: number }
+  | { type: "friend_removed"; user_id: number };
+
+/** 实时推送的好友申请（内嵌的是 public_user，与 REST 列表略有差别）。 */
+export interface PushedFriendRequest {
+  id: number;
+  created_at: string;
+  user: PublicUser;
+}
 
 /** 聊天 SSE 事件（chatApi 解析后）。 */
 export type ChatStreamEvent =
