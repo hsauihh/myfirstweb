@@ -5,6 +5,7 @@
 import sqlite3
 
 import db
+import schema_rag
 
 
 def init_db() -> None:
@@ -12,28 +13,18 @@ def init_db() -> None:
     cur = conn.cursor()
     _create_history(conn, cur)
     _create_conversations(conn, cur)
-    _create_messages(cur)
+    _create_messages(conn, cur)
     _create_users(conn, cur)
     _create_friends(cur)
     _create_direct_messages(cur)
     _create_announcements(cur)
     _create_chat_daily_usage(cur)
-    _create_rag(cur)
     _create_orders(cur)
     _create_anonymous_usage(cur)
     _create_blog(cur)
-    _create_kb(conn, cur)
+    schema_rag.init_rag_schema(conn, cur)
     conn.commit()
     conn.close()
-
-
-def _ensure_column(
-    conn: sqlite3.Connection, table: str, column: str, *, ddl: str
-) -> None:
-    """旧库补列：列已存在时不动。"""
-    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
-    if column not in columns:
-        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
 
 
 def _create_history(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
@@ -49,7 +40,7 @@ def _create_history(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
         created_at TEXT
     )
     """)
-    _ensure_column(conn, "history", "user_id", ddl="INTEGER")
+    db.ensure_column(conn, "history", "user_id", ddl="INTEGER")
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_history_session_created "
         "ON history(session_id, created_at)"
@@ -68,8 +59,8 @@ def _create_conversations(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None
         updated_at TEXT NOT NULL
     )
     """)
-    _ensure_column(conn, "conversations", "user_id", ddl="INTEGER")
-    _ensure_column(conn, "conversations", "kind", ddl="TEXT NOT NULL DEFAULT 'chat'")
+    db.ensure_column(conn, "conversations", "user_id", ddl="INTEGER")
+    db.ensure_column(conn, "conversations", "kind", ddl="TEXT NOT NULL DEFAULT 'chat'")
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_conversations_session "
         "ON conversations(session_id, updated_at DESC)"
@@ -80,16 +71,18 @@ def _create_conversations(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None
     )
 
 
-def _create_messages(cur: sqlite3.Cursor) -> None:
+def _create_messages(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
     cur.execute("""
     CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
         role TEXT NOT NULL CHECK(role IN ('user', 'assistant')),
         content TEXT NOT NULL,
+        sources TEXT,
         created_at TEXT NOT NULL
     )
     """)
+    db.ensure_column(conn, "messages", "sources", ddl="TEXT")
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_messages_conversation "
         "ON messages(conversation_id, id)"
@@ -108,9 +101,9 @@ def _create_users(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
         created_at TEXT NOT NULL
     )
     """)
-    _ensure_column(conn, "users", "friend_code", ddl="TEXT")
-    _ensure_column(conn, "users", "avatar", ddl="TEXT")
-    _ensure_column(conn, "users", "vip_expires_at", ddl="TEXT")
+    db.ensure_column(conn, "users", "friend_code", ddl="TEXT")
+    db.ensure_column(conn, "users", "avatar", ddl="TEXT")
+    db.ensure_column(conn, "users", "vip_expires_at", ddl="TEXT")
     cur.execute(
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_friend_code "
         "ON users(friend_code)"
@@ -204,57 +197,6 @@ def _create_chat_daily_usage(cur: sqlite3.Cursor) -> None:
         PRIMARY KEY (user_id, day)
     )
     """)
-
-
-def _create_rag(cur: sqlite3.Cursor) -> None:
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS documents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source TEXT NOT NULL,
-        chunk_index INTEGER NOT NULL,
-        content TEXT NOT NULL,
-        embedding TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        UNIQUE(source, chunk_index)
-    )
-    """)
-    cur.execute(
-        "CREATE INDEX IF NOT EXISTS idx_documents_source ON documents(source)"
-    )
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS rag_daily_usage (
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        day TEXT NOT NULL,
-        used INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY (user_id, day)
-    )
-    """)
-
-
-def _create_kb(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
-    """个人知识库来源；documents 通过 source_id 关联（NULL 表示站内公共库）。"""
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS kb_sources (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-        source_key TEXT NOT NULL UNIQUE,
-        post_updated_at TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        UNIQUE(user_id, post_id)
-    )
-    """)
-    cur.execute(
-        "CREATE INDEX IF NOT EXISTS idx_kb_sources_user ON kb_sources(user_id)"
-    )
-    cur.execute(
-        "CREATE INDEX IF NOT EXISTS idx_kb_sources_post ON kb_sources(post_id)"
-    )
-    _ensure_column(
-        conn, "documents", "source_id",
-        ddl="INTEGER REFERENCES kb_sources(id) ON DELETE CASCADE",
-    )
-    _ensure_column(conn, "documents", "label", ddl="TEXT")
 
 
 def _create_orders(cur: sqlite3.Cursor) -> None:

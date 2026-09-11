@@ -132,12 +132,15 @@ def _check_quota(
     return quotas.snapshot(owner, user), None
 
 
-def _rag_context(owner: Owner, content: str, include_system: bool) -> str:
-    """个人库（可加站内公共库）检索；检索前先懒同步（文章改过则重建向量）。"""
+def _rag_context(
+    owner: Owner, content: str, include_system: bool
+) -> tuple[str, list[dict]]:
+    """检索个人库（可加站内公共库）；检索前先懒同步（文章改过则重建向量、小节与图谱）。"""
     kb.sync_user(owner.user_id)
-    return rag.build_context(
-        rag.search(content, user_id=owner.user_id, include_public=include_system)
+    retrieval = rag.retrieve(
+        content, user_id=owner.user_id, include_public=include_system
     )
+    return rag.build_context(retrieval), rag.citations(retrieval)
 
 
 def _sse(event: str, data: dict) -> str:
@@ -202,7 +205,10 @@ def send_message_endpoint(
     quota, error = _check_quota(owner, user, use_rag, req.include_system)
     if error is not None:
         return error
-    context = _rag_context(owner, content, req.include_system) if use_rag else ""
+    context = ""
+    sources: list[dict] = []
+    if use_rag:
+        context, sources = _rag_context(owner, content, req.include_system)
 
     # 问答模式不带历史（单轮）；上下文模式取最近历史（多轮）
     history = (
@@ -216,7 +222,7 @@ def send_message_endpoint(
 
     messages = build_messages(config.system_prompt, history, content, context=context)
     stream = StreamingResponse(
-        _stream(config, conversation_id, messages, quota=quota),
+        _stream(config, conversation_id, messages, quota=quota, sources=sources),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
@@ -231,8 +237,9 @@ def _stream(
     messages: list[dict],
     *,
     quota: dict | None,
+    sources: list[dict] | None = None,
 ) -> Iterator[str]:
-    """把模型增量转成 SSE 事件；已产出的内容无论是否中断都落库。"""
+    """把模型增量转成 SSE 事件；已产出的内容无论是否中断都落库（含来源引用）。"""
     chunks: list[str] = []
     error_detail = ""
     reply: dict | None = None
@@ -245,7 +252,9 @@ def _stream(
         error_detail = f"模型调用失败：{error}"
     finally:
         if chunks:
-            reply = add_message(conversation_id, "assistant", "".join(chunks))
+            reply = add_message(
+                conversation_id, "assistant", "".join(chunks), sources=sources
+            )
             conversation = touch_conversation(conversation_id)
 
     if error_detail:

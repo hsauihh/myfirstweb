@@ -39,3 +39,12 @@ def init_db() -> None:
     """建表与迁移（实现见 schema.py，避免本文件过长）。"""
     import schema
     schema.init_db()
+
+
+def ensure_column(
+    conn: sqlite3.Connection, table: str, column: str, *, ddl: str
+) -> None:
+    """旧库补列：列已存在时不动。"""
+    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in columns:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")

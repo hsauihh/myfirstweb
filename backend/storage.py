@@ -1,4 +1,5 @@
 """存储层：分析历史 + AI 会话与消息，全部按 Owner 归属查询。"""
+import json
 import sqlite3
 
 import db
@@ -156,22 +157,37 @@ def _message(row: sqlite3.Row) -> dict:
         "id": row["id"],
         "role": row["role"],
         "content": row["content"],
+        "sources": json.loads(row["sources"]) if row["sources"] else None,
         "created_at": row["created_at"],
     }
 
 
-def add_message(conversation_id: int, role: str, content: str) -> dict:
+def add_message(
+    conversation_id: int,
+    role: str,
+    content: str,
+    sources: list[dict] | None = None,
+) -> dict:
+    """写入一条消息；引用来源随助手消息一起落库，刷新后仍能展示。"""
     now = db.now_iso()
+    stored = sources or None
+    payload = json.dumps(stored, ensure_ascii=False) if stored else None
     conn = db.get_conn()
     cur = conn.execute(
-        "INSERT INTO messages (conversation_id, role, content, created_at)"
-        " VALUES (?, ?, ?, ?)",
-        [conversation_id, role, content, now],
+        "INSERT INTO messages (conversation_id, role, content, sources, created_at)"
+        " VALUES (?, ?, ?, ?, ?)",
+        [conversation_id, role, content, payload, now],
     )
     conn.commit()
     message_id = cur.lastrowid
     conn.close()
-    return {"id": message_id, "role": role, "content": content, "created_at": now}
+    return {
+        "id": message_id,
+        "role": role,
+        "content": content,
+        "sources": stored,
+        "created_at": now,
+    }
 
 
 def get_messages(conversation_id: int, limit: int | None = None) -> list[dict]:

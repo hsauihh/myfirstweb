@@ -1,7 +1,8 @@
-"""知识库状态接口：站内公共库 + 当前登录用户的个人库。"""
+"""知识库状态接口：站内公共库 + 当前登录用户的个人库 + 图谱规模。"""
 from fastapi import APIRouter, Request
 
 import auth
+import graph_store
 import rag
 import rag_store
 
@@ -19,4 +20,6 @@ def status_endpoint(request: Request) -> dict:
         "documents": public + personal,
         "personal": personal,
         "public": public,
+        "entities": graph_store.count_entities(),
+        "relations": graph_store.count_relations(),
     }

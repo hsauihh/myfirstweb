@@ -8,6 +8,7 @@
 import sqlite3
 
 import db
+import graph
 import ingest
 import rag
 import rag_store
@@ -101,18 +102,28 @@ def _source_payload(row: sqlite3.Row) -> dict:
     }
 
 
-def _chunks(title: str, content: str) -> list[str]:
-    return ingest.chunk_text(ingest.clean_markdown(f"{title}\n\n{content}"))
+def _chunks(title: str, content: str) -> list[dict]:
+    """标题以纯文本前置（利于检索），section 只取文章内部的小节路径。"""
+    return ingest.chunk_markdown(ingest.clean_markdown(f"{title}\n\n{content}"))
+
+
+def _build_graph(user_id: int, post_id: int) -> None:
+    """抽图是增强项：失败只打印，绝不影响入库与来源同步状态。"""
+    key = _source_key(user_id, post_id)
+    try:
+        graph.build_for_source(key, max_chunks=graph.SOURCE_CHUNK_LIMIT)
+    except Exception as error:
+        print(f"图谱抽取失败（{key}）：{error}")
 
 
 def _write_chunks(
     source_id: int, user_id: int, post_id: int, post: sqlite3.Row
 ) -> int:
-    """切块 → 向量化 → 写库，并把来源标记为「已按当前版本重建」。"""
+    """切块 → 向量化 → 写库 → 建图，并把来源标记为「已按当前版本重建」。"""
     chunks = _chunks(post["title"], post["content"])
     if not chunks:
         raise KbSourceTooShort()
-    embeddings = rag.embed_texts(chunks)
+    embeddings = rag.embed_texts([chunk["content"] for chunk in chunks])
     rag_store.replace_source(
         _source_key(user_id, post_id),
         chunks,
@@ -120,6 +131,7 @@ def _write_chunks(
         label=_label(post["title"], post["username"]),
         source_id=source_id,
     )
+    _build_graph(user_id, post_id)
     conn = db.get_conn()
     conn.execute(
         "UPDATE kb_sources SET post_updated_at = ? WHERE id = ?",
