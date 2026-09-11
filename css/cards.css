@@ -8,8 +8,9 @@
   box-shadow: none;
 }
 
-/* 入场初始态，交给 AnimatedCardGrid 用动画抬起 */
-.card {
+/* 入场初始态：只在 AnimatedCardGrid（.animated-grid）内生效，由它用动画抬起。
+   没有挂动画的页面里的 .card 保持可见，避免整块卡片隐身。 */
+.animated-grid .card {
   opacity: 0;
   transform: translateY(24px);
 }

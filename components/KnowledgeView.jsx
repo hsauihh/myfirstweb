@@ -3,6 +3,7 @@
 // 我的知识库：顶部 Tab 切换「知识库问答」（KnowledgeQna）与「来源管理」（KnowledgeSources）。
 // 两个面板都保持挂载，切 Tab 不会打断正在生成的回答。
 import { useCallback, useEffect, useState } from "react";
+import AnimatedCardGrid from "./AnimatedCardGrid.jsx";
 import KnowledgeQna from "./KnowledgeQna.jsx";
 import KnowledgeSources from "./KnowledgeSources.jsx";
 import PageHeading from "./PageHeading.jsx";
@@ -76,7 +77,7 @@ export default function KnowledgeView() {
   }
 
   return (
-    <section className="dashboard-grid">
+    <AnimatedCardGrid className="dashboard-grid">
       <div className="panel-full">
         <PageHeading
           eyebrow="知识库"
@@ -105,6 +106,6 @@ export default function KnowledgeView() {
       <div className={"tab-panel" + (tab === "sources" ? "" : " is-hidden")}>
         <KnowledgeSources onChanged={refreshStatus} />
       </div>
-    </section>
+    </AnimatedCardGrid>
   );
 }

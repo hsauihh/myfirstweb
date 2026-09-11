@@ -30,7 +30,7 @@ export default function AnimatedCardGrid({ className, children }) {
   }, []);
 
   return (
-    <section ref={ref} className={className}>
+    <section ref={ref} className={["animated-grid", className].filter(Boolean).join(" ")}>
       {children}
     </section>
   );
