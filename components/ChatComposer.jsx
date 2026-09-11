@@ -36,7 +36,9 @@ export default function ChatComposer({
     setText("");
   }
 
+  // 生成中不抢 Enter：让浏览器默认换行，既不发送也不中断当前回答
   function handleKeyDown(event) {
+    if (sending) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       submit(event);
@@ -58,7 +60,7 @@ export default function ChatComposer({
                 key={item.label}
                 type="button"
                 className="prompt-chip"
-                disabled={sending || blocked}
+                disabled={blocked}
                 onClick={() => pickPrompt(item.prompt)}
               >
                 {item.label}
@@ -74,7 +76,7 @@ export default function ChatComposer({
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={sending || blocked}
+          disabled={blocked}
         />
         <div className="chat-form-footer">
           <div className="chat-form-meta">
