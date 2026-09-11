@@ -1,4 +1,5 @@
 // app/messages/page.jsx → 网站路径 "/messages"
+import "../../css/genshin-font.css";
 import MessagesView from "../../components/MessagesView.jsx";
 
 export const metadata = {

@@ -26,7 +26,7 @@
   --radius-panel: 16px;
   --radius-soft: 12px;
   --maxw: 980px;
-  --font: "LXGW WenKai", "Noto Sans SC", -apple-system, BlinkMacSystemFont,
+  --font: "LXGW WenKai", -apple-system, BlinkMacSystemFont,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 
   /* 聊天气泡（胶囊形：自己奶油色、对方暗色半透明） */

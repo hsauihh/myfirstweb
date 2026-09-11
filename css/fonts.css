@@ -1,13 +1,7 @@
-/* 字体：霞鹜文楷 LXGW WenKai（主字体，字体名 = "LXGW WenKai"）+ 思源黑体 Noto Sans SC（fallback）。
-   这两个 webfont 在 app/layout.jsx 用 <link> 引入（并行加载），不要写成这里的 @import：
+/* 字体：霞鹜文楷 LXGW WenKai（主字体，字体名 = "LXGW WenKai"，远程 CSS）。
+   该 webfont 在 app/layout.jsx 用 <link> 引入（并行加载），不要写成这里的 @import：
    远程 @import 会阻塞本站样式表应用，字体 CDN 被拦截/变慢时会拖首屏。
-   字体加载失败只回退字体，不影响布局。 */
+   字体加载失败只回退字体，不影响布局。
 
-/* 原神游戏内字体（本地 genshin.ttf），聊天用 */
-@font-face {
-  font-family: "Genshin";
-  font-weight: 400;
-  font-style: normal;
-  src: url("/fonts/genshin.ttf") format("truetype");
-  font-display: swap;
-}
+   聊天用的「原神」本地字体不在这里：它按使用频率拆成了多个 WOFF2 分片，
+   由 scripts/subset_genshin.py 生成 css/genshin-font.css，只在聊天相关路由加载。 */
