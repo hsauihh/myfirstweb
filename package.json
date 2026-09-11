@@ -8,6 +8,7 @@
     "start": "next start",
     "back": "cd backend && uv run fastapi dev --port 8001",
     "sync:arch": "node scripts/sync-architecture.mjs",
+    "typecheck": "tsc --noEmit",
     "fonts:subset": "uv run --with fonttools --with brotli python scripts/subset_genshin.py",
     "predev": "npm run sync:arch",
     "prebuild": "npm run sync:arch"
@@ -20,5 +21,12 @@
     "react-easy-crop": "^6.2.3",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
   }
 }
