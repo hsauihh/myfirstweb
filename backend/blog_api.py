@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 
 import blog
+import kb
 import users
 from auth import get_current_user, require_user
 
@@ -76,9 +77,12 @@ def list_my_posts(request: Request, limit: int = blog.MY_LIMIT, offset: int = 0)
 
 @router.get("/posts/{post_id}")
 def get_post_endpoint(post_id: int, request: Request) -> dict:
-    post = blog.get_post_detail(post_id, _viewer_id(request))
+    viewer_id = _viewer_id(request)
+    post = blog.get_post_detail(post_id, viewer_id)
     if post is None:
         raise HTTPException(status_code=404, detail="文章不存在或不可见")
+    if viewer_id is not None:
+        post["in_kb"] = kb.has_source(viewer_id, post_id)
     return post
 
 
@@ -97,6 +101,9 @@ def update_post_endpoint(post_id: int, req: PostUpdate, request: Request) -> dic
     )
     if post is None:
         raise HTTPException(status_code=404, detail="文章不存在")
+    if post["visibility"] != blog.PUBLIC:
+        # 文章不再公开：从他人知识库移除（作者自己的那份保留）
+        kb.remove_post_everywhere(post_id, except_user_id=user["id"])
     return post
 
 
@@ -105,6 +112,7 @@ def delete_post_endpoint(post_id: int, request: Request) -> dict:
     user = require_user(request)
     if not blog.delete_post(user["id"], post_id, is_admin=users.is_admin(user)):
         raise HTTPException(status_code=404, detail="文章不存在")
+    kb.remove_post_everywhere(post_id)
     return {"ok": True}
 
 

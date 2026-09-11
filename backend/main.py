@@ -14,6 +14,7 @@ from auth_api import router as auth_router
 from blog_api import router as blog_router
 from announcements_api import router as announcements_router
 from payments_api import router as payments_router
+from kb_api import router as kb_router
 from rag_api import router as rag_router
 from friends_api import router as friends_router
 from friends_ws import router as friends_ws_router
@@ -39,6 +40,7 @@ app.include_router(auth_router)
 app.include_router(blog_router)
 app.include_router(announcements_router)
 app.include_router(payments_router)
+app.include_router(kb_router)
 app.include_router(rag_router)
 app.include_router(friends_router)
 app.include_router(friends_ws_router)

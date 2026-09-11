@@ -153,6 +153,13 @@
   outline-offset: 2px;
 }
 
+/* 六项主导航在中等宽度下的收缩，避免右侧操作区被挤到换行 */
+@media (max-width: 1080px) {
+  .nav-menu { gap: 16px; }
+  .nav-link { font-size: 15px; }
+  .nav-actions { gap: 10px; }
+}
+
 @media (max-width: 900px) {
   .nav-toggle { display: inline-flex; }
 

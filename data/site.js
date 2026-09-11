@@ -25,11 +25,12 @@ export const textLab = {
   heroSubtitle: "拼音和情绪，挖掘中文里的细节",
 };
 
-// 顶部主导航：五项全部一级平铺，不放二级下拉。
+// 顶部主导航：六项全部一级平铺，不放二级下拉。
 export const navLinks = [
   { href: "/", label: "首页" },
   { href: "/text-lab", label: "文字实验室" },
   { href: "/blog", label: "博客" },
+  { href: "/knowledge", label: "知识库" },
   { href: "/works", label: "作品" },
   { href: "/about", label: "关于" },
 ];

@@ -3,6 +3,8 @@
 模型懒加载（首次使用才加载），测试里可 monkeypatch embed_texts 避开模型；
 numpy 也在函数内导入，避免依赖未装好时整个服务起不来。
 
+检索范围按用户隔离：站内公共库（`source_id IS NULL`）+ 该用户的个人知识库。
+
 注意：fastembed 默认把模型放在系统临时目录（`/tmp/fastembed_cache`），重启/清理即丢，
 丢失后会转去联网下载（国内访问 HuggingFace 会一直卡住、接口无响应）。
 因此这里固定用持久目录 `~/.cache/fastembed`，并优先离线加载本地缓存。
@@ -39,15 +41,19 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
     return [vector.tolist() for vector in _get_model().embed(texts)]
 
 
-def is_ready() -> bool:
-    return rag_store.count() > 0
+def is_ready(user_id: int | None = None) -> bool:
+    return rag_store.count_for_user(user_id) > 0
 
 
 def search(
-    query: str, *, k: int = DEFAULT_K, threshold: float = DEFAULT_THRESHOLD
+    query: str,
+    *,
+    user_id: int | None = None,
+    k: int = DEFAULT_K,
+    threshold: float = DEFAULT_THRESHOLD,
 ) -> list[dict]:
     """返回相似度最高的 k 个块（低于阈值丢弃）。"""
-    documents = rag_store.all_documents()
+    documents = rag_store.documents_for_user(user_id)
     if not documents:
         return []
     import numpy as np
@@ -59,6 +65,7 @@ def search(
     return [
         {
             "source": documents[index]["source"],
+            "label": documents[index]["label"] or documents[index]["source"],
             "content": documents[index]["content"],
             "score": float(scores[index]),
         }
@@ -79,6 +86,6 @@ def build_context(results: list[dict]) -> str:
     if not results:
         return ""
     return "\n\n".join(
-        f"[{index}]（来源：{item['source']}）\n{item['content']}"
+        f"[{index}]（来源：{item.get('label') or item['source']}）\n{item['content']}"
         for index, item in enumerate(results, start=1)
     )

@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 import quotas
+import kb
 import rag
 from auth import resolve_owner, resolve_owner_for_stream
 from chat import (
@@ -110,9 +111,10 @@ def _check_quota(
     if use_rag:
         if owner.user_id is None:
             raise HTTPException(status_code=403, detail="登录后可使用知识库")
-        if not rag.is_ready():
+        if not rag.is_ready(owner.user_id):
             raise HTTPException(
-                status_code=409, detail="知识库为空，请先运行 ingest.py"
+                status_code=409,
+                detail="知识库为空，请先在「我的知识库」添加文章或运行 ingest.py",
             )
         if not quotas.consume_rag(owner, user):
             return quotas.snapshot_rag(owner, user), _quota_error(owner, user, True)
@@ -121,6 +123,12 @@ def _check_quota(
     if not quotas.consume(owner, user):
         return quotas.snapshot(owner, user), _quota_error(owner, user, False)
     return quotas.snapshot(owner, user), None
+
+
+def _rag_context(owner: Owner, content: str) -> str:
+    """个人库 + 站内公共库合并检索；检索前先懒同步（文章改过则重建向量）。"""
+    kb.sync_user(owner.user_id)
+    return rag.build_context(rag.search(content, user_id=owner.user_id))
 
 
 def _sse(event: str, data: dict) -> str:
@@ -184,7 +192,7 @@ def send_message_endpoint(
     quota, error = _check_quota(owner, user, req.use_rag)
     if error is not None:
         return error
-    context = rag.build_context(rag.search(content)) if req.use_rag else ""
+    context = _rag_context(owner, content) if req.use_rag else ""
 
     history = get_messages(conversation_id, HISTORY_FETCH_LIMIT)
     add_message(conversation_id, "user", content)

@@ -2,6 +2,7 @@
 
 // 对话面板：组合操作栏、消息区、输入区；数据与请求都在 useChat 里。
 // kind 决定会话空间（chat = 普通 AI 对话 / rag = 知识库问答），forceRag 表示知识库专用面板。
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ChatComposer from "./ChatComposer.jsx";
 import ChatMessages from "./ChatMessages.jsx";
@@ -72,8 +73,10 @@ export default function ChatPanel({ kind = "chat", forceRag = false }) {
       {forceRag && ragStatus && (
         <p className="chat-quota">
           {ragStatus.ready
-            ? `知识库已入库 ${ragStatus.documents} 个片段`
-            : "知识库尚未入库，请先运行 ingest.py"}
+            ? `个人 ${ragStatus.personal} + 站内 ${ragStatus.public} 个片段`
+            : "知识库还是空的"}
+          {" · "}
+          <Link href="/knowledge">管理我的知识库</Link>
         </p>
       )}
       <ChatMessages

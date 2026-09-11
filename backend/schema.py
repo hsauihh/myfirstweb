@@ -22,6 +22,7 @@ def init_db() -> None:
     _create_orders(cur)
     _create_anonymous_usage(cur)
     _create_blog(cur)
+    _create_kb(conn, cur)
     conn.commit()
     conn.close()
 
@@ -228,6 +229,32 @@ def _create_rag(cur: sqlite3.Cursor) -> None:
         PRIMARY KEY (user_id, day)
     )
     """)
+
+
+def _create_kb(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
+    """个人知识库来源；documents 通过 source_id 关联（NULL 表示站内公共库）。"""
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS kb_sources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        source_key TEXT NOT NULL UNIQUE,
+        post_updated_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(user_id, post_id)
+    )
+    """)
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_kb_sources_user ON kb_sources(user_id)"
+    )
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_kb_sources_post ON kb_sources(post_id)"
+    )
+    _ensure_column(
+        conn, "documents", "source_id",
+        ddl="INTEGER REFERENCES kb_sources(id) ON DELETE CASCADE",
+    )
+    _ensure_column(conn, "documents", "label", ddl="TEXT")
 
 
 def _create_orders(cur: sqlite3.Cursor) -> None:

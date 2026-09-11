@@ -16,6 +16,7 @@ import "../css/chat.css";
 import "../css/markdown.css";
 import "../css/blog.css";
 import "../css/blog-manage.css";
+import "../css/knowledge.css";
 import "../css/auth.css";
 import "../css/messages.css";
 import "../css/messages-panels.css";

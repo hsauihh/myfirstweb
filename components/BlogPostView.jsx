@@ -9,11 +9,17 @@ import Avatar from "./Avatar.jsx";
 import BlogLikeButton from "./BlogLikeButton.jsx";
 import Markdown from "./Markdown.jsx";
 import { formatDate } from "./blogDate.js";
+import { useAuth } from "./AuthContext.jsx";
 import * as blogApi from "./blogApi.js";
+import * as kbApi from "./kbApi.js";
 
 export default function BlogPostView() {
+  const { user } = useAuth();
   const postId = useSearchParams().get("id");
   const [post, setPost] = useState(null);
+  const [inKb, setInKb] = useState(false);
+  const [kbBusy, setKbBusy] = useState(false);
+  const [kbError, setKbError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,7 +34,9 @@ export default function BlogPostView() {
     blogApi
       .getPost(postId)
       .then((data) => {
-        if (alive) setPost(data);
+        if (!alive) return;
+        setPost(data);
+        setInKb(Boolean(data.in_kb));
       })
       .catch((err) => {
         if (alive) setError(err.message);
@@ -40,6 +48,19 @@ export default function BlogPostView() {
       alive = false;
     };
   }, [postId]);
+
+  async function addToKnowledge() {
+    setKbBusy(true);
+    setKbError("");
+    try {
+      await kbApi.addSource(post.id);
+      setInKb(true);
+    } catch (err) {
+      setKbError(err.message);
+    } finally {
+      setKbBusy(false);
+    }
+  }
 
   if (loading) return <p className="blog-loading">加载中…</p>;
 
@@ -91,6 +112,16 @@ export default function BlogPostView() {
             liked={post.liked_by_me}
           />
           <div className="blog-editor__actions">
+            {user && (
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={kbBusy || inKb}
+                onClick={addToKnowledge}
+              >
+                {inKb ? "已在知识库" : "加入知识库"}
+              </button>
+            )}
             {post.can_edit && (
               <Link href={`/blog/manage?edit=${post.id}`} className="btn btn-outline">
                 编辑
@@ -101,6 +132,7 @@ export default function BlogPostView() {
             </Link>
           </div>
         </div>
+        {kbError && <p className="lab-error">{kbError}</p>}
       </article>
     </section>
   );

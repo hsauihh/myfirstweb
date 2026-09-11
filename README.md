@@ -1,6 +1,6 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」「知识库问答」三个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。知识库问答是独立面板（会话与 AI 对话分开）；AI 对话里也可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（知识库独立每天 5 条，VIP 不限量）。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。AI 对话可开启「使用知识库」，基于本地 `RAGdata/` 资料回答（独立每天 5 条，VIP 不限量）。导航栏主导航平铺五项（首页 / 文字实验室 / 博客 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」「知识库问答」三个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。知识库问答是独立面板（会话与 AI 对话分开），回答基于「个人知识库（自选的博客文章）+ 站内公共资料（`RAGdata/`）」检索；登录用户可在 `/knowledge` 把自己或他人的公开文章选进个人库并管理来源（知识库独立每天 5 条，VIP 不限量），AI 对话里也可用「使用知识库」开关。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。导航栏主导航平铺六项（首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
@@ -54,13 +54,13 @@ uv run python ingest.py ../RAGdata             # 增量（按文件整篇替换�
 ```
 
 - 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），代码显式固定缓存目录 `~/.cache/fastembed/`，优先离线加载。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。
-- 入库后 `GET /api/rag/status` 返回 `ready:true`；在 AI 对话里打开「使用知识库」即可基于资料提问。
+- 入库后 `GET /api/rag/status` 返回 `ready:true`；在「知识库问答」里提问即可，问答范围还会叠加你在 `/knowledge` 选入的个人文章（`--rebuild` 只重建站内公共库，不动个人库）。
 
 ## 目录结构
 
 ```
 zero-to-full/
-├── app/          # 路由页：/、/text-lab、/login、/messages、/about、/blog、/works
+├── app/          # 路由页：/、/text-lab、/login、/messages、/about、/blog、/knowledge、/works
 ├── components/   # 页面与交互组件（Nav / NavAuth / Avatar / AuthContext / AuthView / AuthForm /
 │                 #  WeatherWidget / ThemeToggle / WorksGrid / ChatPanel / ChatToolbar /
 │                 #  ChatMessages / ChatComposer / ChatQuotaHint / VipModal / useVipBadge / ChatPromo /
@@ -69,16 +69,18 @@ zero-to-full/
 │                 #  AnnouncementList / SettingsPanel / ProfileSettings / AvatarCropModal /
 │                 #  AddFriendModal / ChatWindow / AddFriend / FriendRequests / EmojiPicker /
 │                 #  MessagesContext / useFriends / useFriendSocket / useMessageReminder /
-│                 #  useAnnouncements / friendsApi / announcementsApi / cropImage / BlogView /
+│                 #  useAnnouncements / friendsApi / announcementsApi / cropImage /
+│                 #  KnowledgeView / kbApi / BlogView /
 │                 #  BlogPostView / BlogManageView / BlogEditor / BlogLikeButton / blogApi / blogDate）
 ├── data/         # 静态文案与打底数据（site.js、quotes.js）
 ├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
 │                 #  + system-architecture.json（生成用规格）与 visual-check 证据
-├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，
+├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，knowledge.css 我的知识库，
 │                 #  messages.css / messages-panels.css 消息中心，chat-window.css 微信式聊天窗口）
 ├── backend/      # FastAPI 服务：main.py（接口层）、auth_api.py（认证与头像）、chat_api.py（AI 对话）、
 │                 #  quotas.py（对话额度）、payments.py / payments_api.py（模拟支付与 VIP）、
 │                 #  rag.py / rag_store.py / rag_api.py / ingest.py（本地知识库）、
+│                 #  kb.py / kb_api.py（个人知识库：文章选入与同步）、
 │                 #  announcements_api.py（公告接口）、announce.py（公告发布脚本）、
 │                 #  friends_api.py（好友接口）、friends_ws.py（好友 WebSocket）、auth.py（密码与登录态）、
 │                 #  chat.py（模型层）、friends.py（好友关系）、friend_codes.py（好友码）、
@@ -128,7 +130,7 @@ zero-to-full/
 | GET  | `/api/pay/orders` | — | 我的订单列表（需登录） |
 | POST | `/api/pay/orders` | `{ product }` | 创建订单（vip_month，1 分），返回 `{ order }` |
 | POST | `/api/pay/orders/{id}/confirm` | — | 模拟支付成功并开通/续费 VIP，返回 `{ order, user }` |
-| GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents }` |
+| GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents, personal, public }`（按登录用户统计） |
 | GET  | `/api/blog/posts` | `?limit=10&offset=0&sort=published` | 公开文章列表 `{ items, has_more }`（无需登录；`sort` 可选 `likes`） |
 | GET  | `/api/blog/posts/{id}` | — | 文章详情；草稿 / 仅自己可见仅作者可见，其余 404 |
 | GET  | `/api/blog/me/posts` | — | 我的全部文章（含草稿，需登录） |
@@ -136,12 +138,17 @@ zero-to-full/
 | PATCH | `/api/blog/posts/{id}` | `{ title?, content?, visibility? }` | 修改自己的文章；非作者 404 |
 | DELETE | `/api/blog/posts/{id}` | — | 删除自己的文章；管理员可删除任意公开文章 |
 | POST | `/api/blog/posts/{id}/like` | — | 切换点赞，返回 `{ liked, like_count }` |
+| GET  | `/api/kb/sources` | — | 我的知识库来源列表 + 公共库片段数（需登录，顺手懒同步） |
+| GET  | `/api/kb/candidates` | `?q=&limit=20&offset=0` | 可加入知识库的文章（我的全部 + 他人公开），带 `in_kb` |
+| POST | `/api/kb/sources` | `{ post_id }` | 加入我的知识库，返回 `{ source, created }`；不可见 404、过短 422 |
+| DELETE | `/api/kb/sources/{post_id}` | — | 从我的知识库移除来源 |
+| POST | `/api/kb/sources/{post_id}/sync` | — | 强制重建单个来源 |
 
 - 情感判定：score ≥ 0.6 偏积极，≤ 0.4 偏消极，其余中性。
 - 数据归属：已登录按账号（`user_id`），匿名按 `session_id` Cookie（有效期 30 天）；接口只读写当前归属的数据，越权访问返回 404。登录/注册时把该浏览器的匿名对话与历史绑到账号。
 - 匿名访客累计可发 3 条 AI 消息（`anonymous_usage` 计数，删会话不会重置）；登录用户每天免费 20 条（`chat_daily_usage` 按 Asia/Shanghai 自然日计数，删会话不重置），用尽返回 403 `code=chat_quota_exceeded`；VIP 不限量。分析模式匿名可用且不占额度。
 - VIP：999 元/月，到期后回到每日 20 条；续费从当前到期时间顺延 30 天。支付目前是**模拟**（点微信/支付宝即视为成功），订单表与确认接口按真实网关形状预留。
-- 知识库（RAG）：数据来自项目根 `RAGdata/`（`.md` / `.txt`）；AI 对话开启「使用知识库」后，用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化并检索 top-4 注入提示词，回答标注来源。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库未入库时请求返回 409。
+- 知识库（RAG）：检索范围 = 「个人知识库（用户在 `/knowledge` 选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`（`.md` / `.txt`））」；AI 对话开启「使用知识库」后用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化并检索 top-4 注入提示词，回答标注来源（个人文章标注《标题》· 作者）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库（个人库与公共库都为空）时请求返回 409。
 - 账号规则：用户名 3-20 位、字母开头、仅字母数字下划线；密码恰好 8 位字符、不含空格；密码用 bcrypt 哈希存储，登录态为 HttpOnly `auth_token` Cookie（30 天）。
 - 对话上下文 = 系统提示词 + 最近 20 条消息；会话标题取首条用户消息前 20 字。
 - 单条消息限 4000 字；`CHAT_API_KEY` 未配置时发消息返回 503。
@@ -163,7 +170,7 @@ zero-to-full/
 - 天气依赖高德开放平台：key 写在 `backend/.env`（已 gitignore），后端启动时自动加载；本地/无法定位的 IP 会回退到服务器出口定位；未配置或定位失败时接口返回 4xx/503，前端静默隐藏天气。
 - AI 对话读取 `backend/.env` 的 `CHAT_BASE_URL` / `CHAT_API_KEY` / `CHAT_MODEL` / `CHAT_SYSTEM_PROMPT`，默认 DeepSeek（`https://api.deepseek.com/v1` + `deepseek-chat`）；换厂商只改这组变量。
 - 公告发布读取 `backend/.env` 的 `ANNOUNCE_KEY`；该接口只校验密钥、不依赖登录态，供 `announce.py` 调用。
-- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）。
+- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）与「个人知识库」（博客文章选入 + 来源管理 + 懒同步）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
 - 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体 `public/fonts/genshin.ttf`；消息上方显示发送者用户名。
 - 博客：所有登录用户可写；`visibility` 三态——`draft`（草稿，未发布，在草稿箱）/ `private`（已发布，仅自己可见）/ `public`（已发布，公开）；正文按 Markdown 渲染（GFM），详情走 `/blog/post?id=`（静态导出不支持动态路由）；`/blog` 可按「最新发布 / 最多点赞」排序；点赞为登录用户每人每篇一次、可取消。

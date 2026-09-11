@@ -1,6 +1,6 @@
 "use client";
 
-// 全站 sticky 顶部导航栏：左 logo，中主导航（五项平铺），右「天气 + 主题 + 用户区」。
+// 全站 sticky 顶部导航栏：左 logo，中主导航（六项平铺），右「天气 + 主题 + 用户区」。
 // ≤900px 折叠为汉堡菜单，导航与登录/用户操作都收进菜单，右侧只留 logo + 主题 + 汉堡。
 import Link from "next/link";
 import { usePathname } from "next/navigation";

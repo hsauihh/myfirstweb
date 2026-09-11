@@ -1,0 +1,57 @@
+/* 我的知识库页面：公共资料卡片、来源列表、候选文章搜索 */
+
+.kb-public {
+  display: grid;
+  gap: 6px;
+}
+
+.kb-public__count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.kb-public__note {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.kb-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.kb-section__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.kb-search {
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.kb-search:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.kb-stale {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12px;
+}
