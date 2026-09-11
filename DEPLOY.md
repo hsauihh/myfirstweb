@@ -126,6 +126,7 @@ sudo cp -r out/* /var/www/zero-to-full/
 ```
 
 > `NEXT_PUBLIC_*` 是构建期内联的，改域名必须重新 `npm run build`。
+> 前端是 TypeScript（strict）：`npm run build` 会先做类型检查，类型不过就不会出产物；本地可单独跑 `npm run typecheck`（`tsc --noEmit`，不写 `.next`，可与 `npm run dev` 并存）。
 
 ## 6. nginx
 
