@@ -1,6 +1,6 @@
 // 每日一句：主页底部轮播的预设文案，单独放在这里方便替换。
 // 首条沿用主页座右铭（site.js 的 identity.motto），其余为占位示例，可自行增删。
-export const quotes = [
+export const quotes: string[] = [
   "已识乾坤大，尤怜草木青",
   "生活没有标准答案，但每一天都值得认真感受。",
   "慢慢来，比较快。",

@@ -1,5 +1,5 @@
 // 博客日期格式化：列表用「年月日」，管理页用「年月日 时:分」。
-export function formatDate(value) {
+export function formatDate(value: string | null | undefined): string {
   if (!value) return "";
   return new Date(value).toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -8,7 +8,7 @@ export function formatDate(value) {
   });
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "";
   return new Date(value).toLocaleString("zh-CN", {
     year: "numeric",

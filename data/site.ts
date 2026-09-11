@@ -5,7 +5,19 @@
 // 埋了一颗模块 5 的种子：现在这些值写死在文件里；等后端登场，
 // 它们可以改成从网络接口实时取——而组件那边照样一个字都不用动。
 
-export const home = {
+export interface HomeContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  featuredWork: {
+    kicker: string;
+    title: string;
+    copy: string;
+    linkLabel: string;
+  };
+  identity: { motto: string; learning: string };
+}
+
+export const home: HomeContent = {
   heroTitle: "关于我",
   heroSubtitle: "项目，创意，灵感，心得，我的作品",
   featuredWork: {
@@ -20,13 +32,18 @@ export const home = {
   },
 };
 
-export const textLab = {
+export const textLab: { heroTitle: string; heroSubtitle: string } = {
   heroTitle: "文字实验室",
   heroSubtitle: "拼音和情绪，挖掘中文里的细节",
 };
 
 // AI 对话的常用提示词：点击填入输入框，用户再粘贴要处理的文字。
-export const textLabPrompts = [
+export interface PromptChip {
+  label: string;
+  prompt: string;
+}
+
+export const textLabPrompts: PromptChip[] = [
   { label: "润色书面化", prompt: "帮我把下面这段文字润色得更书面、通顺：\n" },
   { label: "起三个标题", prompt: "给下面这段文字起三个吸引人的标题：\n" },
   { label: "总结要点", prompt: "用三点总结下面这段文字的要点：\n" },
@@ -36,7 +53,12 @@ export const textLabPrompts = [
 ];
 
 // 顶部主导航：六项全部一级平铺，不放二级下拉。
-export const navLinks = [
+export interface NavLink {
+  href: string;
+  label: string;
+}
+
+export const navLinks: NavLink[] = [
   { href: "/", label: "首页" },
   { href: "/text-lab", label: "文字实验室" },
   { href: "/blog", label: "博客" },
@@ -47,7 +69,15 @@ export const navLinks = [
 
 // 主页「作品」模块的轮播数据（前端本地列表，不动后端 /api/profile）。
 // 每条是独立的一块卡片内容，最终跳转到该条的 href。
-export const featuredWorks = [
+export interface FeaturedWork {
+  kicker: string;
+  title: string;
+  copy: string;
+  linkLabel: string;
+  href: string;
+}
+
+export const featuredWorks: FeaturedWork[] = [
   {
     kicker: "作品",
     title: "文字实验室",
