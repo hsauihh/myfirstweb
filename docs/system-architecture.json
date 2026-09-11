@@ -8,7 +8,7 @@
     "quality_profile": "showcase",
     "repository": {
       "url": "https://github.com/hsauihh/myfirstweb",
-      "revision": "c057022edfc11b71d8574ce7f3b782d347987fb9"
+      "revision": "873ab2c69b05af286d19e8a1082b0fc30ac2b8f6"
     },
     "views": [
       { "id": "request-path", "label": "请求主链路", "focus": ["browser", "nginx", "api", "sqlite"], "note": "浏览器请求经 nginx 反代进入 FastAPI，落到 SQLite。" },
@@ -19,14 +19,14 @@
     ]
   },
   "components": [
-    { "id": "browser", "type": "external", "label": "用户浏览器", "sublabel": "Next.js 静态站点", "pos": [40, 246], "size": [150, 72], "sources": [{ "path": "components/chatApi.js", "label": "SSE 流式客户端" }] },
+    { "id": "browser", "type": "external", "label": "用户浏览器", "sublabel": "Next.js + TypeScript 静态站点", "pos": [40, 246], "size": [150, 72], "sources": [{ "path": "components/apiRequest.ts", "label": "统一请求入口与 SSE 流式客户端" }, { "path": "components/types.ts", "label": "领域与接口 DTO 类型" }] },
     { "id": "nginx", "type": "security", "label": "nginx", "sublabel": "静态托管 + 反向代理", "pos": [270, 246], "size": [160, 72], "sources": [{ "path": "deploy/nginx.conf", "label": "站点与代理配置" }] },
     { "id": "api", "type": "backend", "label": "FastAPI · 单 worker", "sublabel": "backend/main.py 组装路由", "pos": [630, 240], "size": [180, 84], "sources": [{ "path": "backend/main.py", "label": "应用入口" }, { "path": "backend/blog_api.py", "label": "博客与点赞接口" }, { "path": "backend/kb_api.py", "label": "个人知识库来源接口" }] },
-    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "backend/history.db", "pos": [1000, 246], "size": [170, 72], "sources": [{ "path": "backend/schema.py", "label": "连接与建表" }] },
+    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "backend/history.db", "pos": [1000, 246], "size": [170, 72], "sources": [{ "path": "backend/schema.py", "label": "连接与建表" }, { "path": "backend/schema_rag.py", "label": "知识库与图谱建表" }] },
     { "id": "llm", "type": "external", "label": "大模型服务", "sublabel": "OpenAI 兼容 · DeepSeek", "pos": [630, 60], "size": [180, 72], "sources": [{ "path": "backend/chat.py", "label": "模型层与上下文拼装" }] },
     { "id": "amap", "type": "external", "label": "高德开放平台", "sublabel": "IP 定位 + 实况天气", "pos": [1000, 60], "size": [170, 72], "sources": [{ "path": "backend/weather.py", "label": "天气接口" }] },
     { "id": "ws", "type": "messagebus", "label": "WebSocket /ws/friends", "sublabel": "内存连接表", "pos": [270, 400], "size": [170, 72], "sources": [{ "path": "backend/friends_ws.py", "label": "实时推送" }] },
-    { "id": "rag", "type": "backend", "label": "RAG / GraphRAG 检索", "sublabel": "向量召回 + 图谱扩展 + 可溯源引用", "pos": [630, 400], "size": [180, 72], "sources": [{ "path": "backend/rag.py", "label": "向量召回、图谱扩展与引用" }, { "path": "backend/rag_store.py", "label": "块与向量存储" }] },
+    { "id": "rag", "type": "backend", "label": "RAG / GraphRAG 检索", "sublabel": "向量召回 + 图谱扩展 + 可溯源引用", "pos": [630, 400], "size": [180, 72], "sources": [{ "path": "backend/rag.py", "label": "向量召回、图谱扩展与引用" }, { "path": "backend/graph.py", "label": "实体关系抽取" }, { "path": "backend/rag_store.py", "label": "块与向量存储" }] },
     { "id": "files", "type": "cloud", "label": "头像文件", "sublabel": "backend/avatars/", "pos": [1000, 400], "size": [170, 72], "sources": [{ "path": "backend/avatars.py", "label": "校验与落盘" }] }
   ],
   "boundaries": [

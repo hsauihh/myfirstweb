@@ -6,7 +6,7 @@
 
 | 端 | 技术 |
 |----|------|
-| 前端 | Next.js 15（App Router）、React 19、animejs v4、react-markdown、WebSocket、手写 CSS |
+| 前端 | Next.js 15（App Router）、React 19、**TypeScript（strict）**、animejs v4、react-markdown、WebSocket、手写 CSS |
 | 后端 | Python ≥3.13、FastAPI、WebSocket、openai SDK、bcrypt、SnowNLP、pypinyin、SQLite、uv |
 
 前端 `output: 'export'` 静态导出；animejs 用 v4 具名导入；中文字体霞鹜文楷 LXGW WenKai（简体，`css/fonts.css`）。
@@ -25,7 +25,7 @@ npm run back
 npm run dev
 ```
 
-前端通过 `.env.local` 的 `NEXT_PUBLIC_API_BASE_URL` 定位后端（当前 `http://localhost:8001`）。构建：`npm run build`（产物在 `out/`，任意静态服务器托管；`next start` 与静态导出不兼容）。
+前端通过 `.env.local` 的 `NEXT_PUBLIC_API_BASE_URL` 定位后端（当前 `http://localhost:8001`）。构建：`npm run build`（产物在 `out/`，任意静态服务器托管；`next start` 与静态导出不兼容）。类型检查：`npm run typecheck`（`tsc --noEmit`，不写 `.next`，可与 dev 并存）。
 
 ## 公告发布
 
@@ -72,20 +72,11 @@ npm run fonts:subset   # 需要 uv；重新生成分片与 css/genshin-font.css
 
 ```
 zero-to-full/
-├── app/          # 路由页：/、/text-lab、/login、/messages、/about、/blog、/knowledge、/works
-├── components/   # 页面与交互组件（Nav / NavAuth / Avatar / AuthContext / AuthView / AuthForm /
-│                 #  WeatherWidget / ThemeToggle / WorksGrid / ChatPanel / ChatToolbar /
-│                 #  ChatMessages / ChatComposer / ChatQuotaHint / VipModal / useVipBadge / ChatPromo /
-│                 #  useChat / chatApi / paymentsApi / ragApi / AnalysisPanel /
-│                 #  MessagesView / MessagesRail / ConversationList / SystemNotifications /
-│                 #  AnnouncementList / SettingsPanel / ProfileSettings / AvatarCropModal /
-│                 #  AddFriendModal / ChatWindow / AddFriend / FriendRequests / EmojiPicker /
-│                 #  MessagesContext / useFriends / useFriendSocket / useMessageReminder /
-│                 #  useAnnouncements / friendsApi / announcementsApi / cropImage /
-│                 #  KnowledgeView / KnowledgeQna / KnowledgeSources / ChatSources / SourceSnippetModal /
-│                 #  slug.js / remarkCitations.js / kbApi / BlogView /
-│                 #  BlogPostView / BlogManageView / BlogEditor / BlogLikeButton / blogApi / blogDate）
-├── data/         # 静态文案与打底数据（site.js、quotes.js）
+├── app/          # 路由页（.tsx）：/、/text-lab、/login、/messages、/about、/blog、/knowledge、/works
+├── components/   # 页面与交互组件（.tsx）与数据钩子/接口层（.ts，共约 60 个文件：
+│                 #  types.ts 领域与 DTO 类型、apiRequest.ts 统一请求入口、apiError.ts、
+│                 #  各 *Api.ts、use*.ts、及 Nav / Chat* / Knowledge* / Blog* / Messages* 等组件）
+├── data/         # 静态文案与打底数据（site.ts、quotes.ts）
 ├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
 │                 #  + system-architecture.json（生成用规格）与 visual-check 证据
 ├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，knowledge.css 我的知识库，
@@ -93,6 +84,7 @@ zero-to-full/
 │                 #  genshin-font.css 聊天字体分片声明（由 scripts/subset_genshin.py 生成））
 ├── assets/       # 源资源（不入发布目录）：fonts/genshin.ttf 聊天字体源文件
 ├── scripts/      # 构建/生成脚本：sync-architecture.mjs、subset_genshin.py
+├── tsconfig.json # strict 前端类型配置（allowJs 已关闭，不留 JS 文件）
 ├── backend/      # FastAPI 服务：main.py（接口层）、auth_api.py（认证与头像）、chat_api.py（AI 对话）、
 │                 #  quotas.py（对话额度）、payments.py / payments_api.py（模拟支付与 VIP）、
 │                 #  rag.py / rag_store.py / rag_api.py / ingest.py（本地知识库，向量存 document_vectors）、
@@ -199,7 +191,9 @@ zero-to-full/
 
 ## 开发避坑（踩过的坑）
 
-- **不要同时跑 `npm run dev` 和 `npm run build`**：两者共用 `.next` 目录，会互相覆盖，报 `missing required error components, refreshing...` 或 `ENOENT: no such file or directory ... .next/server/app/blog/page.js`。要打包先停 dev，打包后再重启 dev；遇到该报错重启 dev 即可恢复。
+- **不要同时跑 `npm run dev` 和 `npm run build`**：两者共用 `.next` 目录，会互相覆盖，报 `missing required error components, refreshing...` 或 `ENOENT: no such file or directory ... .next/server/app/blog/page.js`。要打包先停 dev，打包后再重启 dev；遇到该报错重启 dev 即可恢复。特别注意 `rm -rf .next && npm run build` 会把正在跑的 dev 彻底弄坏（页面卡在预渲染状态、静态资源 404），必须重启 dev。
+- **前端导入不要写扩展名**：指向项目内模块的相对导入一律写成 `./Foo`（不写 `.js`/`.jsx`），`.css` 与包名导入保留后缀。tsconfig 用 `moduleResolution: bundler` + `allowJs: false`，写扩展名或新增 `.js` 前端文件都会被编译器拒绝。
+- **接口类型只有一处未校验缝隙**：`components/apiRequest.ts` 里的 `res.json() as T`。后端改了字段名，TS 不会发现（它只防前端内部不一致与手误）；要防跨服务漂移就得加运行时校验。
 - **同一项目只保留一个 `next dev`**：多个实例共用同一个 `.next`，会互相删掉对方编译产物（同样是上面的 `ENOENT`）。用 `fuser -k 3000/tcp` 关掉占用端口的实例后再启动。
 - **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
