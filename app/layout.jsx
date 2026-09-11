@@ -42,6 +42,20 @@ export default function RootLayout({ children }) {
               "(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})();",
           }}
         />
+        {/* 霞鹜文楷 + Noto Sans SC：用 <link> 并行加载，不要写成 CSS @import——
+            远程 @import 会给本站样式表加一个第三方阻塞依赖（字体 CDN 被拦/变慢时会拖首屏）。 */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+        />
       </head>
       <body>
         <AuthProvider>

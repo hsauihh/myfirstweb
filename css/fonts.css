@@ -1,9 +1,7 @@
-/* 字体：霞鹜文楷 LXGW WenKai 简体版（主字体，字体名 = "LXGW WenKai"）+ 思源黑体 Noto Sans SC（fallback）。
-   用 jsdelivr 的 lxgw-wenkai-webfont，含 unicode-range 分包，浏览器按需加载。
-   @import 必须放在本文件首行。 */
-@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css');
-@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+/* 字体：霞鹜文楷 LXGW WenKai（主字体，字体名 = "LXGW WenKai"）+ 思源黑体 Noto Sans SC（fallback）。
+   这两个 webfont 在 app/layout.jsx 用 <link> 引入（并行加载），不要写成这里的 @import：
+   远程 @import 会阻塞本站样式表应用，字体 CDN 被拦截/变慢时会拖首屏。
+   字体加载失败只回退字体，不影响布局。 */
 
 /* 原神游戏内字体（本地 genshin.ttf），聊天用 */
 @font-face {
