@@ -43,18 +43,30 @@ uv run python announce.py notice.json --url http://localhost:8001   # 指定后�
 
 仓库自带模板 `backend/notice.json`，改完直接发布即可。密钥来自 `backend/.env` 的 `ANNOUNCE_KEY`（需自行填写随机字符串，未配置时发布接口返回 503）；发布后所有在线用户会在「系统通知 → 公告」实时看到。
 
-## 知识库（RAG）
+## 知识库（RAG / GraphRAG）
 
 把 `.md` / `.txt` 放进项目根 `RAGdata/`，然后入库：
 
 ```bash
 cd backend
-uv run python ingest.py ../RAGdata --rebuild   # 首次或重建
+uv run python ingest.py ../RAGdata --rebuild   # 首次或重建（含实体关系抽取）
 uv run python ingest.py ../RAGdata             # 增量（按文件整篇替换）
+uv run python ingest.py ../RAGdata --no-graph  # 只做向量入库，不抽图
 ```
 
 - 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），代码显式固定缓存目录 `~/.cache/fastembed/`，优先离线加载。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。
-- 入库后 `GET /api/rag/status` 返回 `ready:true`；在「知识库问答」里提问即可，问答范围还会叠加你在 `/knowledge` 选入的个人文章（`--rebuild` 只重建站内公共库，不动个人库）。
+- 入库同时会用 `CHAT_*` 配置的模型抽取实体与关系（可用 `GRAPH_MODEL` 单独指定模型），结果按块内容哈希缓存，重跑不会重复调模型；约 400 块的公共库首次建图需要几十次模型调用、几分钟。
+- 入库后 `GET /api/rag/status` 返回 `ready:true` 与图谱规模；在「知识库问答」里提问即可，问答范围还会叠加你在 `/knowledge` 选入的个人文章（`--rebuild` 只重建站内公共库，不动个人库）。
+
+## 聊天字体分片
+
+`.ttf` 源字体在 `assets/fonts/genshin.ttf`（不随站点发布），分片产物在 `public/fonts/genshin/`：
+
+```bash
+npm run fonts:subset   # 需要 uv；重新生成分片与 css/genshin-font.css
+```
+
+分片与生成的 CSS 已提交进仓库，所以构建与部署不需要联网或额外依赖；换字体时才需要重跑。
 
 ## 目录结构
 
@@ -70,23 +82,28 @@ zero-to-full/
 │                 #  AddFriendModal / ChatWindow / AddFriend / FriendRequests / EmojiPicker /
 │                 #  MessagesContext / useFriends / useFriendSocket / useMessageReminder /
 │                 #  useAnnouncements / friendsApi / announcementsApi / cropImage /
-│                 #  KnowledgeView / KnowledgeQna / KnowledgeSources / kbApi / BlogView /
+│                 #  KnowledgeView / KnowledgeQna / KnowledgeSources / ChatSources / SourceSnippetModal /
+│                 #  slug.js / remarkCitations.js / kbApi / BlogView /
 │                 #  BlogPostView / BlogManageView / BlogEditor / BlogLikeButton / blogApi / blogDate）
 ├── data/         # 静态文案与打底数据（site.js、quotes.js）
 ├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
 │                 #  + system-architecture.json（生成用规格）与 visual-check 证据
 ├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，knowledge.css 我的知识库，
-│                 #  messages.css / messages-panels.css 消息中心，chat-window.css 微信式聊天窗口）
+│                 #  messages.css / messages-panels.css 消息中心，chat-window.css 微信式聊天窗口，
+│                 #  genshin-font.css 聊天字体分片声明（由 scripts/subset_genshin.py 生成））
+├── assets/       # 源资源（不入发布目录）：fonts/genshin.ttf 聊天字体源文件
+├── scripts/      # 构建/生成脚本：sync-architecture.mjs、subset_genshin.py
 ├── backend/      # FastAPI 服务：main.py（接口层）、auth_api.py（认证与头像）、chat_api.py（AI 对话）、
 │                 #  quotas.py（对话额度）、payments.py / payments_api.py（模拟支付与 VIP）、
-│                 #  rag.py / rag_store.py / rag_api.py / ingest.py（本地知识库）、
+│                 #  rag.py / rag_store.py / rag_api.py / ingest.py（本地知识库，向量存 document_vectors）、
+│                 #  graph.py / graph_store.py（GraphRAG 实体关系抽取与图谱存储）、
 │                 #  kb.py / kb_api.py（个人知识库：文章选入与同步）、
 │                 #  announcements_api.py（公告接口）、announce.py（公告发布脚本）、
 │                 #  friends_api.py（好友接口）、friends_ws.py（好友 WebSocket）、auth.py（密码与登录态）、
 │                 #  chat.py（模型层）、friends.py（好友关系）、friend_codes.py（好友码）、
 │                 #  direct_messages.py（私聊消息）、announcements.py（公告存储）、avatars.py（头像文件）、
-│                 #  db.py（连接/归属）、schema.py（建表与迁移）、blog.py / blog_api.py（博客）、users.py（用户与额度）、session.py（匿名 Cookie）、
-│                 #  storage.py（数据层）、weather.py（天气）
+│                 #  db.py（连接/归属）、schema.py / schema_rag.py（建表与迁移）、blog.py / blog_api.py（博客）、
+│                 #  users.py（用户与额度）、session.py（匿名 Cookie）、storage.py（数据层）、weather.py（天气）
 ├── next.config.mjs
 └── .env.local
 ```
@@ -107,9 +124,9 @@ zero-to-full/
 | DELETE | `/api/auth/session` | — | 退出登录，返回 `{ "ok": true }` |
 | POST | `/api/chat/conversations` | `?kind=chat\|rag` | 新建会话（kind 默认 chat；rag = 知识库问答） |
 | GET  | `/api/chat/conversations` | `?limit=20&kind=chat\|rag` | 会话列表，按更新时间倒序；按 kind 隔离 |
-| GET  | `/api/chat/conversations/{id}/messages` | — | 会话消息（正序） |
+| GET  | `/api/chat/conversations/{id}/messages` | — | 会话消息（正序）；助手消息带 `sources`（来源引用，无引用时为 `null`） |
 | DELETE | `/api/chat/conversations/{id}` | — | 删除会话及其消息，返回 `{ "deleted": N }` |
-| POST | `/api/chat/conversations/{id}/messages` | `{ content, mode?, include_system? }` | SSE 流式回复；事件 `delta` / `done` / `error`。`kind=rag` 时 `mode`（qa 单轮/context 多轮，默认 qa）与 `include_system`（是否检索站内公共库，默认 true）生效 |
+| POST | `/api/chat/conversations/{id}/messages` | `{ content, mode?, include_system? }` | SSE 流式回复；事件 `delta` / `done` / `error`。`kind=rag` 时 `mode`（qa 单轮/context 多轮，默认 qa）与 `include_system`（是否检索站内公共库，默认 true）生效；`done.message.sources` 带回来源引用；生成期间输入框仍可继续输入 |
 | GET  | `/api/friends` | — | 好友列表（含 `online` / `unread` / `last_message_at`） |
 | GET  | `/api/friends/requests` | — | `{ incoming, outgoing }` 好友申请 |
 | GET  | `/api/friends/me/code` | — | 我的好友码 `{ code }` |
@@ -130,7 +147,7 @@ zero-to-full/
 | GET  | `/api/pay/orders` | — | 我的订单列表（需登录） |
 | POST | `/api/pay/orders` | `{ product }` | 创建订单（vip_month，1 分），返回 `{ order }` |
 | POST | `/api/pay/orders/{id}/confirm` | — | 模拟支付成功并开通/续费 VIP，返回 `{ order, user }` |
-| GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents, personal, public }`（按登录用户统计） |
+| GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents, personal, public, entities, relations }`（按登录用户统计，图谱计数为全局） |
 | GET  | `/api/blog/posts` | `?limit=10&offset=0&sort=published` | 公开文章列表 `{ items, has_more }`（无需登录；`sort` 可选 `likes`） |
 | GET  | `/api/blog/posts/{id}` | — | 文章详情；草稿 / 仅自己可见仅作者可见，其余 404 |
 | GET  | `/api/blog/me/posts` | — | 我的全部文章（含草稿，需登录） |
@@ -148,7 +165,9 @@ zero-to-full/
 - 数据归属：已登录按账号（`user_id`），匿名按 `session_id` Cookie（有效期 30 天）；接口只读写当前归属的数据，越权访问返回 404。登录/注册时把该浏览器的匿名对话与历史绑到账号。
 - 匿名访客累计可发 3 条 AI 消息（`anonymous_usage` 计数，删会话不会重置）；登录用户每天免费 20 条（`chat_daily_usage` 按 Asia/Shanghai 自然日计数，删会话不重置），用尽返回 403 `code=chat_quota_exceeded`；VIP 不限量。分析模式匿名可用且不占额度。
 - VIP：999 元/月，到期后回到每日 20 条；续费从当前到期时间顺延 30 天。支付目前是**模拟**（点微信/支付宝即视为成功），订单表与确认接口按真实网关形状预留。
-- 知识库（RAG）：在「知识库 → 知识库问答」提问，检索范围 = 个人知识库（用户在「来源管理」选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`，可用「使用系统知识库」开关关掉），用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化并检索 top-4 注入提示词，回答标注来源名称（个人文章标注《标题》· 作者）。模式分「问答」（单轮，不带历史，默认）与「上下文」（多轮，带历史）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库为空时请求返回 409。
+- 知识库（RAG / GraphRAG）：在「知识库 → 知识库问答」提问，检索范围 = 个人知识库（用户在「来源管理」选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`，可用「使用系统知识库」开关关掉），用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化，向量单独存 `document_vectors`（float32 BLOB，检索时整库矩阵常驻内存、库变了才重建）。检索分两步：先向量召回 top-6 作为种子，再从「种子块提到的实体」出发做**一跳图谱扩展**，把向量分不高但共享实体的块一并拿进上下文（最多 8 块，另附命中的实体关系）。图谱数据缺失时自动降级为纯向量检索。模式分「问答」（单轮，不带历史，默认）与「上下文」（多轮，带历史）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建向量与图谱，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库为空时请求返回 409。
+- 切块与来源引用：入库时按 ATX 标题切块（小节之间不合块，块带「标题路径」存 `documents.section`），所以回答能精确到「哪篇文章的哪一节」。模型被要求用 `[n]` 标注依据，`n` 就是参考资料序号；这组引用（文章 / 小节 / 命中片段 / 是否可跳）随助手消息存入 `messages.sources`，前端把 `[n]` 渲染成可点击角标，气泡下方按文章聚合出来源卡片；点个人来源直达 `/blog/post?id=N#小节` 并高亮该标题，站内公共资料（`RAGdata/` 不随站点发布）则弹出命中片段。
+- 图谱构建：实体/关系由 `backend/graph.py` 在**入库时**调用模型抽取（`ingest.py` 默认开、`--no-graph` 可关；个人库在加入/重新同步时抽，单篇最多 24 块），落 `graph_entities` / `graph_mentions` / `graph_relations`，抽取结果按块内容哈希缓存在 `graph_extractions`。用户可见性靠 `chunk_id` 连回 `documents` 判断，与向量检索共用同一套归属规则。抽图是增强项：失败只打日志，不影响入库、来源同步状态与问答。
 - 账号规则：用户名 3-20 位、字母开头、仅字母数字下划线；密码恰好 8 位字符、不含空格；密码用 bcrypt 哈希存储，登录态为 HttpOnly `auth_token` Cookie（30 天）。
 - 对话上下文 = 系统提示词 + 最近 20 条消息；会话标题取首条用户消息前 20 字。
 - 单条消息限 4000 字；`CHAT_API_KEY` 未配置时发消息返回 503。
@@ -168,11 +187,12 @@ zero-to-full/
 - 界面设计：霞鹜文楷字体、米白背景 + 青绿主色、实色卡片；支持浅色/暗色双模式（顶部导航切换，默认跟随系统偏好、记忆用户选择）。
 - 天气卡片在全站顶部导航常驻：首次进入自动获取，点击卡片可刷新，悬停/聚焦展开湿度/风向/更新时间。
 - 天气依赖高德开放平台：key 写在 `backend/.env`（已 gitignore），后端启动时自动加载；本地/无法定位的 IP 会回退到服务器出口定位；未配置或定位失败时接口返回 4xx/503，前端静默隐藏天气。
-- AI 对话读取 `backend/.env` 的 `CHAT_BASE_URL` / `CHAT_API_KEY` / `CHAT_MODEL` / `CHAT_SYSTEM_PROMPT`，默认 DeepSeek（`https://api.deepseek.com/v1` + `deepseek-chat`）；换厂商只改这组变量。
+- AI 对话读取 `backend/.env` 的 `CHAT_BASE_URL` / `CHAT_API_KEY` / `CHAT_MODEL` / `CHAT_SYSTEM_PROMPT`，默认 DeepSeek（`https://api.deepseek.com/v1` + `deepseek-chat`）；换厂商只改这组变量。图谱抽取复用 `CHAT_BASE_URL` / `CHAT_API_KEY`，可用 `GRAPH_MODEL` 单独指定模型（不配则用 `CHAT_MODEL`）。
 - 公告发布读取 `backend/.env` 的 `ANNOUNCE_KEY`；该接口只校验密钥、不依赖登录态，供 `announce.py` 调用。
-- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）与「个人知识库」（博客文章选入 + 来源管理 + 懒同步 + 单轮/多轮模式 + 系统库开关）。
+- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 向量检索 + 注入）、「个人知识库」（博客文章选入 + 来源管理 + 懒同步 + 单轮/多轮模式 + 系统库开关）与阶段 5（GraphRAG：LLM 抽实体关系 + 一跳图谱扩展，降级策略见 `graph.py`）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
-- 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体 `public/fonts/genshin.ttf`；消息上方显示发送者用户名。
+- 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体；消息上方显示发送者用户名。该字体按使用频率分片（`public/fonts/genshin/`，常用字一片 ~550KB），字体 CSS 只挂在 `/text-lab`、`/knowledge`、`/messages` 三条路由上，其他页面不下载任何分片。
+- AI 对话流式生成期间输入框保持可编辑（可先写好下一句），Enter 只换行不发送、也不会中断当前回复；要中断点「停止」，生成结束后草稿保留、按钮恢复「发送」。
 - 博客：所有登录用户可写；`visibility` 三态——`draft`（草稿，未发布，在草稿箱）/ `private`（已发布，仅自己可见）/ `public`（已发布，公开）；正文按 Markdown 渲染（GFM），详情走 `/blog/post?id=`（静态导出不支持动态路由）；`/blog` 可按「最新发布 / 最多点赞」排序；点赞为登录用户每人每篇一次、可取消。
 - 管理员：`backend/.env` 的 `ADMIN_USERNAMES`（逗号分隔，默认 `ryaich`）命中的用户名即为管理员，可在 `/blog` 列表直接删除任意公开文章（不能删草稿 / 仅自己可见）；`/api/auth/me` 返回 `user.is_admin`。
 - `css/markdown.css` 已改为跟随主题（浅色面板 / 暗色面板），暗色聊天气泡的浅色文字在 `.chat-bubble--markdown` 作用域内覆盖。
@@ -185,6 +205,16 @@ zero-to-full/
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
 - **`.card` 默认不要设 `opacity: 0`**：入场初始态必须限定在 `AnimatedCardGrid`（`.animated-grid .card`）里。曾经 `.card { opacity: 0 }` 全局生效，导致没包在 `AnimatedCardGrid` 里的页面（如初版知识库页）整块卡片隐身，表现为「只看到标题 / Tab，看不到内容」。排查时不能只量 `getBoundingClientRect()`（透明元素宽高照常非 0），要同时看 `getComputedStyle(el).opacity`。
 - **Tab 面板不要用 `display: contents`**：Safari/WebKit 对「作为网格子项的 `display: contents`」支持有缺陷，会让整个面板不参与布局。面板容器要自己开一层 12 列网格（`.tab-panel { grid-column: span 12; display: grid; … }`）。
+- **图谱抽取失败也必须更新 `post_updated_at`**：`kb._write_chunks` 里的抽图调用要包 try/except，但 `post_updated_at` 必须照常写。否则 `sync_user` 会认为来源一直「待同步」，每次问答都重试抽图，把一次模型故障放大成持续成本。同理，抽图失败不能影响块入库与来源可见性。
+- **字体分片的 `unicode-range` 必须互不重叠**：重叠时，常用字也会命中生僻字分片（浏览器按范围匹配），等于又把整份字体拉下来。`scripts/subset_genshin.py` 按「常用层优先取走码点」分层，就是为了保证不重叠；改分层逻辑时务必保留这个顺序。
+- **聊天字体 CSS 不要放回全局 `app/layout.jsx`**：它是 87KB 的 range 列表，放全局会变成全站关键 CSS。它只该被 `/text-lab`、`/knowledge`、`/messages` 三个 page 引入。
+- **不要再把 `.ttf` 放进 `public/`**：`public/` 下的一切都会随静态导出发布。字体源文件放 `assets/fonts/`，只有分片产物进 `public/fonts/`。
+- **向量不要写回 `documents`**：向量存 `document_vectors`（float32 BLOB），检索层用「整库矩阵 + 指纹缓存」（`rag._vector_index`），库变了才重建。历史上把向量以 JSON 字符串存在 `documents.embedding`，418 块就有约 3MB JSON，每次提问都要全部解析一遍。改存储形态时记得同步 `rag_store.all_vectors` / `vector_fingerprint` / `schema_rag.migrate`。
+- **切块不得跨小节合并**：`ingest.chunk_markdown` 按 ATX 标题分段，小节之间独立成块。一旦合并，`documents.section` 就只能标到块开头的那个节，引用精度直接丢失。
+- **引用角标 `[n]` 与上下文序号强绑定**：`[n]` 的 n 就是 `build_context` 里的参考资料序号（1..`MAX_CONTEXT_CHUNKS`），`rag.citations` 按同一顺序产出。调种子数/上限时不要动这个对应关系；前端只把本轮真实存在的编号渲染成角标，其余 `[1]`、`[2024]` 保持纯文本。
+- **标题锚点前后端各算一半**：后端只存 `documents.section`（标题路径文本），前端用「取 section 末级（分隔符是带空格的 ` / `）+ `headingSlug`」得到锚点 id。改 slug 规则时必须同时想到引用链接，否则跳转会静默失败（找不到元素就不滚，不报错）。
+- **`conversations.user_id` 没有外键级联**：删用户不会删掉他的会话与消息（`messages` 跟着会话走）。清理测试账号时要按该用户 id 手动删会话和消息，否则留下孤儿会话。
+- **导入 `backend/main.py` 就会对真实 `history.db` 执行 `init_db()`**：`main.py` 顶层调用了建表/迁移，所以跑 `pytest`（用例里 `import main`）或启动后端都会直接改真实库。写迁移时要保证幂等；别把测试数据写进真实库。
 - 「关于」页（`/about`）提供项目架构图入口，新标签打开 `/architecture.html`。
 
 ## 架构图维护

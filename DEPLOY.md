@@ -81,15 +81,19 @@ CHAT_BASE_URL=https://api.deepseek.com/v1
 CHAT_API_KEY=你的模型Key
 CHAT_MODEL=deepseek-chat
 CHAT_SYSTEM_PROMPT=你是「零到全栈」站点的 AI 助手。
+# 可选：图谱抽取单独指定模型（不配则用 CHAT_MODEL）
+# GRAPH_MODEL=deepseek-chat
 ANNOUNCE_KEY=随机字符串
 ADMIN_USERNAMES=ryaich
 EOF
 
-# 3.3 迁移数据（含用户、RAG 向量）：从本地把 history.db 与 avatars/ 传上来
+# 3.3 迁移数据（含用户、RAG 向量与图谱）：从本地把 history.db 与 avatars/ 传上来
 #   本地执行：
 #   scp backend/history.db user@SERVER_IP:/opt/zero-to-full/backend/
 #   rsync -az backend/avatars/ user@SERVER_IP:/opt/zero-to-full/backend/avatars/
 # 说明：不传 history.db 会新建空库（用户与知识库全空）；RAGdata/ 无需上传。
+#   新库没有图谱数据（迁移不会自动抽图），需要按需手动建一次图：
+#   cd /opt/zero-to-full/backend && uv run python ingest.py ../RAGdata --rebuild
 
 # 3.4 预热本地向量模型（约 100MB，下到 ~/.cache/fastembed，需联网一次）
 #     必须显式指定 cache_dir：否则会落到 /tmp，重启即丢，之后加载会联网卡死
@@ -177,6 +181,7 @@ sudo rsync -a --delete out/ /var/www/zero-to-full/
 - **CORS**：后端写死 `allow_origins=["http://localhost:3000"]`；同源部署不会触发 CORS，无需改动。若前端要放到别的域名，需在 `backend/main.py` 补上生产域名。
 - **Cookie**：目前 `httponly + samesite=lax`。上 HTTPS 后可给 `backend/session.py`、`backend/auth.py` 的 `set_cookie` 加 `secure=True` 加固（可选）。
 - **备份**：定期备份 `backend/history.db` 与 `backend/avatars/`，它们承载全部用户与聊天数据。
+- **静态缓存**：`deploy/nginx.conf` 已内置 gzip 与缓存头（`_next/static/` 不可变长缓存、字体/图片 30 天、`html|txt` 必须回源校验）。更新前端请用 `update.sh`（`rsync --delete`），否则旧产物（如已下线的 `fonts/genshin.ttf`）会残留在 `WEB_ROOT`。
 - **公告发布**：服务器上用 `ANNOUNCE_KEY` 调 `backend/announce.py` 发布公告。
 
 ## 11. 常见问题
