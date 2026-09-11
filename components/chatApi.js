@@ -30,10 +30,11 @@ export function deleteConversation(conversationId) {
 }
 
 // 发送消息并消费 SSE 流：onDelta 收到每个文本增量，返回 done 事件的数据。
+// mode = qa（单轮问答）/ context（多轮）；includeSystem 控制是否检索站内公共库。
 export async function streamChat(
   conversationId,
   content,
-  { onDelta, signal, useRag = false } = {}
+  { onDelta, signal, mode = "qa", includeSystem = true } = {}
 ) {
   const res = await fetch(
     `${API}/api/chat/conversations/${conversationId}/messages`,
@@ -41,7 +42,7 @@ export async function streamChat(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ content, use_rag: useRag }),
+      body: JSON.stringify({ content, mode, include_system: includeSystem }),
       signal,
     }
   );

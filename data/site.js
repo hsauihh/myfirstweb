@@ -25,6 +25,16 @@ export const textLab = {
   heroSubtitle: "拼音和情绪，挖掘中文里的细节",
 };
 
+// AI 对话的常用提示词：点击填入输入框，用户再粘贴要处理的文字。
+export const textLabPrompts = [
+  { label: "润色书面化", prompt: "帮我把下面这段文字润色得更书面、通顺：\n" },
+  { label: "起三个标题", prompt: "给下面这段文字起三个吸引人的标题：\n" },
+  { label: "总结要点", prompt: "用三点总结下面这段文字的要点：\n" },
+  { label: "翻成英文", prompt: "把下面这段文字翻译成地道的英文：\n" },
+  { label: "分析情绪", prompt: "分析下面这段文字的情绪倾向，并说明理由：\n" },
+  { label: "改得口语", prompt: "把下面这段文字改得更口语、自然：\n" },
+];
+
 // 顶部主导航：六项全部一级平铺，不放二级下拉。
 export const navLinks = [
   { href: "/", label: "首页" },

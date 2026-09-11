@@ -1,49 +1,21 @@
 "use client";
 
-// 对话面板：组合操作栏、消息区、输入区；数据与请求都在 useChat 里。
-// kind 决定会话空间（chat = 普通 AI 对话 / rag = 知识库问答），forceRag 表示知识库专用面板。
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+// 普通 AI 对话面板：会话列表 + 消息区 + 输入区（含「文字实验室」常用提示词）。
+// 知识库问答已移到 /knowledge，这里不涉及知识库。
+import { useEffect, useRef } from "react";
 import ChatComposer from "./ChatComposer.jsx";
 import ChatMessages from "./ChatMessages.jsx";
 import ChatToolbar from "./ChatToolbar.jsx";
 import useChat from "./useChat.js";
-import * as ragApi from "./ragApi.js";
 import { useAuth } from "./AuthContext.jsx";
+import { textLabPrompts } from "../data/site.js";
 
-const HEADINGS = {
-  chat: { kicker: "AI 对话", title: "和助手聊聊" },
-  rag: { kicker: "知识库问答", title: "基于站内资料回答" },
-};
-
-export default function ChatPanel({ kind = "chat", forceRag = false }) {
+export default function ChatPanel() {
   const auth = useAuth();
-  const chat = useChat({ kind, onQuota: auth.applyQuota });
+  const chat = useChat({ kind: "chat", onQuota: auth.applyQuota });
   const listRef = useRef(null);
-  const [useRag, setUseRag] = useState(forceRag);
-  const [ragStatus, setRagStatus] = useState(null);
-  const activeRag = forceRag || useRag;
-  const activeQuota = activeRag ? auth.ragQuota : auth.quota;
   const blocked =
-    !auth.loading && !auth.user?.vip && (activeQuota?.remaining ?? 0) <= 0;
-  const heading = HEADINGS[kind] || HEADINGS.chat;
-
-  // 知识库面板：取一次入库状态，用于顶部提示
-  useEffect(() => {
-    if (!forceRag) return undefined;
-    let alive = true;
-    ragApi
-      .ragStatus()
-      .then((data) => {
-        if (alive) setRagStatus(data);
-      })
-      .catch(() => {
-        // 后端不可用时静默
-      });
-    return () => {
-      alive = false;
-    };
-  }, [forceRag]);
+    !auth.loading && !auth.user?.vip && (auth.quota?.remaining ?? 0) <= 0;
 
   // 新消息或流式增量出现时滚到底部
   useEffect(() => {
@@ -58,11 +30,20 @@ export default function ChatPanel({ kind = "chat", forceRag = false }) {
     await chat.removeConversation(chat.activeId);
   }
 
+  function placeholder() {
+    if (blocked) {
+      return auth.user
+        ? "今日免费次数已用完，开通 VIP 继续"
+        : "额度已用完，登录后继续";
+    }
+    return "说点什么…（Enter 发送，Shift+Enter 换行）";
+  }
+
   return (
     <article className="panel panel-full chat-panel card">
       <ChatToolbar
-        kicker={heading.kicker}
-        title={heading.title}
+        kicker="AI 对话"
+        title="和助手聊聊"
         conversations={chat.conversations}
         activeId={chat.activeId}
         sending={chat.sending}
@@ -70,15 +51,6 @@ export default function ChatPanel({ kind = "chat", forceRag = false }) {
         onCreate={chat.newConversation}
         onRemove={handleRemove}
       />
-      {forceRag && ragStatus && (
-        <p className="chat-quota">
-          {ragStatus.ready
-            ? `个人 ${ragStatus.personal} + 站内 ${ragStatus.public} 个片段`
-            : "知识库还是空的"}
-          {" · "}
-          <Link href="/knowledge">管理我的知识库</Link>
-        </p>
-      )}
       <ChatMessages
         messages={chat.messages}
         streamingText={chat.streamingText}
@@ -89,12 +61,10 @@ export default function ChatPanel({ kind = "chat", forceRag = false }) {
       <ChatComposer
         sending={chat.sending}
         disabled={blocked}
-        quota={auth.quota}
-        ragQuota={auth.ragQuota}
+        placeholder={placeholder()}
+        prompts={textLabPrompts}
         user={auth.user}
-        useRag={activeRag}
-        showRagToggle={!forceRag}
-        onToggleRag={setUseRag}
+        quota={auth.quota}
         onSend={chat.send}
         onStop={chat.stop}
       />

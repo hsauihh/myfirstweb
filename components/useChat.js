@@ -126,7 +126,7 @@ export default function useChat({ kind = "chat", onQuota } = {}) {
   );
 
   const send = useCallback(
-    async (text, useRag = false) => {
+    async (text, options = {}) => {
       const content = text.trim();
       if (!content || sending) return;
 
@@ -147,8 +147,8 @@ export default function useChat({ kind = "chat", onQuota } = {}) {
 
       try {
         const result = await streamChat(targetId, content, {
+          ...options,
           signal: controller.signal,
-          useRag,
           onDelta: (delta) => {
             reply += delta;
             setStreamingText(reply);

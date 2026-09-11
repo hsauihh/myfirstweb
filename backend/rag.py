@@ -41,19 +41,20 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
     return [vector.tolist() for vector in _get_model().embed(texts)]
 
 
-def is_ready(user_id: int | None = None) -> bool:
-    return rag_store.count_for_user(user_id) > 0
+def is_ready(user_id: int | None = None, include_public: bool = True) -> bool:
+    return rag_store.count_for_user(user_id, include_public) > 0
 
 
 def search(
     query: str,
     *,
     user_id: int | None = None,
+    include_public: bool = True,
     k: int = DEFAULT_K,
     threshold: float = DEFAULT_THRESHOLD,
 ) -> list[dict]:
     """返回相似度最高的 k 个块（低于阈值丢弃）。"""
-    documents = rag_store.documents_for_user(user_id)
+    documents = rag_store.documents_for_user(user_id, include_public)
     if not documents:
         return []
     import numpy as np

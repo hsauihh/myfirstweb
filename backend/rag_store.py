@@ -58,19 +58,28 @@ def all_documents() -> list[dict]:
     return [_document(row) for row in rows]
 
 
-def documents_for_user(user_id: int | None) -> list[dict]:
-    """该用户可见的块：站内公共库 + 他自己的个人库。"""
+def documents_for_user(
+    user_id: int | None, include_public: bool = True
+) -> list[dict]:
+    """该用户可见的块：可含站内公共库，加上他自己的个人库。"""
     conn = db.get_conn()
     if user_id is None:
         rows = conn.execute(
             f"SELECT {_DOCUMENT_COLUMNS} FROM documents"
             " WHERE source_id IS NULL ORDER BY id"
         ).fetchall()
-    else:
+    elif include_public:
         rows = conn.execute(
             f"SELECT {_DOCUMENT_COLUMNS} FROM documents"
             " WHERE source_id IS NULL OR source_id IN"
             " (SELECT id FROM kb_sources WHERE user_id = ?)"
+            " ORDER BY id",
+            [user_id],
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            f"SELECT {_DOCUMENT_COLUMNS} FROM documents"
+            " WHERE source_id IN (SELECT id FROM kb_sources WHERE user_id = ?)"
             " ORDER BY id",
             [user_id],
         ).fetchall()
@@ -95,10 +104,12 @@ def count_personal(user_id: int) -> int:
     return _count("source_id IN (SELECT id FROM kb_sources WHERE user_id = ?)", [user_id])
 
 
-def count_for_user(user_id: int | None) -> int:
+def count_for_user(user_id: int | None, include_public: bool = True) -> int:
     if user_id is None:
         return count_public()
-    return count_public() + count_personal(user_id)
+    if include_public:
+        return count_public() + count_personal(user_id)
+    return count_personal(user_id)
 
 
 def count() -> int:

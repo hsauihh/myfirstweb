@@ -27,6 +27,7 @@ from chat import (
 from db import Owner
 from session import set_session_cookie
 from storage import (
+    RAG_KIND,
     add_message,
     create_conversation,
     delete_conversation,
@@ -42,13 +43,17 @@ TITLE_MAX_LENGTH = 20
 MAX_CONTENT_LENGTH = 4000
 CONVERSATION_LIST_LIMIT = 20
 ConversationKind = Literal["chat", "rag"]
+# qa = 单轮问答（不带历史）；context = 多轮对话（带历史）
+MessageMode = Literal["qa", "context"]
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
 class MessageRequest(BaseModel):
+    """知识库相关字段只在 kind=rag 的会话里生效。"""
     content: str = Field(min_length=1, max_length=MAX_CONTENT_LENGTH)
-    use_rag: bool = False
+    mode: MessageMode = "qa"
+    include_system: bool = True
 
 
 def _chat_config() -> ChatConfig:
@@ -105,17 +110,19 @@ def _quota_error(
 
 
 def _check_quota(
-    owner: Owner, user: dict | None, use_rag: bool
+    owner: Owner, user: dict | None, use_rag: bool, include_system: bool = True
 ) -> tuple[dict | None, JSONResponse | None]:
     """返回 (额度快照, 错误响应)；额度足够时错误响应为 None。"""
     if use_rag:
         if owner.user_id is None:
             raise HTTPException(status_code=403, detail="登录后可使用知识库")
-        if not rag.is_ready(owner.user_id):
-            raise HTTPException(
-                status_code=409,
-                detail="知识库为空，请先在「我的知识库」添加文章或运行 ingest.py",
+        if not rag.is_ready(owner.user_id, include_public=include_system):
+            detail = (
+                "知识库为空，请先在「知识库 → 来源管理」添加文章或运行 ingest.py"
+                if include_system
+                else "个人知识库为空，请先在「来源管理」添加文章"
             )
+            raise HTTPException(status_code=409, detail=detail)
         if not quotas.consume_rag(owner, user):
             return quotas.snapshot_rag(owner, user), _quota_error(owner, user, True)
         return quotas.snapshot_rag(owner, user), None
@@ -125,10 +132,12 @@ def _check_quota(
     return quotas.snapshot(owner, user), None
 
 
-def _rag_context(owner: Owner, content: str) -> str:
-    """个人库 + 站内公共库合并检索；检索前先懒同步（文章改过则重建向量）。"""
+def _rag_context(owner: Owner, content: str, include_system: bool) -> str:
+    """个人库（可加站内公共库）检索；检索前先懒同步（文章改过则重建向量）。"""
     kb.sync_user(owner.user_id)
-    return rag.build_context(rag.search(content, user_id=owner.user_id))
+    return rag.build_context(
+        rag.search(content, user_id=owner.user_id, include_public=include_system)
+    )
 
 
 def _sse(event: str, data: dict) -> str:
@@ -183,20 +192,25 @@ def send_message_endpoint(
         raise HTTPException(status_code=503, detail="未配置 CHAT_API_KEY")
 
     owner, user, new_session_id = resolve_owner_for_stream(request)
-    _require_conversation(owner, conversation_id)
+    conversation = _require_conversation(owner, conversation_id)
 
     content = req.content.strip()
     if not content:
         raise HTTPException(status_code=422, detail="消息不能为空")
 
-    quota, error = _check_quota(owner, user, req.use_rag)
+    use_rag = conversation["kind"] == RAG_KIND
+    quota, error = _check_quota(owner, user, use_rag, req.include_system)
     if error is not None:
         return error
-    context = _rag_context(owner, content) if req.use_rag else ""
+    context = _rag_context(owner, content, req.include_system) if use_rag else ""
 
-    history = get_messages(conversation_id, HISTORY_FETCH_LIMIT)
+    # 问答模式不带历史（单轮）；上下文模式取最近历史（多轮）
+    history = (
+        get_messages(conversation_id, HISTORY_FETCH_LIMIT)
+        if req.mode == "context"
+        else []
+    )
     add_message(conversation_id, "user", content)
-    conversation = _require_conversation(owner, conversation_id)
     if conversation["title"] == DEFAULT_TITLE:
         rename_conversation(conversation_id, _make_title(content))
 

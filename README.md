@@ -1,6 +1,6 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」「知识库问答」三个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite；分析模式做情感分析与拼音标注。知识库问答是独立面板（会话与 AI 对话分开），回答基于「个人知识库（自选的博客文章）+ 站内公共资料（`RAGdata/`）」检索；登录用户可在 `/knowledge` 把自己或他人的公开文章选进个人库并管理来源（知识库独立每天 5 条，VIP 不限量），AI 对话里也可用「使用知识库」开关。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。导航栏主导航平铺六项（首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」两个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite，并提供一排常用提示词快捷按钮；分析模式做情感分析与拼音标注。「知识库」页（`/knowledge`）分「知识库问答 / 来源管理」两个 Tab：登录用户把自己或他人的公开文章选进个人库，问答基于「个人知识库 + 站内公共资料（`RAGdata/`）」检索，可切换「问答（单轮，默认）/ 上下文（多轮）」模式与「使用系统知识库」开关（知识库独立每天 5 条，VIP 不限量）。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。导航栏主导航平铺六项（首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
@@ -70,7 +70,7 @@ zero-to-full/
 │                 #  AddFriendModal / ChatWindow / AddFriend / FriendRequests / EmojiPicker /
 │                 #  MessagesContext / useFriends / useFriendSocket / useMessageReminder /
 │                 #  useAnnouncements / friendsApi / announcementsApi / cropImage /
-│                 #  KnowledgeView / kbApi / BlogView /
+│                 #  KnowledgeView / KnowledgeQna / KnowledgeSources / kbApi / BlogView /
 │                 #  BlogPostView / BlogManageView / BlogEditor / BlogLikeButton / blogApi / blogDate）
 ├── data/         # 静态文案与打底数据（site.js、quotes.js）
 ├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
@@ -109,7 +109,7 @@ zero-to-full/
 | GET  | `/api/chat/conversations` | `?limit=20&kind=chat\|rag` | 会话列表，按更新时间倒序；按 kind 隔离 |
 | GET  | `/api/chat/conversations/{id}/messages` | — | 会话消息（正序） |
 | DELETE | `/api/chat/conversations/{id}` | — | 删除会话及其消息，返回 `{ "deleted": N }` |
-| POST | `/api/chat/conversations/{id}/messages` | `{ content }` | SSE 流式回复；事件 `delta` / `done` / `error` |
+| POST | `/api/chat/conversations/{id}/messages` | `{ content, mode?, include_system? }` | SSE 流式回复；事件 `delta` / `done` / `error`。`kind=rag` 时 `mode`（qa 单轮/context 多轮，默认 qa）与 `include_system`（是否检索站内公共库，默认 true）生效 |
 | GET  | `/api/friends` | — | 好友列表（含 `online` / `unread` / `last_message_at`） |
 | GET  | `/api/friends/requests` | — | `{ incoming, outgoing }` 好友申请 |
 | GET  | `/api/friends/me/code` | — | 我的好友码 `{ code }` |
@@ -148,7 +148,7 @@ zero-to-full/
 - 数据归属：已登录按账号（`user_id`），匿名按 `session_id` Cookie（有效期 30 天）；接口只读写当前归属的数据，越权访问返回 404。登录/注册时把该浏览器的匿名对话与历史绑到账号。
 - 匿名访客累计可发 3 条 AI 消息（`anonymous_usage` 计数，删会话不会重置）；登录用户每天免费 20 条（`chat_daily_usage` 按 Asia/Shanghai 自然日计数，删会话不重置），用尽返回 403 `code=chat_quota_exceeded`；VIP 不限量。分析模式匿名可用且不占额度。
 - VIP：999 元/月，到期后回到每日 20 条；续费从当前到期时间顺延 30 天。支付目前是**模拟**（点微信/支付宝即视为成功），订单表与确认接口按真实网关形状预留。
-- 知识库（RAG）：检索范围 = 「个人知识库（用户在 `/knowledge` 选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`（`.md` / `.txt`））」；AI 对话开启「使用知识库」后用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化并检索 top-4 注入提示词，回答标注来源（个人文章标注《标题》· 作者）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库（个人库与公共库都为空）时请求返回 409。
+- 知识库（RAG）：在「知识库 → 知识库问答」提问，检索范围 = 个人知识库（用户在「来源管理」选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`，可用「使用系统知识库」开关关掉），用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化并检索 top-4 注入提示词，回答标注来源名称（个人文章标注《标题》· 作者）。模式分「问答」（单轮，不带历史，默认）与「上下文」（多轮，带历史）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库为空时请求返回 409。
 - 账号规则：用户名 3-20 位、字母开头、仅字母数字下划线；密码恰好 8 位字符、不含空格；密码用 bcrypt 哈希存储，登录态为 HttpOnly `auth_token` Cookie（30 天）。
 - 对话上下文 = 系统提示词 + 最近 20 条消息；会话标题取首条用户消息前 20 字。
 - 单条消息限 4000 字；`CHAT_API_KEY` 未配置时发消息返回 503。
@@ -158,7 +158,7 @@ zero-to-full/
 - 消息中心 `/messages`：左侧「我的消息」（会话列表 + 微信式聊天）/「系统通知」（公告 + 好友申请）/「设置」（个人资料换头像 + 消息设置）；好友、公告与 WebSocket 由 `MessagesProvider` 全站共享，只有一份连接。
 - 头像：登录后可在「设置 → 个人资料」选图 → 裁剪 → 上传。前端用 `react-easy-crop` 拖拽缩放，输出 256×256 JPEG；后端限制 jpg/png/webp 且 ≤2MB，存 `backend/avatars/`（gitignore），访问路径 `/avatars/xxx`；换新头像会删旧文件。
 - 公告：`announce.py` 读取 JSON 文件（`title` 必填、`body` 可选）发布；未读按用户记，点开标题标记已读；发布时通过 WebSocket 广播给所有在线用户。
-- 导航：主导航平铺「首页 / 文字实验室 / 博客 / 作品 / 关于」；右侧为天气、主题切换与账号区——未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），其中「个人资料」直达 `/messages?section=settings`。有未读时头像右上角红点、菜单「消息」行显示数字，开关存浏览器 `localStorage`（默认开，只影响这些提示）。窄屏（≤900px）折叠为汉堡菜单，导航与账号操作都收进菜单；天气在各宽度常驻，≤480px 只留「城市+温度」、≤380px 只留温度。
+- 导航：主导航平铺「首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于」；右侧为天气、主题切换与账号区——未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），其中「个人资料」直达 `/messages?section=settings`。有未读时头像右上角红点、菜单「消息」行显示数字，开关存浏览器 `localStorage`（默认开，只影响这些提示）。窄屏（≤900px）折叠为汉堡菜单，导航与账号操作都收进菜单；天气在各宽度常驻，≤480px 只留「城市+温度」、≤380px 只留温度。
 
 ## 说明
 
@@ -170,7 +170,7 @@ zero-to-full/
 - 天气依赖高德开放平台：key 写在 `backend/.env`（已 gitignore），后端启动时自动加载；本地/无法定位的 IP 会回退到服务器出口定位；未配置或定位失败时接口返回 4xx/503，前端静默隐藏天气。
 - AI 对话读取 `backend/.env` 的 `CHAT_BASE_URL` / `CHAT_API_KEY` / `CHAT_MODEL` / `CHAT_SYSTEM_PROMPT`，默认 DeepSeek（`https://api.deepseek.com/v1` + `deepseek-chat`）；换厂商只改这组变量。
 - 公告发布读取 `backend/.env` 的 `ANNOUNCE_KEY`；该接口只校验密钥、不依赖登录态，供 `announce.py` 调用。
-- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）与「个人知识库」（博客文章选入 + 来源管理 + 懒同步）。
+- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 暴力检索 + 注入）与「个人知识库」（博客文章选入 + 来源管理 + 懒同步 + 单轮/多轮模式 + 系统库开关）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
 - 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体 `public/fonts/genshin.ttf`；消息上方显示发送者用户名。
 - 博客：所有登录用户可写；`visibility` 三态——`draft`（草稿，未发布，在草稿箱）/ `private`（已发布，仅自己可见）/ `public`（已发布，公开）；正文按 Markdown 渲染（GFM），详情走 `/blog/post?id=`（静态导出不支持动态路由）；`/blog` 可按「最新发布 / 最多点赞」排序；点赞为登录用户每人每篇一次、可取消。

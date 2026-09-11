@@ -121,6 +121,36 @@
   50% { opacity: 0; }
 }
 
+/* 常用提示词快捷按钮（文字实验室 AI 对话） */
+.prompt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompt-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.prompt-chip:hover:not(:disabled) {
+  color: var(--brand);
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.prompt-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* 输入区 */
 .chat-form {
   display: grid;
@@ -242,6 +272,52 @@
 .rag-toggle-label {
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* 知识库问答的 footer 控件：问答/上下文分段 + 系统库开关 */
+.rag-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rag-mode {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.rag-mode__btn {
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rag-mode__btn.is-active {
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* 正文里的文字按钮 */
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--brand);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .switch--sm {
