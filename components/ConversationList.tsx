@@ -2,8 +2,9 @@
 
 // 会话列表：微信式条目（头像 + 用户名 + 最后消息 + 时间 + 未读）。
 import Avatar from "./Avatar";
+import type { Friend } from "./types";
 
-function formatTime(iso) {
+function formatTime(iso: string | null): string {
   if (!iso) return "";
   const date = new Date(iso);
   const sameDay = date.toDateString() === new Date().toDateString();
@@ -16,13 +17,25 @@ function formatTime(iso) {
   return date.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" });
 }
 
-function preview(friend, selfId) {
+function preview(friend: Friend, selfId: number): string {
   if (!friend.last_message) return "还没有消息";
   const prefix = friend.last_message_sender_id === selfId ? "我：" : "";
   return prefix + friend.last_message;
 }
 
-export default function ConversationList({ friends, activeId, selfId, onSelect }) {
+interface ConversationListProps {
+  friends: Friend[];
+  activeId: number | null;
+  selfId: number;
+  onSelect: (id: number) => void;
+}
+
+export default function ConversationList({
+  friends,
+  activeId,
+  selfId,
+  onSelect,
+}: ConversationListProps) {
   return (
     <div className="conversation-pane">
       {friends.length === 0 ? (

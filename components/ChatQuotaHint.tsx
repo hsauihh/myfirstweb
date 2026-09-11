@@ -2,14 +2,15 @@
 
 // 聊天面板的额度 / VIP 提示（普通对话与知识库共用）。
 import Link from "next/link";
+import type { PublicUser, Quota, QuotaScope } from "./types";
 
-const SCOPE_LABELS = {
+const SCOPE_LABELS: Record<QuotaScope, string> = {
   anonymous: "匿名",
   daily: "今日",
   rag_daily: "知识库",
 };
 
-function formatExpiry(iso) {
+function formatExpiry(iso: string | null): string {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -18,7 +19,19 @@ function formatExpiry(iso) {
   });
 }
 
-export default function ChatQuotaHint({ user, quota, useRag, onOpenVip }) {
+interface ChatQuotaHintProps {
+  user: PublicUser | null;
+  quota: Quota | null | undefined;
+  useRag?: boolean;
+  onOpenVip: () => void;
+}
+
+export default function ChatQuotaHint({
+  user,
+  quota,
+  useRag = false,
+  onOpenVip,
+}: ChatQuotaHintProps) {
   if (user?.vip) {
     return (
       <span
@@ -34,7 +47,7 @@ export default function ChatQuotaHint({ user, quota, useRag, onOpenVip }) {
     return <span className="chat-quota">登录后使用知识库</span>;
   }
 
-  const label = SCOPE_LABELS[quota?.scope] || "今日";
+  const label = quota ? SCOPE_LABELS[quota.scope] : "今日";
   const exhausted = quota ? quota.remaining === 0 : false;
 
   return (

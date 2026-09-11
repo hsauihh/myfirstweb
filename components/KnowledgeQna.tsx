@@ -8,17 +8,23 @@ import ChatMessages from "./ChatMessages";
 import ChatToolbar from "./ChatToolbar";
 import useChat from "./useChat";
 import { useAuth } from "./AuthContext";
+import type { RagMode, RagStatus } from "./types";
 
-const MODES = [
+const MODES: { id: RagMode; label: string }[] = [
   { id: "qa", label: "问答" },
   { id: "context", label: "上下文" },
 ];
 
-export default function KnowledgeQna({ status, onManageSources }) {
+interface KnowledgeQnaProps {
+  status: RagStatus | null;
+  onManageSources: () => void;
+}
+
+export default function KnowledgeQna({ status, onManageSources }: KnowledgeQnaProps) {
   const auth = useAuth();
   const chat = useChat({ kind: "rag", onQuota: auth.applyQuota });
-  const listRef = useRef(null);
-  const [mode, setMode] = useState("qa");
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [mode, setMode] = useState<RagMode>("qa");
   const [includeSystem, setIncludeSystem] = useState(true);
   const blocked =
     !auth.loading && !auth.user?.vip && (auth.ragQuota?.remaining ?? 0) <= 0;
@@ -35,7 +41,7 @@ export default function KnowledgeQna({ status, onManageSources }) {
     await chat.removeConversation(chat.activeId);
   }
 
-  function send(text) {
+  function send(text: string) {
     return chat.send(text, { mode, includeSystem });
   }
 

@@ -2,19 +2,25 @@
 
 // 模拟支付弹窗：点微信 / 支付宝即视为支付成功并开通 VIP。
 import { useEffect, useState } from "react";
+import { errorMessage } from "./apiError";
 import { useAuth } from "./AuthContext";
 import { confirmOrder, createOrder } from "./paymentsApi";
 
 const PRICE_YUAN = "999";
 
-export default function VipModal({ open, onClose }) {
+interface VipModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function VipModal({ open, onClose }: VipModalProps) {
   const { refresh } = useAuth();
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!open) return undefined;
-    function onKey(event) {
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
     document.addEventListener("keydown", onKey);
@@ -23,7 +29,7 @@ export default function VipModal({ open, onClose }) {
 
   if (!open) return null;
 
-  async function pay(channel) {
+  async function pay(channel: string) {
     setBusy(channel);
     setMessage("");
     try {
@@ -32,7 +38,7 @@ export default function VipModal({ open, onClose }) {
       await refresh();
       setMessage("支付成功，已开通「至尊无敌黄金VIP」");
     } catch (err) {
-      setMessage(err.message);
+      setMessage(errorMessage(err));
     } finally {
       setBusy("");
     }

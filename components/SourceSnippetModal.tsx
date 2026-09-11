@@ -4,11 +4,17 @@
 // 所以这里只展示命中片段本身。
 import { useEffect } from "react";
 import { lastSection } from "./slug";
+import type { Citation } from "./types";
 
-export default function SourceSnippetModal({ source, onClose }) {
+interface SourceSnippetModalProps {
+  source: Citation | null;
+  onClose: () => void;
+}
+
+export default function SourceSnippetModal({ source, onClose }: SourceSnippetModalProps) {
   useEffect(() => {
     if (!source) return undefined;
-    function onKey(event) {
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
     document.addEventListener("keydown", onKey);

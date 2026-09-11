@@ -10,7 +10,7 @@ export default function AddFriendModal() {
 
   useEffect(() => {
     if (!addFriendOpen) return undefined;
-    function onKey(event) {
+    function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") closeAddFriend();
     }
     document.addEventListener("keydown", onKey);

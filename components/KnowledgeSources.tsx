@@ -3,9 +3,11 @@
 // 来源管理：站内公共资料（只读）+ 我添加的文章 + 从可读文章里挑选添加。
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { errorMessage } from "./apiError";
 import Avatar from "./Avatar";
 import { useAuth } from "./AuthContext";
 import * as kbApi from "./kbApi";
+import type { KbCandidate, KbSource } from "./types";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
@@ -15,14 +17,14 @@ const VISIBILITY_TAGS = {
   draft: { text: "草稿", className: "blog-tag--private" },
 };
 
-export default function KnowledgeSources({ onChanged }) {
+export default function KnowledgeSources({ onChanged }: { onChanged?: () => void }) {
   const { user } = useAuth();
-  const [sources, setSources] = useState([]);
+  const [sources, setSources] = useState<KbSource[]>([]);
   const [publicCount, setPublicCount] = useState(0);
-  const [candidates, setCandidates] = useState([]);
+  const [candidates, setCandidates] = useState<KbCandidate[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   const loadSources = useCallback(async () => {
@@ -38,7 +40,7 @@ export default function KnowledgeSources({ onChanged }) {
     setLoading(true);
     loadSources()
       .then(() => alive && setError(""))
-      .catch((err) => alive && setError(err.message))
+      .catch((err) => alive && setError(errorMessage(err)))
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
@@ -61,20 +63,20 @@ export default function KnowledgeSources({ onChanged }) {
     };
   }, [user, query]);
 
-  async function run(postId, action) {
+  async function run(postId: number, action: () => Promise<unknown>) {
     setBusyId(postId);
     setError("");
     try {
       await action();
       await loadSources();
     } catch (err) {
-      setError(err.message);
+      setError(errorMessage(err));
     } finally {
       setBusyId(null);
     }
   }
 
-  function add(postId) {
+  function add(postId: number) {
     return run(postId, async () => {
       await kbApi.addSource(postId);
       setCandidates((prev) =>
@@ -83,7 +85,7 @@ export default function KnowledgeSources({ onChanged }) {
     });
   }
 
-  function remove(postId) {
+  function remove(postId: number) {
     if (!window.confirm("从知识库移除这篇文章？")) return undefined;
     return run(postId, async () => {
       await kbApi.removeSource(postId);
@@ -95,7 +97,7 @@ export default function KnowledgeSources({ onChanged }) {
     });
   }
 
-  function sync(postId) {
+  function sync(postId: number) {
     return run(postId, () => kbApi.syncSource(postId));
   }
 

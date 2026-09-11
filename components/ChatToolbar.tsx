@@ -1,6 +1,19 @@
 "use client";
 
 // 会话操作栏：切换会话、新建、删除。
+import type { ChatToolbarConversation } from "./types";
+
+interface ChatToolbarProps {
+  kicker?: string;
+  title?: string;
+  conversations: ChatToolbarConversation[];
+  activeId: number | null;
+  sending: boolean;
+  onSelect: (id: number) => void;
+  onCreate: () => void;
+  onRemove: () => void;
+}
+
 export default function ChatToolbar({
   kicker = "AI 对话",
   title = "和助手聊聊",
@@ -10,7 +23,7 @@ export default function ChatToolbar({
   onSelect,
   onCreate,
   onRemove,
-}) {
+}: ChatToolbarProps) {
   return (
     <div className="panel-heading chat-heading">
       <div>

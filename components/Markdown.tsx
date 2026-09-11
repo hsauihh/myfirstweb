@@ -4,15 +4,17 @@
 // 默认不渲染原始 HTML，避免注入。
 // 传入 sources 时，正文里的 [n] 会渲染成可点击的引用角标；标题一律带锚点 id。
 import { useMemo } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkCitations from "./remarkCitations";
 import { headingSlug, nodeText } from "./slug";
+import type { Citation } from "./types";
+import type { ReactNode } from "react";
 
 const CITATION_PREFIX = "#cite-";
 
-function makeHeading(Tag) {
-  function Heading({ children }) {
+function makeHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") {
+  function Heading({ children }: { children?: ReactNode }) {
     return <Tag id={headingSlug(nodeText(children))}>{children}</Tag>;
   }
   Heading.displayName = `Markdown${Tag.toUpperCase()}`;
@@ -28,8 +30,16 @@ const HEADINGS = {
   h6: makeHeading("h6"),
 };
 
-function makeLink(onCitation) {
-  function CitationOrLink({ href, title, children }) {
+function makeLink(onCitation?: (index: number) => void) {
+  function CitationOrLink({
+    href,
+    title,
+    children,
+  }: {
+    href?: string;
+    title?: string;
+    children?: ReactNode;
+  }) {
     if (typeof href === "string" && href.startsWith(CITATION_PREFIX)) {
       const index = Number(href.slice(CITATION_PREFIX.length));
       return (
@@ -52,12 +62,24 @@ function makeLink(onCitation) {
   return CitationOrLink;
 }
 
-export default function Markdown({ content, className = "", sources, onCitation }) {
+interface MarkdownProps {
+  content: string;
+  className?: string;
+  sources?: Citation[] | null;
+  onCitation?: (index: number) => void;
+}
+
+export default function Markdown({
+  content,
+  className = "",
+  sources,
+  onCitation,
+}: MarkdownProps) {
   const indexes = useMemo(
     () => new Set((sources || []).map((item) => item.index)),
     [sources]
   );
-  const components = useMemo(
+  const components = useMemo<Components>(
     () => ({ ...HEADINGS, a: makeLink(onCitation) }),
     [onCitation]
   );

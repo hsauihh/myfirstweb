@@ -1,7 +1,7 @@
 "use client";
 
 // 分析模式下的引导条：对分析结果不满意时，一键切到 AI 聊天。
-export default function ChatPromo({ onSwitch }) {
+export default function ChatPromo({ onSwitch }: { onSwitch: () => void }) {
   return (
     <article className="panel panel-full chat-promo card">
       <div>

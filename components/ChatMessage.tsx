@@ -6,6 +6,15 @@ import { useState } from "react";
 import ChatSources from "./ChatSources";
 import Markdown from "./Markdown";
 import SourceSnippetModal from "./SourceSnippetModal";
+import type { Citation, ChatMessage as ChatMessageData } from "./types";
+
+interface ChatMessageProps {
+  role: ChatMessageData["role"];
+  content: string;
+  streaming?: boolean;
+  selfName?: string;
+  sources?: Citation[] | null;
+}
 
 export default function ChatMessage({
   role,
@@ -13,12 +22,12 @@ export default function ChatMessage({
   streaming = false,
   selfName,
   sources,
-}) {
-  const [activeSource, setActiveSource] = useState(null);
+}: ChatMessageProps) {
+  const [activeSource, setActiveSource] = useState<Citation | null>(null);
   const isUser = role === "user";
   const label = isUser ? selfName || "我" : "助手";
 
-  function openCitation(index) {
+  function openCitation(index: number) {
     const found = (sources || []).find((item) => item.index === index);
     if (found) setActiveSource(found);
   }

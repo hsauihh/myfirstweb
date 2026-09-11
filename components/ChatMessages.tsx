@@ -1,7 +1,21 @@
 // 消息列表：历史消息 + 正在流式生成的回复。
 import ChatMessage from "./ChatMessage";
+import type { ChatMessage as ChatMessageData } from "./types";
+import type { RefObject } from "react";
 
-export default function ChatMessages({ messages, streamingText, listRef, selfName }) {
+interface ChatMessagesProps {
+  messages: ChatMessageData[];
+  streamingText: string;
+  listRef: RefObject<HTMLDivElement | null>;
+  selfName?: string;
+}
+
+export default function ChatMessages({
+  messages,
+  streamingText,
+  listRef,
+  selfName,
+}: ChatMessagesProps) {
   const isEmpty = messages.length === 0 && !streamingText;
   return (
     <div className="chat-messages" ref={listRef}>

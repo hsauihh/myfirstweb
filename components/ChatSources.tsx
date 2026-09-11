@@ -5,34 +5,45 @@
 // 个人文章点击直达原文对应小节；站内公共资料没有网页，点击弹出命中片段。
 import Link from "next/link";
 import { headingSlug, lastSection } from "./slug";
+import type { Citation } from "./types";
 
-function groupSources(sources) {
-  const groups = new Map();
+interface SourceGroup {
+  key: string;
+  title: string;
+  author: string | null;
+  post_id: number | null;
+  items: Citation[];
+}
+
+function groupSources(sources: Citation[]): SourceGroup[] {
+  const groups = new Map<string, SourceGroup>();
   for (const item of sources) {
     const key = item.post_id ? `post:${item.post_id}` : `public:${item.label}`;
-    if (!groups.has(key)) {
-      groups.set(key, {
+    let group = groups.get(key);
+    if (!group) {
+      group = {
         key,
         title: item.title,
         author: item.author,
         post_id: item.post_id,
         items: [],
-      });
+      };
+      groups.set(key, group);
     }
-    groups.get(key).items.push(item);
+    group.items.push(item);
   }
   const list = [...groups.values()];
   list.forEach((group) => group.items.sort((a, b) => a.index - b.index));
-  return list.sort((a, b) => a.items[0].index - b.items[0].index);
+  return list.sort((a, b) => a.items[0]!.index - b.items[0]!.index);
 }
 
-function anchorHref(item) {
+function anchorHref(item: Citation): string {
   const base = `/blog/post?id=${item.post_id}`;
   const heading = lastSection(item.section);
   return heading ? `${base}#${headingSlug(heading)}` : base;
 }
 
-function MarkLabel({ item }) {
+function MarkLabel({ item }: { item: Citation }) {
   return (
     <>
       [{item.index}] {lastSection(item.section) || "正文"}
@@ -40,7 +51,12 @@ function MarkLabel({ item }) {
   );
 }
 
-export default function ChatSources({ sources, onOpen }) {
+interface ChatSourcesProps {
+  sources?: Citation[] | null;
+  onOpen: (source: Citation) => void;
+}
+
+export default function ChatSources({ sources, onOpen }: ChatSourcesProps) {
   if (!sources || sources.length === 0) return null;
 
   return (

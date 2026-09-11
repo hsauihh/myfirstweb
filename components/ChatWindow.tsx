@@ -1,11 +1,25 @@
 "use client";
 
 // 微信式聊天窗口：对方消息左侧、自己消息右侧，底部输入区带表情。
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Avatar from "./Avatar";
 import EmojiPicker from "./EmojiPicker";
+import type { DirectMessage, Friend } from "./types";
 
 const MAX_LENGTH = 2000;
+
+interface ChatWindowProps {
+  friend: Friend | null;
+  selfId: number;
+  selfName: string;
+  selfAvatar: string | null;
+  messages: DirectMessage[];
+  hasMore: boolean;
+  sending: boolean;
+  onSend: (text: string) => void;
+  onLoadOlder: () => void;
+  onRemove: (friendId: number) => void;
+}
 
 export default function ChatWindow({
   friend,
@@ -18,14 +32,14 @@ export default function ChatWindow({
   onSend,
   onLoadOlder,
   onRemove,
-}) {
+}: ChatWindowProps) {
   const [text, setText] = useState("");
-  const listRef = useRef(null);
-  const lastIdRef = useRef(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const lastIdRef = useRef<number | null>(null);
 
   // 只有出现新消息时才滚到底部；加载更早的消息不打断阅读位置
   useEffect(() => {
-    const lastId = messages.length ? messages[messages.length - 1].id : null;
+    const lastId = messages.length ? messages[messages.length - 1]!.id : null;
     if (lastId === lastIdRef.current) return;
     lastIdRef.current = lastId;
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -39,7 +53,7 @@ export default function ChatWindow({
     );
   }
 
-  function submit(event) {
+  function submit(event: FormEvent) {
     event.preventDefault();
     if (!text.trim() || sending) return;
     onSend(text);
@@ -48,9 +62,9 @@ export default function ChatWindow({
 
   async function remove() {
     const confirmed = window.confirm(
-      `确定删除好友 ${friend.username} 吗？聊天记录会一并删除。`
+      `确定删除好友 ${friend?.username} 吗？聊天记录会一并删除。`
     );
-    if (confirmed) await onRemove(friend.id);
+    if (confirmed && friend) await onRemove(friend.id);
   }
 
   return (
@@ -105,7 +119,7 @@ export default function ChatWindow({
           </span>
         </div>
         <textarea
-          rows="3"
+          rows={3}
           maxLength={MAX_LENGTH}
           placeholder="输入消息…（Enter 发送，Shift+Enter 换行）"
           value={text}

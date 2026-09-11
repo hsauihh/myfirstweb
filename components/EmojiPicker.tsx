@@ -11,14 +11,14 @@ const EMOJIS = [
   "🌱", "🌈", "☕", "🍜", "🎵", "📚", "💡", "⭐",
 ];
 
-export default function EmojiPicker({ onPick }) {
+export default function EmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return undefined;
-    function onDocClick(event) {
-      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
+    function onDocClick(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);

@@ -2,10 +2,13 @@
 
 // 添加好友：用户名精确搜索 / 好友码；展示自己的好友码与邀请链接。
 import { useEffect, useState } from "react";
+import { errorMessage } from "./apiError";
 import Avatar from "./Avatar";
 import { lookup, myCode } from "./friendsApi";
+import type { FriendLookup, FriendRequestResult } from "./types";
+import type { PerformResult } from "./useFriends";
 
-const RELATION_LABELS = {
+const RELATION_LABELS: Record<string, string> = {
   self: "这是你自己",
   friends: "已经是好友",
   request_sent: "已发送申请，等待对方通过",
@@ -13,10 +16,20 @@ const RELATION_LABELS = {
   none: "",
 };
 
-export default function AddFriend({ onAdd, presetCode }) {
-  const [mode, setMode] = useState("username");
+type AddMode = "username" | "code";
+
+interface AddFriendProps {
+  onAdd: (payload: {
+    username?: string;
+    code?: string;
+  }) => Promise<PerformResult<FriendRequestResult>>;
+  presetCode?: string;
+}
+
+export default function AddFriend({ onAdd, presetCode }: AddFriendProps) {
+  const [mode, setMode] = useState<AddMode>("username");
   const [value, setValue] = useState("");
-  const [found, setFound] = useState(null);
+  const [found, setFound] = useState<FriendLookup | null>(null);
   const [message, setMessage] = useState("");
   const [code, setCode] = useState("");
   const [origin, setOrigin] = useState("");
@@ -35,7 +48,7 @@ export default function AddFriend({ onAdd, presetCode }) {
     search("code", presetCode);
   }, [presetCode]);
 
-  async function search(searchMode = mode, searchValue = value) {
+  async function search(searchMode: AddMode = mode, searchValue: string = value) {
     const trimmed = searchValue.trim();
     if (!trimmed) return;
     setMessage("");
@@ -46,7 +59,7 @@ export default function AddFriend({ onAdd, presetCode }) {
       );
       setFound(data);
     } catch (err) {
-      setMessage(err.message);
+      setMessage(errorMessage(err));
     }
   }
 
@@ -79,7 +92,7 @@ export default function AddFriend({ onAdd, presetCode }) {
   return (
     <div className="add-friend-body">
       <div className="add-tabs">
-        {["username", "code"].map((item) => (
+        {(["username", "code"] as AddMode[]).map((item) => (
           <button
             key={item}
             type="button"
