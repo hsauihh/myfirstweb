@@ -2,17 +2,35 @@
 
 // 全站消息状态：好友、公告、WebSocket 与提醒开关。
 // 导航栏红点、消息中心各面板都从这里取数据，保证只有一份连接与状态。
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 import useAnnouncements from "./useAnnouncements";
 import useFriendSocket from "./useFriendSocket";
 import useFriends from "./useFriends";
 import useMessageReminder from "./useMessageReminder";
 import useVipBadge from "./useVipBadge";
+import type { Announcement, FriendSocketEvent } from "./types";
 
-const MessagesContext = createContext(null);
+export type MessagesContextValue = ReturnType<typeof useFriends> & {
+  announcements: Announcement[];
+  announcementUnread: number;
+  announcementError: string;
+  markAnnouncementRead: (announcementId: number) => Promise<void>;
+  notificationCount: number;
+  totalUnread: number;
+  reminderEnabled: boolean;
+  setReminderEnabled: (value: boolean) => void;
+  vipBadgeEnabled: boolean;
+  setVipBadgeEnabled: (value: boolean) => void;
+  addFriendOpen: boolean;
+  presetCode: string;
+  openAddFriend: (code?: string) => void;
+  closeAddFriend: () => void;
+};
 
-export function MessagesProvider({ children }) {
+const MessagesContext = createContext<MessagesContextValue | null>(null);
+
+export function MessagesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const friends = useFriends({ enabled: Boolean(user) });
   const announcements = useAnnouncements({ enabled: Boolean(user) });
@@ -22,7 +40,7 @@ export function MessagesProvider({ children }) {
   const [presetCode, setPresetCode] = useState("");
 
   const handleEvent = useCallback(
-    (event) => {
+    (event: FriendSocketEvent) => {
       friends.handleSocketEvent(event);
       announcements.applyEvent(event);
     },
@@ -51,7 +69,7 @@ export function MessagesProvider({ children }) {
     friends.requests.incoming.length + announcements.unreadCount;
   const totalUnread = friends.chatUnread + notificationCount;
 
-  const value = {
+  const value: MessagesContextValue = {
     ...friends,
     announcements: announcements.items,
     announcementUnread: announcements.unreadCount,
@@ -74,7 +92,7 @@ export function MessagesProvider({ children }) {
   );
 }
 
-export function useMessages() {
+export function useMessages(): MessagesContextValue {
   const value = useContext(MessagesContext);
   if (value === null) {
     throw new Error("useMessages 必须在 MessagesProvider 内使用");
