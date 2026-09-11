@@ -2,6 +2,8 @@
 // Nav 在此全局渲染（每个页面自动出现 sticky 顶部导航栏：logo 返回入口 + 导航 + 天气 + 主题 + CTA）。
 // 顶部 head 的内联脚本在首帧前设置 data-theme，避免主题闪烁。
 
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import "../css/fonts.css";
 import "../css/reset.css";
 import "../css/variables.css";
@@ -27,12 +29,12 @@ import AddFriendModal from "../components/AddFriendModal";
 import { AuthProvider } from "../components/AuthContext";
 import { MessagesProvider } from "../components/MessagesContext";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "zero to tech",
   description: "个人主页 + 文字实验室",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>

@@ -1,7 +1,8 @@
 // app/blog/page.jsx → 网站路径 "/blog"（公开文章列表）
+import type { Metadata } from "next";
 import BlogView from "../../components/BlogView";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "博客 · zero to tech",
   description: "零碎的想法，慢慢写，慢慢积累",
 };
