@@ -58,7 +58,7 @@ desktop.ini
 /.deploy-state
 
 # ===== 知识库原始资料 =====
-
+RAGdata/
 
 # ===== 本地工具与中间文件 =====
 .mcp.json
