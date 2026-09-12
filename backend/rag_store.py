@@ -136,6 +136,21 @@ def chunks_for_source(source: str) -> list[dict]:
     return [{"id": row["id"], "content": row["content"]} for row in rows]
 
 
+def document_sources(public_only: bool = True) -> list[tuple[str, int]]:
+    """库里已有的来源及其块数（按来源名排序），供入库/补图脚本遍历。
+
+    `public_only=True` 只给站内公共库（`source_id IS NULL`），不碰用户个人库。
+    """
+    where = "source_id IS NULL" if public_only else "1 = 1"
+    conn = db.get_conn()
+    rows = conn.execute(
+        f"SELECT source, COUNT(*) AS chunks FROM documents WHERE {where}"
+        " GROUP BY source ORDER BY source"
+    ).fetchall()
+    conn.close()
+    return [(row["source"], row["chunks"]) for row in rows]
+
+
 def all_vectors() -> tuple[list[int], list[bytes]]:
     """整库向量：按 document_id 升序返回 (ids, 字节串)。"""
     conn = db.get_conn()

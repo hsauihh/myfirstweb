@@ -139,6 +139,7 @@ graph_extractions(content_hash PRIMARY KEY, payload, created_at)       -- 抽取
 
 - 公共库：`ingest.py` 入库后逐文件抽图，默认开启，`--no-graph` 关闭；`--rebuild` 重建后清孤立实体。约 400 块的公共库首次建图需要几十次模型调用（几分钟）。
 - 个人库：`kb.add_source` / `kb.sync_source` 重建块后抽图，单篇最多 `SOURCE_CHUNK_LIMIT=24` 块（超出的块仍可被向量检索命中，只是没有图增益）。`/knowledge` 的按钮在等待期间会显示「加入中…/同步中…」。
+- 补图（库已入过、只缺图谱时）：`graph_build.py` 按库里**已有的块**抽图，不重切块、不重算向量、不动用户数据，也不需要 RAGdata 在机器上——适合历史库（`--no-graph` 入的库、图谱功能上线前入的库）和线上环境。`--dry-run` 先看范围，`--personal` 才连个人库一起补；抽取按内容哈希缓存，重复跑不再调模型。
 
 ### 12.6 本阶段的取舍
 

@@ -52,6 +52,8 @@ cd backend
 uv run python ingest.py ../RAGdata --rebuild   # 首次或重建（含实体关系抽取）
 uv run python ingest.py ../RAGdata             # 增量（按文件整篇替换）
 uv run python ingest.py ../RAGdata --no-graph  # 只做向量入库，不抽图
+uv run python graph_build.py                   # 库已入过、只缺图谱时：按已有块补图（不动向量与用户数据）
+uv run python graph_build.py --dry-run         # 先看会处理哪些来源
 ```
 
 - 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），代码显式固定缓存目录 `~/.cache/fastembed/`，优先离线加载。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。

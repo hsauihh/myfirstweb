@@ -71,6 +71,32 @@ curl -s http://8.133.217.95/api/rag/status                              # 期望
 
 > 前端产物 `out/` **不入库**（gitignore），所以永远不要「只 push 产物」：要么服务器重建，要么用 §4 的 rsync 方式。
 
+### 服务器图谱为空（`entities` / `relations` 都是 0）怎么办
+
+判断：
+
+```bash
+curl -s http://8.133.217.95/api/rag/status     # 期望 entities/relations > 0
+```
+
+如果是 `"entities":0,"relations":0`，且 `/knowledge` 的「知识图谱」页是空的，说明这个库**入过库但没抽图**（图谱是入库时抽的：`ingest.py` 默认开、`--no-graph` 关掉；图谱功能上线前入的库也没有）。
+
+补法：**只补图谱**，不需要重传 `RAGdata`，也不重算向量、不动用户数据：
+
+```bash
+cd /opt/zero-to-full/backend
+uv run python graph_build.py --dry-run    # 先看会处理哪些来源、多少块
+uv run python graph_build.py              # 站内公共库补图
+```
+
+- 抽取按 6 块/次批量调模型：几百块的公共库大约几十次调用、几分钟；抽取结果按块内容哈希缓存（`graph_extractions`），重复跑不再调模型；
+- 抽图是增强项：某个来源失败只打日志并继续，问答会自动降级为纯向量检索，不影响可用性；
+- 个人库默认不动（要一起补加 `--personal`；个人库一般在「加入知识库 / 重新同步」时已自动抽过）。
+
+> 什么时候**不需要**重建：只要求问答可用（向量检索照常工作）时可以不管；但想要「知识图谱」页、首页概览里的实体/关系数字、以及一问一跳的图谱增益，就必须补上。
+
+> 顺带一提：线上与本地如果块数不一致（例如线上 416 / 本地 513），说明服务器上的 `RAGdata/` 是另一份（该目录被 gitignore，`git pull` 带不过去）。想让两边资料一致，要先把 `RAGdata/` rsync 上去再 `ingest.py ../RAGdata --rebuild`。
+
 ---
 
 ## 3. 首次发布 / 换一台新服务器
