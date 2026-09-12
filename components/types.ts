@@ -12,7 +12,7 @@ export type RagMode = "qa" | "context";
 export type MessageRole = "user" | "assistant";
 export type QuotaScope = "anonymous" | "daily" | "rag_daily";
 export type OrderStatus = "pending" | "paid";
-export type CitationKind = "post" | "public";
+export type CitationKind = "post" | "public" | "note";
 export type CitationVia = "vector" | "graph";
 
 /** 最小用户信息（头像、好友、候选文章等处复用）。 */
@@ -79,6 +79,8 @@ export interface Citation {
   label: string;
   section: string;
   post_id: number | null;
+  /** 随心一记的笔记来源 id（笔记没有网页可跳，用弹层展示片段）。 */
+  note_id: number | null;
   snippet: string;
   score: number | null;
   via: CitationVia;
@@ -91,11 +93,6 @@ export interface ChatMessage {
   content: string;
   sources?: Citation[] | null;
   created_at?: string;
-}
-
-export interface ChatToolbarConversation {
-  id: number;
-  title: string;
 }
 
 // ---------- 博客 ----------
@@ -193,6 +190,21 @@ export interface KbCandidatesResponse {
   has_more: boolean;
 }
 
+/** 随心一记的一条笔记（一句/一段自由文本，已入库可被问答检索）。 */
+export interface KbNote {
+  id: number;
+  content: string;
+  created_at: string;
+  /** 入库片段数：正常为 1，未同步成功时为 0。 */
+  chunks: number;
+}
+
+export interface KbNotesResponse {
+  items: KbNote[];
+  total: number;
+  has_more: boolean;
+}
+
 export interface RagStatus {
   ready: boolean;
   documents: number;
@@ -200,6 +212,75 @@ export interface RagStatus {
   public: number;
   entities: number;
   relations: number;
+}
+
+// ---------- 知识图谱 ----------
+
+export interface RagGraphGroup {
+  key: string;
+  label: string;
+  kind: "chapter" | "source";
+  nodes: number;
+}
+
+export interface RagGraphNode {
+  id: string;
+  entity_id: number;
+  name: string;
+  kind: string;
+  group: string;
+  degree: number;
+}
+
+export interface RagGraphEdge {
+  source: string;
+  target: string;
+  relation: string;
+  weight: number;
+}
+
+export interface RagGraphStats {
+  chunks: number;
+  entities: number;
+  relations: number;
+  nodes: number;
+  edges: number;
+  truncated: boolean;
+}
+
+export interface RagGraph {
+  groups: RagGraphGroup[];
+  nodes: RagGraphNode[];
+  edges: RagGraphEdge[];
+  stats: RagGraphStats;
+}
+
+export interface RagGraphRelation {
+  /** out = 概念是关系的起点，in = 概念是关系的终点。 */
+  direction: "out" | "in";
+  name: string;
+  relation: string;
+  weight: number;
+}
+
+export interface RagGraphChunk {
+  kind: "post" | "public";
+  label: string;
+  title: string;
+  author: string | null;
+  post_id: number | null;
+  section: string;
+  snippet: string;
+}
+
+export interface RagGraphEntity {
+  entity_id: number;
+  name: string;
+  kind: string;
+  degree: number;
+  groups: string[];
+  relations: RagGraphRelation[];
+  chunks: RagGraphChunk[];
 }
 
 // ---------- 好友与私聊 ----------

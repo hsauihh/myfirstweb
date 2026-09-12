@@ -11,40 +11,366 @@
       "revision": "873ab2c69b05af286d19e8a1082b0fc30ac2b8f6"
     },
     "views": [
-      { "id": "request-path", "label": "请求主链路", "focus": ["browser", "nginx", "api", "sqlite"], "note": "浏览器请求经 nginx 反代进入 FastAPI，落到 SQLite。" },
-      { "id": "ai-chat", "label": "AI 对话与知识库", "focus": ["api", "llm", "rag", "sqlite"], "note": "对话走 OpenAI 兼容接口，开启知识库时先做本地向量检索 + 图谱扩展。" },
-      { "id": "graphrag", "label": "GraphRAG 图谱链路", "focus": ["api", "llm", "rag", "sqlite"], "note": "入库/同步时用模型抽实体与关系落 SQLite；提问时向量召回后再做一跳图谱扩展。" },
-      { "id": "citation", "label": "来源引用", "focus": ["browser", "api", "rag", "sqlite"], "note": "检索结果变成带小节与片段的引用，随消息落库；前端角标与来源卡片可回跳原文。" },
-      { "id": "realtime", "label": "好友实时推送", "focus": ["browser", "nginx", "api", "ws"], "note": "发消息走 HTTP，收消息走 WebSocket 推送。" }
+      {
+        "id": "request-path",
+        "label": "请求主链路",
+        "focus": [
+          "browser",
+          "nginx",
+          "api",
+          "sqlite"
+        ],
+        "note": "浏览器请求经 nginx 反代进入 FastAPI，落到 SQLite。"
+      },
+      {
+        "id": "ai-chat",
+        "label": "AI 对话与知识库",
+        "focus": [
+          "api",
+          "llm",
+          "rag",
+          "sqlite"
+        ],
+        "note": "对话走 OpenAI 兼容接口，开启知识库时先做本地向量检索 + 图谱扩展。"
+      },
+      {
+        "id": "graphrag",
+        "label": "GraphRAG 图谱链路",
+        "focus": [
+          "api",
+          "llm",
+          "rag",
+          "sqlite"
+        ],
+        "note": "入库/同步时用模型抽实体与关系落 SQLite；提问时向量召回后再做一跳图谱扩展。"
+      },
+      {
+        "id": "citation",
+        "label": "来源引用",
+        "focus": [
+          "browser",
+          "api",
+          "rag",
+          "sqlite"
+        ],
+        "note": "检索结果变成带小节与片段的引用，随消息落库；前端角标与来源卡片可回跳原文。"
+      },
+      {
+        "id": "realtime",
+        "label": "好友实时推送",
+        "focus": [
+          "browser",
+          "nginx",
+          "api",
+          "ws"
+        ],
+        "note": "发消息走 HTTP，收消息走 WebSocket 推送。"
+      }
     ]
   },
   "components": [
-    { "id": "browser", "type": "external", "label": "用户浏览器", "sublabel": "Next.js + TypeScript 静态站点", "pos": [40, 246], "size": [150, 72], "sources": [{ "path": "components/apiRequest.ts", "label": "统一请求入口与 SSE 流式客户端" }, { "path": "components/types.ts", "label": "领域与接口 DTO 类型" }] },
-    { "id": "nginx", "type": "security", "label": "nginx", "sublabel": "静态托管 + 反向代理", "pos": [270, 246], "size": [160, 72], "sources": [{ "path": "deploy/nginx.conf", "label": "站点与代理配置" }] },
-    { "id": "api", "type": "backend", "label": "FastAPI · 单 worker", "sublabel": "backend/main.py 组装路由", "pos": [630, 240], "size": [180, 84], "sources": [{ "path": "backend/main.py", "label": "应用入口" }, { "path": "backend/blog_api.py", "label": "博客与点赞接口" }, { "path": "backend/kb_api.py", "label": "个人知识库来源接口" }] },
-    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "backend/history.db", "pos": [1000, 246], "size": [170, 72], "sources": [{ "path": "backend/schema.py", "label": "连接与建表" }, { "path": "backend/schema_rag.py", "label": "知识库与图谱建表" }] },
-    { "id": "llm", "type": "external", "label": "大模型服务", "sublabel": "OpenAI 兼容 · DeepSeek", "pos": [630, 60], "size": [180, 72], "sources": [{ "path": "backend/chat.py", "label": "模型层与上下文拼装" }] },
-    { "id": "amap", "type": "external", "label": "高德开放平台", "sublabel": "IP 定位 + 实况天气", "pos": [1000, 60], "size": [170, 72], "sources": [{ "path": "backend/weather.py", "label": "天气接口" }] },
-    { "id": "ws", "type": "messagebus", "label": "WebSocket /ws/friends", "sublabel": "内存连接表", "pos": [270, 400], "size": [170, 72], "sources": [{ "path": "backend/friends_ws.py", "label": "实时推送" }] },
-    { "id": "rag", "type": "backend", "label": "RAG / GraphRAG 检索", "sublabel": "向量召回 + 图谱扩展 + 可溯源引用", "pos": [630, 400], "size": [180, 72], "sources": [{ "path": "backend/rag.py", "label": "向量召回、图谱扩展与引用" }, { "path": "backend/graph.py", "label": "实体关系抽取" }, { "path": "backend/rag_store.py", "label": "块与向量存储" }] },
-    { "id": "files", "type": "cloud", "label": "头像文件", "sublabel": "backend/avatars/", "pos": [1000, 400], "size": [170, 72], "sources": [{ "path": "backend/avatars.py", "label": "校验与落盘" }] }
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "用户浏览器",
+      "sublabel": "Next.js + TypeScript 静态站点",
+      "pos": [
+        40,
+        246
+      ],
+      "size": [
+        150,
+        72
+      ],
+      "sources": [
+        {
+          "path": "components/apiRequest.ts",
+          "label": "统一请求入口与 SSE 流式客户端"
+        },
+        {
+          "path": "components/types.ts",
+          "label": "领域与接口 DTO 类型"
+        }
+      ]
+    },
+    {
+      "id": "nginx",
+      "type": "security",
+      "label": "nginx",
+      "sublabel": "静态托管 + 反向代理",
+      "pos": [
+        270,
+        246
+      ],
+      "size": [
+        160,
+        72
+      ],
+      "sources": [
+        {
+          "path": "deploy/nginx.conf",
+          "label": "站点与代理配置"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI · 单 worker",
+      "sublabel": "backend/main.py 组装路由",
+      "pos": [
+        630,
+        240
+      ],
+      "size": [
+        180,
+        84
+      ],
+      "sources": [
+        {
+          "path": "backend/main.py",
+          "label": "应用入口"
+        },
+        {
+          "path": "backend/blog_api.py",
+          "label": "博客与点赞接口"
+        },
+        {
+          "path": "backend/kb_api.py",
+          "label": "个人知识库来源接口"
+        }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "backend/history.db",
+      "pos": [
+        1000,
+        246
+      ],
+      "size": [
+        170,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/schema.py",
+          "label": "连接与建表"
+        },
+        {
+          "path": "backend/schema_rag.py",
+          "label": "知识库与图谱建表"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "大模型服务",
+      "sublabel": "OpenAI 兼容 · DeepSeek",
+      "pos": [
+        630,
+        60
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/chat.py",
+          "label": "模型层与上下文拼装"
+        }
+      ]
+    },
+    {
+      "id": "amap",
+      "type": "external",
+      "label": "高德开放平台",
+      "sublabel": "IP 定位 + 实况天气",
+      "pos": [
+        1000,
+        60
+      ],
+      "size": [
+        170,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/weather.py",
+          "label": "天气接口"
+        }
+      ]
+    },
+    {
+      "id": "ws",
+      "type": "messagebus",
+      "label": "WebSocket /ws/friends",
+      "sublabel": "内存连接表",
+      "pos": [
+        270,
+        400
+      ],
+      "size": [
+        170,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/friends_ws.py",
+          "label": "实时推送"
+        }
+      ]
+    },
+    {
+      "id": "rag",
+      "type": "backend",
+      "label": "RAG / GraphRAG 检索",
+      "sublabel": "向量召回 + 图谱扩展 + 可溯源引用",
+      "pos": [
+        630,
+        400
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/rag.py",
+          "label": "向量召回、图谱扩展与引用"
+        },
+        {
+          "path": "backend/graph.py",
+          "label": "实体关系抽取"
+        },
+        {
+          "path": "backend/rag_store.py",
+          "label": "块与向量存储"
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "type": "cloud",
+      "label": "头像文件",
+      "sublabel": "backend/avatars/",
+      "pos": [
+        1000,
+        400
+      ],
+      "size": [
+        170,
+        72
+      ],
+      "sources": [
+        {
+          "path": "backend/avatars.py",
+          "label": "校验与落盘"
+        }
+      ]
+    }
   ],
   "boundaries": [
-    { "kind": "region", "label": "Ubuntu 单机 · systemd 常驻", "wraps": ["nginx", "api", "sqlite", "ws", "rag", "files"], "pad": 22 }
+    {
+      "kind": "region",
+      "label": "Ubuntu 单机 · systemd 常驻",
+      "wraps": [
+        "nginx",
+        "api",
+        "sqlite",
+        "ws",
+        "rag",
+        "files"
+      ],
+      "pad": 22
+    }
   ],
   "connections": [
-    { "from": "browser", "to": "nginx", "label": "HTTPS", "variant": "emphasis" },
-    { "from": "nginx", "to": "api", "label": "/api · /ws · /avatars" },
-    { "from": "api", "to": "sqlite", "label": "SQL 读写", "labelDx": 60 },
-    { "from": "api", "to": "llm", "label": "流式 SSE", "variant": "emphasis" },
-    { "from": "api", "to": "amap", "label": "IP 定位 + 实况", "variant": "dashed" },
-    { "from": "api", "to": "rag", "label": "向量召回 + 图谱扩展", "variant": "dashed", "labelDy": 24 },
-    { "from": "api", "to": "ws", "label": "message / presence", "variant": "dashed" },
-    { "from": "api", "to": "files", "label": "头像落盘", "variant": "dashed" }
+    {
+      "from": "browser",
+      "to": "nginx",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "from": "nginx",
+      "to": "api",
+      "label": "/api · /ws · /avatars"
+    },
+    {
+      "from": "api",
+      "to": "sqlite",
+      "label": "SQL 读写",
+      "labelDx": 60
+    },
+    {
+      "from": "api",
+      "to": "llm",
+      "label": "流式 SSE",
+      "variant": "emphasis"
+    },
+    {
+      "from": "api",
+      "to": "amap",
+      "label": "IP 定位 + 实况",
+      "variant": "dashed"
+    },
+    {
+      "from": "api",
+      "to": "rag",
+      "label": "向量召回 + 图谱扩展",
+      "variant": "dashed",
+      "labelDy": 24
+    },
+    {
+      "from": "api",
+      "to": "ws",
+      "label": "message / presence",
+      "variant": "dashed"
+    },
+    {
+      "from": "api",
+      "to": "files",
+      "label": "头像落盘",
+      "variant": "dashed"
+    }
   ],
   "cards": [
-    { "dot": "cyan", "title": "运行形态", "items": ["前端 Next.js 静态导出，nginx 托管 out/（gzip + 静态资源长缓存）", "后端 FastAPI + uvicorn 单 worker", "单 worker 的原因：好友连接表在进程内存", "聊天字体按使用频率拆成 WOFF2 分片（public/fonts/genshin/），只挂在聊天相关路由"] },
-    { "dot": "emerald", "title": "数据与内容", "items": ["对话走 OpenAI 兼容接口，换厂商只改 .env", "知识库 = 站内公共资料（RAGdata）+ 个人库（kb_sources 记来源）", "入库按标题感知切块（块带标题路径），向量存 document_vectors", "检索 = 向量召回 + 图谱一跳扩展；回答带来源引用（messages.sources）可跳原文", "博客三态（草稿 / 仅自己 / 公开）与账号对话同库"] },
-    { "dot": "rose", "title": "边界与入口", "items": ["登录态是 HttpOnly Cookie + auth_sessions", "匿名 3 句 / 每日 20 条 / 知识库 5 条 / VIP 不限", "管理员（ADMIN_USERNAMES）可删任意公开文章", "/knowledge 内含知识库问答与来源管理：问答/上下文模式、使用系统知识库开关，编辑懒重建、删文/改非公开自动清理"] }
+    {
+      "dot": "cyan",
+      "title": "运行形态",
+      "items": [
+        "前端 Next.js 静态导出，nginx 托管 out/（gzip + 静态资源长缓存）",
+        "后端 FastAPI + uvicorn 单 worker",
+        "单 worker 的原因：好友连接表在进程内存",
+        "聊天字体按使用频率拆成 WOFF2 分片（public/fonts/genshin/），只挂在聊天相关路由"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "数据与内容",
+      "items": [
+        "对话走 OpenAI 兼容接口，换厂商只改 .env；界面为 DeepSeek 同款版式（左栏会话 + 无气泡回答 + 圆角输入区）",
+        "知识库 = 站内公共资料（RAGdata）+ 个人库（kb_sources 记来源，kind 区分文章与随心一记的笔记）",
+        "入库按标题感知切块（块带标题路径），向量存 document_vectors；随心一记的一句话笔记单块直写、不抽图",
+        "检索 = 向量召回 + 图谱一跳扩展；回答带来源引用可跳原文（笔记弹片段）；知识图谱页实时渲染「章 → 概念 → 关系」",
+        "助手回复可复制 / 重新生成（只重跑最后一条，SSE 同发送）",
+        "博客三态（草稿 / 仅自己 / 公开）与账号对话同库"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "边界与入口",
+      "items": [
+        "登录态是 HttpOnly Cookie + auth_sessions",
+        "匿名 3 句 / 每日 20 条 / 知识库 5 条 / VIP 不限；记笔记不占额度",
+        "管理员（ADMIN_USERNAMES）可删任意公开文章",
+        "/knowledge 四个页签：知识库问答、随心一记（笔记增删）、知识图谱、来源管理；问答/上下文模式、使用系统知识库开关，编辑懒重建、删文/改非公开自动清理"
+      ]
+    }
   ]
 }

@@ -15,6 +15,8 @@ import "../css/cards.css";
 import "../css/widgets.css";
 import "../css/lab.css";
 import "../css/chat.css";
+import "../css/chat-ds.css";
+import "../css/chat-ds-messages.css";
 import "../css/markdown.css";
 import "../css/blog.css";
 import "../css/blog-manage.css";

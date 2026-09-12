@@ -8,9 +8,11 @@
   box-shadow: none;
 }
 
-/* 入场初始态：只在 AnimatedCardGrid（.animated-grid）内生效，由它用动画抬起。
+/* 入场初始态：只在 AnimatedCardGrid（.animated-grid）内、且它还没接管动画时生效。
+   AnimatedCardGrid 挂载后会把初始态固化到那一轮卡片自身并给根节点加 data-entered，
+   所以之后才挂载的 .card（如懒加载的知识图谱面板）不会被永久留在透明。
    没有挂动画的页面里的 .card 保持可见，避免整块卡片隐身。 */
-.animated-grid .card {
+.animated-grid:not([data-entered="true"]) .card {
   opacity: 0;
   transform: translateY(24px);
 }

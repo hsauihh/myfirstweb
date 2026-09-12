@@ -1,0 +1,356 @@
+/* 对话界面（DeepSeek 同款版式）：左栏会话列表 + 居中消息列 + 圆角输入区。
+   配色沿用站点 token（--brand / --surface* / 气泡变量），深浅色自动跟随。
+   好友聊天（/messages）不走这套，仍用 chat-window.css 的 .chat-bubble。 */
+
+/* 面板骨架：左栏 + 右侧对话列 */
+.chat-shell {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.chat-main {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ---------- 左栏会话列表 ---------- */
+
+.chat-sidebar {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface-soft);
+}
+
+.chat-sidebar__new {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--brand);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--brand);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.chat-sidebar__new:hover:not(:disabled) {
+  background: var(--brand);
+  color: #fff;
+}
+
+.chat-sidebar__new:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.chat-sidebar__empty {
+  padding: 8px 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.chat-sidebar__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-sidebar__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: 10px;
+}
+
+.chat-sidebar__row:hover,
+.chat-sidebar__row.is-active {
+  background: var(--surface);
+}
+
+.chat-sidebar__item {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text-soft);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-sidebar__row.is-active .chat-sidebar__item {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.chat-sidebar__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.chat-sidebar__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.chat-sidebar__time {
+  color: var(--text-soft);
+  font-size: 11px;
+}
+
+.chat-sidebar__remove {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.chat-sidebar__row:hover .chat-sidebar__remove,
+.chat-sidebar__row:focus-within .chat-sidebar__remove {
+  opacity: 1;
+}
+
+.chat-sidebar__remove:hover:not(:disabled) {
+  color: #b4453a;
+}
+
+/* 窄屏回退用的会话下拉（宽屏走左栏会话列表） */
+.chat-select {
+  max-width: 220px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.chat-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ---------- 头部 ---------- */
+
+.chat-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.chat-header__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 窄屏才出现的会话控件（宽屏用左栏） */
+.chat-header__narrow {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- 输入区 ---------- */
+
+.ds-composer {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 22px;
+  background: var(--surface-soft);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-composer:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.ds-composer__input {
+  width: 100%;
+  max-height: 200px;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15.5px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+}
+
+.ds-composer__input::placeholder {
+  color: var(--text-muted);
+}
+
+.ds-composer__input:disabled {
+  opacity: 0.6;
+}
+
+.ds-composer__bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ds-composer__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ds-composer__tail {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.ds-composer__count {
+  color: var(--text-soft);
+  font-size: 11.5px;
+}
+
+/* 圆形发送 / 停止按钮 */
+.ds-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.ds-send:hover:not(:disabled) {
+  background: var(--brand-hover);
+}
+
+.ds-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ds-send.is-stop {
+  background: var(--text-soft);
+}
+
+.ds-composer-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  /* 次级但仍是正文级信息：用 text-soft 保证暗色下也有 4.5:1 以上 */
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+/* 额度与用量提示（ChatQuotaHint / 知识库计数） */
+.chat-quota {
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.chat-quota-link {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+/* 知识库问答：输入区里的「记一笔」 */
+.rag-quicknote {
+  padding: 4px 12px;
+  border: 1px dashed var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.rag-quicknote:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+.chat-error__retry {
+  margin-left: 8px;
+}
+
+/* 窄屏：左栏折叠成头部下拉（站点断点 900px） */
+@media (max-width: 900px) {
+  .chat-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-sidebar {
+    display: none;
+  }
+
+  .chat-header__narrow {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-header__aside {
+    width: 100%;
+  }
+
+  .chat-header__narrow {
+    width: 100%;
+  }
+
+  .chat-select {
+    max-width: 100%;
+    width: 100%;
+  }
+}

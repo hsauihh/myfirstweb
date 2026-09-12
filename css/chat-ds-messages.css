@@ -1,0 +1,157 @@
+/* 对话消息列（DeepSeek 同款）：居中列、用户气泡、助手无气泡正文、操作条与空状态。
+   面板骨架、左栏会话列表与输入区在 chat-ds.css。 */
+
+/* ---------- 消息区 ---------- */
+
+.ds-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 760px;
+  max-height: min(58vh, 560px);
+  min-height: 220px;
+  margin: 0 auto;
+  padding: 4px 2px;
+  overflow-y: auto;
+}
+
+.ds-msg {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ds-msg--user {
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.ds-msg--assistant {
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* 用户气泡：沿用站点气泡 token（与好友聊天同一套颜色） */
+.ds-bubble {
+  max-width: 78%;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--bubble-radius);
+  background: var(--bubble-self-bg);
+  color: var(--bubble-self-color);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* 助手回答：没有气泡，直接排 Markdown，读起来更像正文 */
+.ds-answer {
+  color: var(--text-main);
+  font-size: 15.5px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.ds-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ds-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.ds-action:hover:not(:disabled) {
+  color: var(--brand);
+}
+
+.ds-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* 空对话：居中欢迎语 + 建议问题 */
+.ds-empty {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  padding: 56px 0;
+  text-align: center;
+}
+
+.ds-empty__title {
+  color: var(--text-main);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.ds-empty__hint {
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.ds-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.ds-suggestion {
+  padding: 8px 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.ds-suggestion:hover:not(:disabled) {
+  color: var(--brand);
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.ds-suggestion:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 生成中的光标 */
+.chat-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: chat-cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes chat-cursor-blink {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-cursor { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .ds-bubble {
+    max-width: 92%;
+  }
+}

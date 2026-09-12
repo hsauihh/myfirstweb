@@ -1,11 +1,12 @@
 "use client";
 
-// 来源管理：站内公共资料（只读）+ 我添加的文章 + 从可读文章里挑选添加。
+// 来源管理：站内公共资料（只读）+ 随心一记的笔记 + 我添加的文章 + 从可读文章里挑选添加。
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { errorMessage } from "./apiError";
 import Avatar from "./Avatar";
 import { useAuth } from "./AuthContext";
+import { NoteList } from "./KnowledgeNotes";
 import * as kbApi from "./kbApi";
 import type { KbCandidate, KbSource } from "./types";
 
@@ -17,7 +18,14 @@ const VISIBILITY_TAGS = {
   draft: { text: "草稿", className: "blog-tag--private" },
 };
 
-export default function KnowledgeSources({ onChanged }: { onChanged?: () => void }) {
+export default function KnowledgeSources({
+  onChanged,
+  notesNonce = 0,
+}: {
+  onChanged?: () => void;
+  /** 随心一记那边增删后 +1，让这里的笔记列表保持同步。 */
+  notesNonce?: number;
+}) {
   const { user } = useAuth();
   const [sources, setSources] = useState<KbSource[]>([]);
   const [publicCount, setPublicCount] = useState(0);
@@ -109,6 +117,20 @@ export default function KnowledgeSources({ onChanged }: { onChanged?: () => void
         <p className="kb-public__note">
           随站点更新，可在问答里用「使用系统知识库」开关控制是否参与。
         </p>
+      </div>
+
+      <div className="panel panel-full card">
+        <div className="kb-section__head">
+          <h2 className="kb-section__title">随心一记</h2>
+        </div>
+        <p className="kb-public__note">
+          你随手记下的一句话，也已经进知识库：这里可以直接删，新增去「随心一记」页签。
+        </p>
+        <NoteList
+          nonce={notesNonce}
+          onChanged={onChanged}
+          empty="还没有笔记。去「随心一记」记一条试试。"
+        />
       </div>
 
       <div className="panel panel-full card">

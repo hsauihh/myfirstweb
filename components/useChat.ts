@@ -9,6 +9,7 @@ import {
   deleteConversation,
   listConversations,
   listMessages,
+  regenerateChat,
   streamChat,
   type StreamChatOptions,
 } from "./chatApi";
@@ -185,6 +186,55 @@ export default function useChat({ kind = "chat", onQuota }: UseChatOptions = {})
     abortRef.current?.abort();
   }, []);
 
+  // 重新生成最后一条回复：后端会替换掉旧回复，所以结束后按服务端重拉一次消息
+  const regenerate = useCallback(
+    async (options: StreamChatOptions = {}) => {
+      const targetId = activeId;
+      if (targetId === null || sending) return;
+
+      setError("");
+      setSending(true);
+      setStreamingText("");
+      // 旧回复立即从界面拿掉，避免流式内容叠在它下面
+      setMessages((prev) =>
+        prev.length > 0 && prev[prev.length - 1]!.role === "assistant"
+          ? prev.slice(0, -1)
+          : prev
+      );
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+      let reply = "";
+
+      try {
+        const result = await regenerateChat(targetId, {
+          ...options,
+          signal: controller.signal,
+          onDelta: (delta) => {
+            reply += delta;
+            setStreamingText(reply);
+          },
+        });
+        if (result?.conversation) {
+          setConversations((prev) => upsertConversation(prev, result.conversation!));
+        }
+        await resyncMessages(targetId);
+        onQuota?.(result?.quota ?? null);
+      } catch (err) {
+        if (err instanceof ApiError && err.quota) onQuota?.(err.quota);
+        if (!(err instanceof Error) || err.name !== "AbortError") {
+          setError(errorMessage(err));
+        }
+        await resyncMessages(targetId);
+      } finally {
+        setStreamingText("");
+        setSending(false);
+        abortRef.current = null;
+      }
+    },
+    [activeId, sending, resyncMessages, onQuota]
+  );
+
   return {
     conversations,
     activeId,
@@ -196,6 +246,7 @@ export default function useChat({ kind = "chat", onQuota }: UseChatOptions = {})
     selectConversation,
     removeConversation,
     send,
+    regenerate,
     stop,
   };
 }

@@ -13,6 +13,23 @@ _DOCUMENTS_SOURCE_ID = (
     "INTEGER REFERENCES kb_sources(id) ON DELETE CASCADE"
 )
 
+# 多态来源表：文章（post）与随心一记的笔记（note）共用一张表，
+# documents.source_id 因此仍是唯一的归属列（可见性规则不用改）。
+def _kb_sources_ddl(table: str) -> str:
+    return f"""
+CREATE TABLE IF NOT EXISTS {table} (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL DEFAULT 'post',
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    note_content TEXT,
+    source_key TEXT NOT NULL UNIQUE,
+    post_updated_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(user_id, post_id)
+)
+"""
+
 
 def init_rag_schema(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
     """建知识库与图谱相关的表，并把旧库升级到当前结构。"""
@@ -56,21 +73,62 @@ def _create_rag(cur: sqlite3.Cursor) -> None:
 
 def _create_kb(conn: sqlite3.Connection, cur: sqlite3.Cursor) -> None:
     """个人知识库来源；documents 通过 source_id 关联（NULL 表示站内公共库）。"""
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS kb_sources (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-        source_key TEXT NOT NULL UNIQUE,
-        post_updated_at TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        UNIQUE(user_id, post_id)
-    )
-    """)
+    cur.execute(_kb_sources_ddl("kb_sources"))
     cur.execute("CREATE INDEX IF NOT EXISTS idx_kb_sources_user ON kb_sources(user_id)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_kb_sources_post ON kb_sources(post_id)")
     db.ensure_column(conn, "documents", "source_id", ddl=_DOCUMENTS_SOURCE_ID)
     db.ensure_column(conn, "documents", "label", ddl="TEXT")
+    if "kind" not in _columns(conn, "kb_sources"):
+        _rebuild_kb_sources(conn)
+
+
+def _rebuild_kb_sources(conn: sqlite3.Connection) -> None:
+    """把 kb_sources 升级成多态来源表（加 kind / note_content，post_id 改可空）。
+
+    SQLite 改不了列约束，只能重建。重建期间必须关外键：documents.source_id 是
+    ON DELETE CASCADE，开着外键 DROP 旧表会把所有块（含站内公共库）级联删掉。
+    逐行保留 id，documents.source_id 才不会指错行。
+    """
+    before = _orphan_chunks(conn)
+    conn.commit()  # 先结束外层隐式事务，PRAGMA 在事务里是空操作
+    conn.execute("PRAGMA foreign_keys = OFF")
+    conn.execute("PRAGMA legacy_alter_table = ON")
+    try:
+        conn.execute(_kb_sources_ddl("kb_sources_new"))
+        conn.execute(
+            "INSERT INTO kb_sources_new"
+            " (id, user_id, kind, post_id, note_content, source_key,"
+            "  post_updated_at, created_at)"
+            " SELECT id, user_id, 'post', post_id, NULL, source_key,"
+            "  post_updated_at, created_at FROM kb_sources"
+        )
+        conn.execute("DROP TABLE kb_sources")
+        conn.execute("ALTER TABLE kb_sources_new RENAME TO kb_sources")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_kb_sources_user ON kb_sources(user_id)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_kb_sources_post ON kb_sources(post_id)"
+        )
+        conn.commit()
+    finally:
+        conn.execute("PRAGMA legacy_alter_table = OFF")
+        conn.execute("PRAGMA foreign_keys = ON")
+    # 关键断言：重建后不能有块变成「指向不存在的来源行」（id 没对齐就会这样）
+    after = _orphan_chunks(conn)
+    if after > before:
+        raise RuntimeError(
+            f"kb_sources 重建后有 {after - before} 个块失去了来源行（重建前 {before} 个）"
+        )
+    print("已把 kb_sources 升级为多态来源表（kind / note_content）")
+
+
+def _orphan_chunks(conn: sqlite3.Connection) -> int:
+    """source_id 指向不存在来源行的块数（正常库恒为 0）。"""
+    return conn.execute(
+        "SELECT COUNT(*) AS total FROM documents d WHERE d.source_id IS NOT NULL"
+        " AND NOT EXISTS (SELECT 1 FROM kb_sources s WHERE s.id = d.source_id)"
+    ).fetchone()["total"]
 
 
 def _create_graph(cur: sqlite3.Cursor) -> None:

@@ -1,6 +1,7 @@
 """知识库文档存储层：块内容与向量。
 
-`source_id IS NULL` 表示站内公共库（RAGdata 入库）；非空表示某用户的个人知识库来源。
+`source_id IS NULL` 表示站内公共库（RAGdata 入库）；非空表示某用户的个人知识库来源
+（`kb_sources.kind` 区分文章与随心一记的笔记）。
 向量单独放 `document_vectors`（float32 BLOB），与块正文分离：
 既让 `documents` 保持可读的小体积，也让检索层能一次性把整库矩阵读进内存缓存。
 """
@@ -8,6 +9,12 @@ import sqlite3
 import struct
 
 import db
+
+# kb_sources.kind 的取值（与 kb.py 保持一致，避免各处写字面量）
+SOURCE_KIND_POST = "post"
+SOURCE_KIND_NOTE = "note"
+# 笔记在引用卡片里的标题长度
+NOTE_TITLE_LIMIT = 24
 
 _DOCUMENT_COLUMNS = (
     "id, source, chunk_index, content, section, source_id, label"
@@ -151,28 +158,52 @@ def vector_fingerprint() -> tuple[int, int]:
 
 
 def source_targets(source_ids: list[int]) -> dict[int, dict]:
-    """个人库来源的跳转信息：来源 id → 文章（标题 / 作者 / 文章 id）。"""
+    """个人库来源的跳转信息：来源 id → 文章（标题/作者/文章 id）或笔记（预览文本）。
+
+    笔记没有网页可跳，所以只给预览标题与 note_id，前端弹片段展示。
+    """
     if not source_ids:
         return {}
     placeholders = ", ".join("?" for _ in source_ids)
     conn = db.get_conn()
     rows = conn.execute(
-        "SELECT s.id AS source_id, p.id AS post_id, p.title AS title,"
-        " u.username AS author"
-        " FROM kb_sources s JOIN posts p ON p.id = s.post_id"
-        " JOIN users u ON u.id = p.author_id"
+        "SELECT s.id AS source_id, s.kind AS kind, s.note_content AS note_content,"
+        " p.id AS post_id, p.title AS title, u.username AS author"
+        " FROM kb_sources s"
+        " LEFT JOIN posts p ON p.id = s.post_id"
+        " LEFT JOIN users u ON u.id = p.author_id"
         f" WHERE s.id IN ({placeholders})",
         source_ids,
     ).fetchall()
     conn.close()
-    return {
-        row["source_id"]: {
+    targets: dict[int, dict] = {}
+    for row in rows:
+        if row["kind"] == SOURCE_KIND_NOTE:
+            targets[row["source_id"]] = {
+                "kind": SOURCE_KIND_NOTE,
+                "note_id": row["source_id"],
+                "post_id": None,
+                "title": note_title(row["note_content"]),
+                "author": None,
+            }
+            continue
+        targets[row["source_id"]] = {
+            "kind": SOURCE_KIND_POST,
+            "note_id": None,
             "post_id": row["post_id"],
             "title": row["title"],
             "author": row["author"],
         }
-        for row in rows
-    }
+    return targets
+
+
+def note_title(content: str | None) -> str:
+    """笔记的引用标题：取第一行并截断，让来源卡片能区分不同笔记。"""
+    text = (content or "").strip()
+    if not text:
+        return "随心一记"
+    first = text.splitlines()[0].strip()
+    return first[:NOTE_TITLE_LIMIT] + ("…" if len(first) > NOTE_TITLE_LIMIT else "")
 
 
 def _count(where: str, params: list) -> int:

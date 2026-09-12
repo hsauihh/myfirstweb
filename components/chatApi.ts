@@ -62,9 +62,39 @@ export async function streamChat(
       signal,
     }
   );
+  return consumeStream(res, { onDelta }, `发送失败：${res.status}`);
+}
+
+/**
+ * 重新生成最后一条回复：后端会删掉旧回复并按原问题重跑（额度与发送一致）。
+ * 返回的 done 数据与发送相同，只是它是替换而非追加。
+ */
+export async function regenerateChat(
+  conversationId: number | string,
+  { onDelta, signal, mode = "qa", includeSystem = true }: StreamChatOptions = {}
+): Promise<ChatStreamResult | null> {
+  const res = await fetch(
+    `${API}/api/chat/conversations/${conversationId}/regenerate`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mode, include_system: includeSystem }),
+      signal,
+    }
+  );
+  return consumeStream(res, { onDelta }, `重新生成失败：${res.status}`);
+}
+
+/** 两个流式接口共用：校验响应、解析 SSE、只在 done 时返回数据。 */
+async function consumeStream(
+  res: Response,
+  { onDelta }: Pick<StreamChatOptions, "onDelta">,
+  fallbackMessage: string
+): Promise<ChatStreamResult | null> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw apiError(body, `发送失败：${res.status}`);
+    throw apiError(body, fallbackMessage);
   }
   if (!res.body) throw new ApiError("响应没有可读的数据流");
 

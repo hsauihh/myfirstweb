@@ -1,4 +1,4 @@
-"""个人知识库接口：来源增删查、候选文章挑选、手动同步。"""
+"""个人知识库接口：来源增删查、候选文章挑选、手动同步、随心一记的笔记。"""
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
@@ -8,12 +8,19 @@ from auth import require_user
 
 CANDIDATE_LIMIT = 20
 MAX_LIMIT = 50
+NOTE_PAGE_SIZE = kb.NOTE_PAGE_SIZE
+NOTE_MAX_LIMIT = kb.NOTE_MAX_LIMIT
 
 router = APIRouter(prefix="/api/kb", tags=["kb"])
 
 
 class SourceCreate(BaseModel):
     post_id: int = Field(gt=0)
+
+
+class NoteCreate(BaseModel):
+    """笔记正文；长度上限与前端计数器一致。"""
+    content: str = Field(min_length=1, max_length=kb.NOTE_MAX_LENGTH)
 
 
 def _safe_limit(limit: int, default: int) -> int:
@@ -74,3 +81,36 @@ def sync_source_endpoint(post_id: int, request: Request) -> dict:
     if source is None:
         raise HTTPException(status_code=404, detail="来源不存在或已不可见")
     return {"source": source}
+
+
+# ---------- 随心一记 ----------
+
+
+@router.get("/notes")
+def list_notes_endpoint(
+    request: Request, limit: int = NOTE_PAGE_SIZE, offset: int = 0
+) -> dict:
+    """我的笔记列表（时间倒序，带总数供分页）。"""
+    user = require_user(request)
+    return kb.list_notes(
+        user["id"], min(max(limit, 1), NOTE_MAX_LIMIT), max(offset, 0)
+    )
+
+
+@router.post("/notes")
+def add_note_endpoint(req: NoteCreate, request: Request) -> dict:
+    """记一条笔记：入库即可被知识库问答检索到（不消耗对话额度）。"""
+    user = require_user(request)
+    content = req.content.strip()
+    if not content:
+        raise HTTPException(status_code=422, detail="笔记不能为空")
+    return {"note": kb.add_note(user["id"], content), "created": True}
+
+
+@router.delete("/notes/{note_id}")
+def remove_note_endpoint(note_id: int, request: Request) -> dict:
+    user = require_user(request)
+    deleted = kb.remove_note(user["id"], note_id)
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="笔记不存在")
+    return {"deleted": deleted}

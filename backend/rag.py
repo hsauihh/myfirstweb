@@ -30,6 +30,7 @@ MAX_CONTEXT_RELATIONS = 10
 SNIPPET_LIMIT = 600              # 引用片段截断长度
 POST_KIND = "post"               # 来源类型：个人知识库里的博客文章
 PUBLIC_KIND = "public"           # 来源类型：站内公共资料
+NOTE_KIND = "note"               # 来源类型：随心一记里的笔记
 
 _model = None
 
@@ -196,8 +197,8 @@ def _snippet(content: str) -> str:
 def _citation(index: int, item: dict, target: dict | None) -> dict:
     """一条引用：index 与上下文里的 [n] 编号一致。
 
-    个人来源带 post_id / 标题 / 作者（前端据此跳原文）；公共资料（RAGdata 未随站点
-    发布）没有网页可跳，只给文件名与小节，正文片段由前端弹层展示。
+    个人来源带 post_id / 标题 / 作者（前端据此跳原文）；随心一记的笔记带 note_id
+    （前端弹命中片段）；公共资料（RAGdata 未随站点发布）没有网页可跳，只给文件名与小节。
     """
     personal = item["source_id"] is not None
     citation = {
@@ -208,6 +209,7 @@ def _citation(index: int, item: dict, target: dict | None) -> dict:
         "label": item["label"],
         "section": item["section"],
         "post_id": None,
+        "note_id": None,
         "snippet": _snippet(item["content"]),
         "score": item["score"],
         "via": item["via"],
@@ -216,6 +218,9 @@ def _citation(index: int, item: dict, target: dict | None) -> dict:
         citation["title"] = target["title"]
         citation["author"] = target["author"]
         citation["post_id"] = target["post_id"]
+        citation["note_id"] = target["note_id"]
+        if target["note_id"] is not None:
+            citation["kind"] = NOTE_KIND
     return citation
 
 

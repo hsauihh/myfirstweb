@@ -190,6 +190,18 @@ def add_message(
     }
 
 
+def delete_message(conversation_id: int, message_id: int) -> int:
+    """删除会话里的某条消息（重新生成时丢掉旧回复用），返回删除条数。"""
+    conn = db.get_conn()
+    cur = conn.execute(
+        "DELETE FROM messages WHERE id = ? AND conversation_id = ?",
+        [message_id, conversation_id],
+    )
+    conn.commit()
+    conn.close()
+    return cur.rowcount
+
+
 def get_messages(conversation_id: int, limit: int | None = None) -> list[dict]:
     """按时间正序返回消息；limit 给定时只取最近 limit 条（仍按正序）。"""
     conn = db.get_conn()

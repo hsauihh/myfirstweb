@@ -31,6 +31,7 @@ from storage import (
     add_message,
     create_conversation,
     delete_conversation,
+    delete_message,
     get_conversation,
     get_messages,
     list_conversations,
@@ -52,6 +53,12 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 class MessageRequest(BaseModel):
     """知识库相关字段只在 kind=rag 的会话里生效。"""
     content: str = Field(min_length=1, max_length=MAX_CONTENT_LENGTH)
+    mode: MessageMode = "qa"
+    include_system: bool = True
+
+
+class RegenerateRequest(BaseModel):
+    """重新生成没有新正文：模式与开关沿用发送时的语义。"""
     mode: MessageMode = "qa"
     include_system: bool = True
 
@@ -118,9 +125,10 @@ def _check_quota(
             raise HTTPException(status_code=403, detail="登录后可使用知识库")
         if not rag.is_ready(owner.user_id, include_public=include_system):
             detail = (
-                "知识库为空，请先在「知识库 → 来源管理」添加文章或运行 ingest.py"
+                "知识库为空：先在「随心一记」记一条，或在「来源管理」添加文章，"
+                "也可运行 ingest.py 入库站内资料"
                 if include_system
-                else "个人知识库为空，请先在「来源管理」添加文章"
+                else "个人知识库为空：先在「随心一记」记一条，或在「来源管理」添加文章"
             )
             raise HTTPException(status_code=409, detail=detail)
         if not quotas.consume_rag(owner, user):
@@ -220,6 +228,76 @@ def send_message_endpoint(
     if conversation["title"] == DEFAULT_TITLE:
         rename_conversation(conversation_id, _make_title(content))
 
+    messages = build_messages(config.system_prompt, history, content, context=context)
+    stream = StreamingResponse(
+        _stream(config, conversation_id, messages, quota=quota, sources=sources),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+    if new_session_id:
+        set_session_cookie(stream, new_session_id)
+    return stream
+
+
+def _last_turn(conversation_id: int) -> tuple[str, int | None] | None:
+    """从会话尾部解析出要重新生成的问题与待替换的助手消息 id。
+
+    - 尾部是助手消息：它就是要被替换的那条，前一条必须是用户消息；
+    - 尾部是用户消息（上次生成失败）：直接用它重新生成。
+    返回 None 表示没有可重新生成的内容。
+    """
+    tail = get_messages(conversation_id, 2)
+    if not tail:
+        return None
+    last = tail[-1]
+    if last["role"] == "assistant":
+        if len(tail) < 2 or tail[-2]["role"] != "user":
+            return None
+        return tail[-2]["content"], last["id"]
+    if last["role"] == "user":
+        return last["content"], None
+    return None
+
+
+def _regenerate_history(conversation_id: int) -> list[dict]:
+    """重新生成时的历史：去掉尾部那条就是本次问题的用户消息（它单独作 content 传入）。"""
+    history = get_messages(conversation_id, HISTORY_FETCH_LIMIT)
+    if history and history[-1]["role"] == "user":
+        return history[:-1]
+    return history
+
+
+@router.post("/conversations/{conversation_id}/regenerate")
+def regenerate_endpoint(
+    conversation_id: int, req: RegenerateRequest, request: Request
+) -> Response:
+    """重新生成最后一条回复：删掉旧回复并按原问题重跑（额度与发送一致）。
+
+    额度不足时直接返回 403，不动已有回复；生成失败时用户消息仍在，前端可再点重试。
+    """
+    config = _chat_config()
+    if not config.api_key:
+        raise HTTPException(status_code=503, detail="未配置 CHAT_API_KEY")
+
+    owner, user, new_session_id = resolve_owner_for_stream(request)
+    conversation = _require_conversation(owner, conversation_id)
+    turn = _last_turn(conversation_id)
+    if turn is None:
+        raise HTTPException(status_code=422, detail="没有可重新生成的问题")
+    content, replaced_id = turn
+
+    use_rag = conversation["kind"] == RAG_KIND
+    quota, error = _check_quota(owner, user, use_rag, req.include_system)
+    if error is not None:
+        return error
+    if replaced_id is not None:
+        delete_message(conversation_id, replaced_id)
+
+    context = ""
+    sources: list[dict] = []
+    if use_rag:
+        context, sources = _rag_context(owner, content, req.include_system)
+    history = _regenerate_history(conversation_id) if req.mode == "context" else []
     messages = build_messages(config.system_prompt, history, content, context=context)
     stream = StreamingResponse(
         _stream(config, conversation_id, messages, quota=quota, sources=sources),

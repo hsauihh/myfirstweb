@@ -14,6 +14,7 @@
     "prebuild": "npm run sync:arch"
   },
   "dependencies": {
+    "@xyflow/react": "^12.11.6",
     "animejs": "^4.4.1",
     "next": "^15.0.0",
     "react": "^19.2.6",

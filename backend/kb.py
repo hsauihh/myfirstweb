@@ -1,10 +1,13 @@
-"""个人知识库：把博客文章选入知识库，并保持与文章同步。
+"""个人知识库：把博客文章或随心一记的笔记选入知识库，并保持与文章同步。
 
-- 来源元数据在 `kb_sources`；块内容与向量复用 `documents` 表。
+- 来源元数据在 `kb_sources`（多态：`kind=post` 文章 / `kind=note` 笔记）；
+  块内容与向量复用 `documents` 表。
 - 个人库块写 `source`（内部键）、`source_id`（指向来源行）、`label`（展示名）。
 - 站内公共库（RAGdata 入库）没有来源行，检索时与本用户的个人库合并。
 - 文章被编辑后由 `sync_user` 懒重建；删除或改非公开后移除来源，外键级联删块。
+- 笔记（`add_note`）是用户直接写的一句话：单块入库、不切块、不抽图，增删即时生效。
 """
+import secrets
 import sqlite3
 
 import db
@@ -15,6 +18,17 @@ import rag_store
 
 PUBLIC = "public"
 DRAFT = "draft"
+
+# kb_sources.kind 的取值：文章与随心一记的笔记共用一张来源表
+# （字面值由 rag_store 定义，避免多处各写一份）
+POST_KIND = rag_store.SOURCE_KIND_POST
+NOTE_KIND = rag_store.SOURCE_KIND_NOTE
+# 笔记在提示词与引用里的展示名（section 也用它，引用角标才能读成「[1] 随心一记」）
+NOTE_LABEL = "随心一记"
+NOTE_SECTION = "随心一记"
+NOTE_MAX_LENGTH = 500
+NOTE_PAGE_SIZE = 30
+NOTE_MAX_LIMIT = 100
 
 _SOURCE_SELECT = """
 SELECT s.id AS source_id, s.post_id, s.post_updated_at, s.created_at,
@@ -193,8 +207,10 @@ def get_source(user_id: int, post_id: int) -> dict | None:
 def list_sources(user_id: int) -> list[dict]:
     conn = db.get_conn()
     rows = conn.execute(
-        _SOURCE_SELECT + " WHERE s.user_id = ? ORDER BY s.created_at DESC, s.id DESC",
-        [user_id],
+        _SOURCE_SELECT
+        + " WHERE s.user_id = ? AND s.kind = ?"
+        " ORDER BY s.created_at DESC, s.id DESC",
+        [user_id, POST_KIND],
     ).fetchall()
     conn.close()
     return [_source_payload(row) for row in rows]
@@ -236,6 +252,102 @@ def remove_post_everywhere(post_id: int, except_user_id: int | None = None) -> i
     return cur.rowcount
 
 
+# ---------- 随心一记（笔记） ----------
+
+_NOTE_SELECT = """
+SELECT s.id AS note_id, s.note_content, s.created_at,
+       (SELECT COUNT(*) FROM documents d WHERE d.source_id = s.id) AS chunks
+FROM kb_sources s
+"""
+
+
+def _note_key(user_id: int) -> str:
+    """笔记的内部来源键（与文章的 kb:user:post 同构，便于排查）。"""
+    return f"note:{user_id}:{secrets.token_hex(4)}"
+
+
+def _note_payload(row: sqlite3.Row) -> dict:
+    return {
+        "id": row["note_id"],
+        "content": row["note_content"] or "",
+        "created_at": row["created_at"],
+        "chunks": row["chunks"],
+    }
+
+
+def _delete_note_row(user_id: int, note_id: int) -> int:
+    conn = db.get_conn()
+    cur = conn.execute(
+        "DELETE FROM kb_sources WHERE id = ? AND user_id = ? AND kind = ?",
+        [note_id, user_id, NOTE_KIND],
+    )
+    conn.commit()
+    conn.close()
+    return cur.rowcount
+
+
+def add_note(user_id: int, content: str) -> dict:
+    """记一条笔记：一行来源 + 一个块（含向量）。
+
+    不走 `ingest.chunk_markdown`（它按标题切块并丢弃不足 MIN_CHUNK 的内容，一句话会被丢掉），
+    也不抽图：笔记要即时可查，不该为每条笔记调一次模型。向量化失败就不留这条。
+    """
+    text = content.strip()
+    now = db.now_iso()
+    key = _note_key(user_id)
+    conn = db.get_conn()
+    try:
+        cur = conn.execute(
+            "INSERT INTO kb_sources"
+            " (user_id, kind, post_id, note_content, source_key,"
+            "  post_updated_at, created_at)"
+            " VALUES (?, ?, NULL, ?, ?, ?, ?)",
+            [user_id, NOTE_KIND, text, key, now, now],
+        )
+        note_id = cur.lastrowid
+        conn.commit()
+    finally:
+        conn.close()
+    try:
+        rag_store.replace_source(
+            key,
+            [{"content": text, "section": NOTE_SECTION}],
+            rag.embed_texts([text]),
+            label=NOTE_LABEL,
+            source_id=note_id,
+        )
+    except Exception:
+        _delete_note_row(user_id, note_id)
+        raise
+    return {"id": note_id, "content": text, "created_at": now, "chunks": 1}
+
+
+def list_notes(user_id: int, limit: int = NOTE_PAGE_SIZE, offset: int = 0) -> dict:
+    """我的笔记（时间倒序）+ 总数，供分页展示与删除。"""
+    conn = db.get_conn()
+    rows = conn.execute(
+        _NOTE_SELECT
+        + " WHERE s.user_id = ? AND s.kind = ?"
+        " ORDER BY s.created_at DESC, s.id DESC LIMIT ? OFFSET ?",
+        [user_id, NOTE_KIND, limit + 1, offset],
+    ).fetchall()
+    total = conn.execute(
+        "SELECT COUNT(*) AS total FROM kb_sources WHERE user_id = ? AND kind = ?",
+        [user_id, NOTE_KIND],
+    ).fetchone()["total"]
+    conn.close()
+    return {
+        "items": [_note_payload(row) for row in rows[:limit]],
+        "total": total,
+        "has_more": len(rows) > limit,
+    }
+
+
+def remove_note(user_id: int, note_id: int) -> int:
+    """删笔记（外键级联删块与向量），返回删除条数。"""
+    return _delete_note_row(user_id, note_id)
+
+
 def _rebuild(user_id: int, row: sqlite3.Row) -> bool:
     """按文章当前内容重建来源；失败时保留旧块（下次再试）。"""
     conn = db.get_conn()
@@ -256,9 +368,11 @@ def _rebuild(user_id: int, row: sqlite3.Row) -> bool:
 
 
 def sync_user(user_id: int) -> int:
-    """懒同步：清理已不可见的来源，重建内容已变化的来源；返回重建条数。"""
+    """懒同步（只针对文章）：清理已不可见的来源，重建内容已变化的来源；返回重建条数。"""
     conn = db.get_conn()
-    rows = conn.execute(_SOURCE_SELECT + " WHERE s.user_id = ?", [user_id]).fetchall()
+    rows = conn.execute(
+        _SOURCE_SELECT + " WHERE s.user_id = ? AND s.kind = ?", [user_id, POST_KIND]
+    ).fetchall()
     conn.close()
     rebuilt = 0
     for row in rows:

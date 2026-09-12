@@ -13,6 +13,8 @@ import re
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 import graph
 import graph_store
 import rag
@@ -153,6 +155,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    load_dotenv()
     root = Path(args.directory)
     if not root.is_dir():
         print(f"目录不存在：{root}", file=sys.stderr)

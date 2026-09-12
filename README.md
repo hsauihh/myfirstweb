@@ -1,12 +1,12 @@
 # zero-to-full · 零到全栈
 
-个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」两个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite，并提供一排常用提示词快捷按钮；分析模式做情感分析与拼音标注。「知识库」页（`/knowledge`）分「知识库问答 / 来源管理」两个 Tab：登录用户把自己或他人的公开文章选进个人库，问答基于「个人知识库 + 站内公共资料（`RAGdata/`）」检索，可切换「问答（单轮，默认）/ 上下文（多轮）」模式与「使用系统知识库」开关（知识库独立每天 5 条，VIP 不限量）。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。导航栏主导航平铺六项（首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
+个人主页 + 文字实验室 + 消息中心。文字实验室有「分析」「AI 对话」两个模式，默认进入分析（分析页有引导条可一键切到 AI 对话）：AI 对话接 OpenAI 兼容接口、SSE 流式回复，会话与消息存 SQLite，并提供一排常用提示词快捷按钮；分析模式做情感分析与拼音标注。「知识库」页（`/knowledge`）分「知识库问答 / 随心一记 / 知识图谱 / 来源管理」四个 Tab：登录用户把自己或他人的公开文章选进个人库，也能用「随心一记」记一句话（如「钥匙放在玄关柜第二层」）直接进个人库，问答基于「个人知识库（含笔记）+ 站内公共资料（`RAGdata/`）」检索，可切换「问答（单轮，默认）/ 上下文（多轮）」模式与「使用系统知识库」开关（知识库独立每天 5 条，VIP 不限量）。问答界面是 DeepSeek 网页端同款版式：左侧会话列表、居中消息列（用户消息右对齐气泡、助手消息直接排 Markdown 无气泡）、圆角输入框 + 圆形发送/停止按钮，助手回复下方可复制或重新生成；配色仍用站点自己的米白 + 青绿与深浅色两套。账号用用户名 + 密码注册登录，匿名访客可免费聊 3 句，登录用户每天免费 20 条、登录后可上传头像；999 元/月开通「至尊无敌黄金VIP」不限量。导航栏主导航平铺六项（首页 / 文字实验室 / 博客 / 知识库 / 作品 / 关于），右侧是天气、主题切换与账号入口：未登录显示「登录」，登录后点头像弹出账号菜单（消息 / 个人资料 / 添加好友 / 退出），有未读时头像右上角显示红点（可在设置里关闭）。「消息」进入 `/messages` 消息中心：左侧导航（我的消息 / 系统通知 / 设置），中间会话列表，右侧微信式聊天窗口（REST 发送 + WebSocket 推送），带未读与在线状态。系统通知里可看公告（由独立脚本发布）与好友申请。「博客」页所有登录用户都能写文章：草稿只有自己可见，发布后所有人（含游客）可读，正文用 Markdown 渲染，登录用户可点赞。主页内容由后端接口实时提供。前端 Next.js 与后端 FastAPI 独立运行，通过 HTTP / WebSocket 联调。
 
 ## 技术栈
 
 | 端 | 技术 |
 |----|------|
-| 前端 | Next.js 15（App Router）、React 19、**TypeScript（strict）**、animejs v4、react-markdown、WebSocket、手写 CSS |
+| 前端 | Next.js 15（App Router）、React 19、**TypeScript（strict）**、animejs v4、react-markdown、@xyflow/react v12（知识图谱）、WebSocket、手写 CSS |
 | 后端 | Python ≥3.13、FastAPI、WebSocket、openai SDK、bcrypt、SnowNLP、pypinyin、SQLite、uv |
 
 前端 `output: 'export'` 静态导出；animejs 用 v4 具名导入；中文字体霞鹜文楷 LXGW WenKai（简体，`css/fonts.css`）。
@@ -57,6 +57,8 @@ uv run python ingest.py ../RAGdata --no-graph  # 只做向量入库，不抽图
 - 向量化用本地 `fastembed` + `BAAI/bge-small-zh-v1.5`（约 90MB），代码显式固定缓存目录 `~/.cache/fastembed/`，优先离线加载。下载不通时可用 `HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1`，或手动下载 `fast-bge-small-zh-v1.5.tar.gz` 解压到该目录。
 - 入库同时会用 `CHAT_*` 配置的模型抽取实体与关系（可用 `GRAPH_MODEL` 单独指定模型），结果按块内容哈希缓存，重跑不会重复调模型；约 400 块的公共库首次建图需要几十次模型调用、几分钟。
 - 入库后 `GET /api/rag/status` 返回 `ready:true` 与图谱规模；在「知识库问答」里提问即可，问答范围还会叠加你在 `/knowledge` 选入的个人文章（`--rebuild` 只重建站内公共库，不动个人库）。
+- 「知识库 → 随心一记」页签记一句话就进个人库：笔记是 `kb_sources.kind='note'` 的独立来源，单块入库、**不切块也不抽图**（保存即时、不花模型调用），因此不出现在知识图谱页（没有实体提及）；问答命中时来源卡片显示笔记首行与片段（笔记没有网页可跳）。增删都在这个页签，「来源管理」里也能看到并删除；写笔记不消耗对话额度。
+- 「知识库 → 知识图谱」页签把结构实时画出来：**章 / 来源作为分组骨架，节点是各组里提及最多的概念，边是图谱里真实抽取到的关系**；点概念可看它的关系、命中片段，并可一键切回问答预填问题。图随库变，不需要重新生成。
 
 ## 聊天字体分片
 
@@ -75,12 +77,13 @@ zero-to-full/
 ├── app/          # 路由页（.tsx）：/、/text-lab、/login、/messages、/about、/blog、/knowledge、/works
 ├── components/   # 页面与交互组件（.tsx）与数据钩子/接口层（.ts，共约 60 个文件：
 │                 #  types.ts 领域与 DTO 类型、apiRequest.ts 统一请求入口、apiError.ts、
-│                 #  各 *Api.ts、use*.ts、及 Nav / Chat* / Knowledge* / Blog* / Messages* 等组件）
+│                 #  各 *Api.ts、use*.ts、及 Nav / Chat*（含 Sidebar/Header/Suggestions）/ Knowledge* / Blog* / Messages* 等组件）
 ├── data/         # 静态文案与打底数据（site.ts、quotes.ts）
 ├── docs/         # 系统架构图：system-architecture.html（自包含交互图）
 │                 #  + system-architecture.json（生成用规格）与 visual-check 证据
 ├── css/          # 手写样式（chat.css AI 对话与 VIP，auth.css 登录页，knowledge.css 我的知识库，
 │                 #  messages.css / messages-panels.css 消息中心，chat-window.css 微信式聊天窗口，
+│                 #  chat-ds.css / chat-ds-messages.css 对话版式（左栏会话列表、消息列、圆角输入区），
 │                 #  genshin-font.css 聊天字体分片声明（由 scripts/subset_genshin.py 生成））
 ├── assets/       # 源资源（不入发布目录）：fonts/genshin.ttf 聊天字体源文件
 ├── scripts/      # 构建/生成脚本：sync-architecture.mjs、subset_genshin.py
@@ -89,6 +92,7 @@ zero-to-full/
 │                 #  quotas.py（对话额度）、payments.py / payments_api.py（模拟支付与 VIP）、
 │                 #  rag.py / rag_store.py / rag_api.py / ingest.py（本地知识库，向量存 document_vectors）、
 │                 #  graph.py / graph_store.py（GraphRAG 实体关系抽取与图谱存储）、
+│                 #  rag_graph.py / rag_graph_detail.py（知识图谱页：结构图与概念详情查询）、
 │                 #  kb.py / kb_api.py（个人知识库：文章选入与同步）、
 │                 #  announcements_api.py（公告接口）、announce.py（公告发布脚本）、
 │                 #  friends_api.py（好友接口）、friends_ws.py（好友 WebSocket）、auth.py（密码与登录态）、
@@ -119,6 +123,7 @@ zero-to-full/
 | GET  | `/api/chat/conversations/{id}/messages` | — | 会话消息（正序）；助手消息带 `sources`（来源引用，无引用时为 `null`） |
 | DELETE | `/api/chat/conversations/{id}` | — | 删除会话及其消息，返回 `{ "deleted": N }` |
 | POST | `/api/chat/conversations/{id}/messages` | `{ content, mode?, include_system? }` | SSE 流式回复；事件 `delta` / `done` / `error`。`kind=rag` 时 `mode`（qa 单轮/context 多轮，默认 qa）与 `include_system`（是否检索站内公共库，默认 true）生效；`done.message.sources` 带回来源引用；生成期间输入框仍可继续输入 |
+| POST | `/api/chat/conversations/{id}/regenerate` | `{ mode?, include_system? }` | 重新生成**最后一条**回复（删掉旧回复并按原问题重跑，SSE 事件同发送）；额度与发送一致，额度不足 403 且不动旧回复；没有可重生成的问题 422 |
 | GET  | `/api/friends` | — | 好友列表（含 `online` / `unread` / `last_message_at`） |
 | GET  | `/api/friends/requests` | — | `{ incoming, outgoing }` 好友申请 |
 | GET  | `/api/friends/me/code` | — | 我的好友码 `{ code }` |
@@ -140,6 +145,8 @@ zero-to-full/
 | POST | `/api/pay/orders` | `{ product }` | 创建订单（vip_month，1 分），返回 `{ order }` |
 | POST | `/api/pay/orders/{id}/confirm` | — | 模拟支付成功并开通/续费 VIP，返回 `{ order, user }` |
 | GET  | `/api/rag/status` | — | 知识库状态 `{ ready, documents, personal, public, entities, relations }`（按登录用户统计，图谱计数为全局） |
+| GET  | `/api/rag/graph` | — | 知识库结构图 `{ groups, nodes, edges, stats }`（章 / 来源骨架 + 核心概念 + 关系；未登录只看站内公共库） |
+| GET  | `/api/rag/graph/entities/{id}` | — | 概念详情 `{ name, kind, degree, groups, relations, chunks }`；实体对该用户不可见时 404 |
 | GET  | `/api/blog/posts` | `?limit=10&offset=0&sort=published` | 公开文章列表 `{ items, has_more }`（无需登录；`sort` 可选 `likes`） |
 | GET  | `/api/blog/posts/{id}` | — | 文章详情；草稿 / 仅自己可见仅作者可见，其余 404 |
 | GET  | `/api/blog/me/posts` | — | 我的全部文章（含草稿，需登录） |
@@ -152,14 +159,21 @@ zero-to-full/
 | POST | `/api/kb/sources` | `{ post_id }` | 加入我的知识库，返回 `{ source, created }`；不可见 404、过短 422 |
 | DELETE | `/api/kb/sources/{post_id}` | — | 从我的知识库移除来源 |
 | POST | `/api/kb/sources/{post_id}/sync` | — | 强制重建单个来源 |
+| GET  | `/api/kb/notes` | `?limit=30&offset=0` | 我的随心一记笔记（时间倒序）`{ items, total, has_more }`（需登录） |
+| POST | `/api/kb/notes` | `{ content }` | 记一条笔记（1–500 字），入库即可被问答检索，返回 `{ note, created }`；空/超长 422 |
+| DELETE | `/api/kb/notes/{id}` | — | 删除我的笔记（级联删块与向量），返回 `{ deleted }`；非本人 404 |
 
 - 情感判定：score ≥ 0.6 偏积极，≤ 0.4 偏消极，其余中性。
 - 数据归属：已登录按账号（`user_id`），匿名按 `session_id` Cookie（有效期 30 天）；接口只读写当前归属的数据，越权访问返回 404。登录/注册时把该浏览器的匿名对话与历史绑到账号。
 - 匿名访客累计可发 3 条 AI 消息（`anonymous_usage` 计数，删会话不会重置）；登录用户每天免费 20 条（`chat_daily_usage` 按 Asia/Shanghai 自然日计数，删会话不重置），用尽返回 403 `code=chat_quota_exceeded`；VIP 不限量。分析模式匿名可用且不占额度。
 - VIP：999 元/月，到期后回到每日 20 条；续费从当前到期时间顺延 30 天。支付目前是**模拟**（点微信/支付宝即视为成功），订单表与确认接口按真实网关形状预留。
-- 知识库（RAG / GraphRAG）：在「知识库 → 知识库问答」提问，检索范围 = 个人知识库（用户在「来源管理」选入的博客文章）+ 站内公共资料（项目根 `RAGdata/`，可用「使用系统知识库」开关关掉），用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化，向量单独存 `document_vectors`（float32 BLOB，检索时整库矩阵常驻内存、库变了才重建）。检索分两步：先向量召回 top-6 作为种子，再从「种子块提到的实体」出发做**一跳图谱扩展**，把向量分不高但共享实体的块一并拿进上下文（最多 8 块，另附命中的实体关系）。图谱数据缺失时自动降级为纯向量检索。模式分「问答」（单轮，不带历史，默认）与「上下文」（多轮，带历史）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建向量与图谱，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库为空时请求返回 409。
+- 知识库（RAG / GraphRAG）：在「知识库 → 知识库问答」提问，检索范围 = 个人知识库（用户在「来源管理」选入的博客文章 + 随心一记的笔记）+ 站内公共资料（项目根 `RAGdata/`，可用「使用系统知识库」开关关掉），用本地 `fastembed`（`BAAI/bge-small-zh-v1.5`）向量化，向量单独存 `document_vectors`（float32 BLOB，检索时整库矩阵常驻内存、库变了才重建）。检索分两步：先向量召回 top-6 作为种子，再从「种子块提到的实体」出发做**一跳图谱扩展**，把向量分不高但共享实体的块一并拿进上下文（最多 8 块，另附命中的实体关系）。图谱数据缺失时自动降级为纯向量检索。模式分「问答」（单轮，不带历史，默认）与「上下文」（多轮，带历史）。个人库来源可增删、可手动重新同步；文章被编辑后下次问答前自动重建向量与图谱，被删除或被作者改为非公开时自动移除（作者自己的那份保留）。RAG 独立每天 5 条，VIP 不限量，不占普通 20 条；知识库为空时请求返回 409。
+- 随心一记：笔记与文章共用一张来源表（`kb_sources.kind` 区分 `post` / `note`），所以可见性、配额、引用规则完全同一套；笔记写一个块（不走 ATX 切块，也就不会被「不足 30 字丢弃」的规则吃掉），向量化失败会回滚不留脏行。**不抽图**：没有实体提及，知识图谱页自然不会出现它；被问答检索到时，引用 `kind="note"`、`note_id` 是来源 id、标题取笔记首行，卡片点开只弹命中片段（笔记没有原文网页）。上限 500 字，可随时增删，不消耗对话额度。
+- 重新生成：助手回复下方提供「复制」与「重新生成」，**重新生成只作用于最后一条回复**（避免回滚后续会话），后端删掉旧回复并按原问题重跑（含重新检索），消耗一次对话额度；额度不足返回 403 且不动旧回复；上次生成失败（没有助手消息）时同一个按钮充当重试。
+- 对话界面版式：`/knowledge` 知识库问答与 `/text-lab` 的 AI 对话共用同一套组件，都是 DeepSeek 网页端同款版式（左栏会话列表 + 居中消息列 + 圆角输入区），配色沿用站点 token；好友聊天（`/messages`）仍用 `chat-window.css` 的胶囊气泡，不受影响。
 - 切块与来源引用：入库时按 ATX 标题切块（小节之间不合块，块带「标题路径」存 `documents.section`），所以回答能精确到「哪篇文章的哪一节」。模型被要求用 `[n]` 标注依据，`n` 就是参考资料序号；这组引用（文章 / 小节 / 命中片段 / 是否可跳）随助手消息存入 `messages.sources`，前端把 `[n]` 渲染成可点击角标，气泡下方按文章聚合出来源卡片；点个人来源直达 `/blog/post?id=N#小节` 并高亮该标题，站内公共资料（`RAGdata/` 不随站点发布）则弹出命中片段。
 - 图谱构建：实体/关系由 `backend/graph.py` 在**入库时**调用模型抽取（`ingest.py` 默认开、`--no-graph` 可关；个人库在加入/重新同步时抽，单篇最多 24 块），落 `graph_entities` / `graph_mentions` / `graph_relations`，抽取结果按块内容哈希缓存在 `graph_extractions`。用户可见性靠 `chunk_id` 连回 `documents` 判断，与向量检索共用同一套归属规则。抽图是增强项：失败只打日志，不影响入库、来源同步状态与问答。
+- 知识图谱页：「知识库 → 知识图谱」页签请求 `GET /api/rag/graph`，用 `@xyflow/react` 的分组节点画成结构图（章 / 来源为框、概念为节点、关系为连线），点概念再取 `GET /api/rag/graph/entities/{id}` 看类型、关系与命中片段。图是**实时查库**出来的（不是静态导出），公共资料与个人库变了刷新即见效；选取与截断规则见 `RAG.md` 第 14 节。
 - 账号规则：用户名 3-20 位、字母开头、仅字母数字下划线；密码恰好 8 位字符、不含空格；密码用 bcrypt 哈希存储，登录态为 HttpOnly `auth_token` Cookie（30 天）。
 - 对话上下文 = 系统提示词 + 最近 20 条消息；会话标题取首条用户消息前 20 字。
 - 单条消息限 4000 字；`CHAT_API_KEY` 未配置时发消息返回 503。
@@ -181,7 +195,7 @@ zero-to-full/
 - 天气依赖高德开放平台：key 写在 `backend/.env`（已 gitignore），后端启动时自动加载；本地/无法定位的 IP 会回退到服务器出口定位；未配置或定位失败时接口返回 4xx/503，前端静默隐藏天气。
 - AI 对话读取 `backend/.env` 的 `CHAT_BASE_URL` / `CHAT_API_KEY` / `CHAT_MODEL` / `CHAT_SYSTEM_PROMPT`，默认 DeepSeek（`https://api.deepseek.com/v1` + `deepseek-chat`）；换厂商只改这组变量。图谱抽取复用 `CHAT_BASE_URL` / `CHAT_API_KEY`，可用 `GRAPH_MODEL` 单独指定模型（不配则用 `CHAT_MODEL`）。
 - 公告发布读取 `backend/.env` 的 `ANNOUNCE_KEY`；该接口只校验密钥、不依赖登录态，供 `announce.py` 调用。
-- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 向量检索 + 注入）、「个人知识库」（博客文章选入 + 来源管理 + 懒同步 + 单轮/多轮模式 + 系统库开关）与阶段 5（GraphRAG：LLM 抽实体关系 + 一跳图谱扩展，降级策略见 `graph.py`）。
+- RAG 方案与取舍见 `RAG.md`；已实现阶段 1（站内/本地 Markdown 入库 + 向量检索 + 注入）、「个人知识库」（博客文章选入 + 来源管理 + 懒同步 + 单轮/多轮模式 + 系统库开关）、阶段 5（GraphRAG：LLM 抽实体关系 + 一跳图谱扩展，降级策略见 `graph.py`）、阶段 6/7（可溯源引用、知识图谱页）与阶段 8（随心一记：一句话笔记即时入库）。
 - AI 对话的助手回复按 Markdown 渲染（GFM：标题 / 列表 / 代码块 / 表格 / 引用），用户输入保持纯文本；好友聊天不渲染 Markdown。
 - 聊天（AI 对话与好友聊天）气泡采用胶囊形（自己奶油色、对方暗色半透明），并应用本地「原神」字体；消息上方显示发送者用户名。该字体按使用频率分片（`public/fonts/genshin/`，常用字一片 ~550KB），字体 CSS 只挂在 `/text-lab`、`/knowledge`、`/messages` 三条路由上，其他页面不下载任何分片。
 - AI 对话流式生成期间输入框保持可编辑（可先写好下一句），Enter 只换行不发送、也不会中断当前回复；要中断点「停止」，生成结束后草稿保留、按钮恢复「发送」。
@@ -196,9 +210,13 @@ zero-to-full/
 - **接口类型只有一处未校验缝隙**：`components/apiRequest.ts` 里的 `res.json() as T`。后端改了字段名，TS 不会发现（它只防前端内部不一致与手误）；要防跨服务漂移就得加运行时校验。
 - **同一项目只保留一个 `next dev`**：多个实例共用同一个 `.next`，会互相删掉对方编译产物（同样是上面的 `ENOENT`）。用 `fuser -k 3000/tcp` 关掉占用端口的实例后再启动。
 - **清理数据库测试数据只用精确条件**：不要用 `DELETE FROM users WHERE username LIKE 'a%'` 这类模糊匹配，会连带删掉真实账号及其文章（外键级联删除）。只按自己创建的确切用户名删，操作前先备份 `backend/history.db`。
+- **本地验证用的临时账号不必删除**：跑需要登录态的浏览器校验时，用接口临时注册一个账号即可，例如现有的 `kgtmp_probe / probe123`（只存在于本地 `backend/history.db`，该库已 gitignore，不会随部署上线）。这类账号留着可以反复复用，不用每次新建、也不用每轮清理；确实要清时按确切用户名删（见上一条）。
+- **SQLite 改不了列约束，改结构只能重建表**：`kb_sources` 从「只存文章」升级成多态来源表（加 `kind`/`note_content`、`post_id` 改可空）走的就是重建。重建时必须 `PRAGMA foreign_keys=OFF`：`documents.source_id` 是 `ON DELETE CASCADE`，开着外键 `DROP TABLE` 会把**所有块**（含站内公共库）级联删光。同时要 `PRAGMA legacy_alter_table=ON`，否则改名时会被其他表里指向旧表的引用卡住。重建后要**逐行保留 id**（`documents.source_id` 就靠它），并用「有没有块失去来源行」来校验（`schema_rag._orphan_chunks`）。改这段前先拿 `history.db` 副本跑一遍。
+- **笔记不能走文章那条切块路径**：`ingest.chunk_markdown` 按 ATX 标题切块，并且丢弃清洗后不足 `MIN_CHUNK=30` 字的内容——「钥匙在玄关柜」这种一句话会被直接丢掉。随心一记因此自己写单块（`kb.add_note`），不要去复用文章入库的函数。
 - **向量模型必须放在持久目录**：fastembed 默认缓存是系统临时目录 `/tmp/fastembed_cache`，重启/清理即丢；丢了之后加载会去联网下载（国内会被墙），表现为「开启知识库对话后一直无输出」。`backend/rag.py` 已固定 `cache_dir=~/.cache/fastembed` 并优先离线加载；换机器/上线时把该模型目录一并带上（或重新执行预热）。
-- **`.card` 默认不要设 `opacity: 0`**：入场初始态必须限定在 `AnimatedCardGrid`（`.animated-grid .card`）里。曾经 `.card { opacity: 0 }` 全局生效，导致没包在 `AnimatedCardGrid` 里的页面（如初版知识库页）整块卡片隐身，表现为「只看到标题 / Tab，看不到内容」。排查时不能只量 `getBoundingClientRect()`（透明元素宽高照常非 0），要同时看 `getComputedStyle(el).opacity`。
+- **`.card` 的入场初始态必须同时满足两个条件**：限定在 `AnimatedCardGrid`（`.animated-grid`）里，并靠根节点的 `data-entered` 在它接管动画后失效。曾经 `.card { opacity: 0 }` 全局生效，导致没包在 `AnimatedCardGrid` 里的页面（如初版知识库页）整块卡片隐身；后来只限定在 `.animated-grid .card` 又漏了后挂载的卡片——动画只在挂载时扫一遍当时的 `.card`，懒加载的面板（知识图谱页签）既没被动画，又被初始态按住，表现为「切到该页签后一片空白」。排查时不能只量 `getBoundingClientRect()` 或数 DOM 节点（透明元素宽高照常非 0、节点也照常在），要同时看 `getComputedStyle(el).opacity`。
 - **Tab 面板不要用 `display: contents`**：Safari/WebKit 对「作为网格子项的 `display: contents`」支持有缺陷，会让整个面板不参与布局。面板容器要自己开一层 12 列网格（`.tab-panel { grid-column: span 12; display: grid; … }`）。
+- **图谱的悬停高亮不要在节点 `mouseleave` 里清除**：只要有一个激活节点，其余 50+ 个节点就会淡化到 `opacity .3`；没有激活节点则全图正常。把清除挂在节点 `mouseleave` 上，指针在图上移动时每跨过一次节点边界就会整图「正常 ↔ 全暗」跳一次——实测淡化节点数在 0↔53 之间振荡约 5 次/秒、4 秒内重绘 160 帧，看起来就是高频闪烁。现在只在离开整张画布（`.kg-canvas` 的 `mouseleave`）或点空白处才清除，指针在画布内移动只切换激活节点（变化收敛在邻域差集，约 9 个节点）。
 - **图谱抽取失败也必须更新 `post_updated_at`**：`kb._write_chunks` 里的抽图调用要包 try/except，但 `post_updated_at` 必须照常写。否则 `sync_user` 会认为来源一直「待同步」，每次问答都重试抽图，把一次模型故障放大成持续成本。同理，抽图失败不能影响块入库与来源可见性。
 - **字体分片的 `unicode-range` 必须互不重叠**：重叠时，常用字也会命中生僻字分片（浏览器按范围匹配），等于又把整份字体拉下来。`scripts/subset_genshin.py` 按「常用层优先取走码点」分层，就是为了保证不重叠；改分层逻辑时务必保留这个顺序。
 - **聊天字体 CSS 不要放回全局 `app/layout.jsx`**：它是 87KB 的 range 列表，放全局会变成全站关键 CSS。它只该被 `/text-lab`、`/knowledge`、`/messages` 三个 page 引入。
