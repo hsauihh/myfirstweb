@@ -1,0 +1,267 @@
+/* 首页卡片内部：概览指标条、骨架屏、博客/公告行式列表。
+   页面骨架（顶部小字、引文条、两栏卡片）在 css/home.css，随心一记输入区在 home-notes.css。 */
+
+/* ---------- 概览指标条 ---------- */
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0;
+  margin: 0;
+}
+
+.home-stat {
+  display: grid;
+  gap: 2px;
+  padding: 2px 18px;
+  border-left: 1px solid var(--border-soft);
+}
+
+.home-stat:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.home-stat__label {
+  color: var(--text-soft);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+
+.home-stat__value {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+  margin: 0;
+  color: var(--text-main);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.home-stat__unit {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.home-stat--hint {
+  align-content: center;
+}
+
+.home-stat__hint {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* ---------- 骨架屏（加载占位，尺寸与真实行一致，不跳动） ---------- */
+
+.skel {
+  display: block;
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-soft) 25%,
+    var(--border-soft) 37%,
+    var(--surface-soft) 63%
+  );
+  background-size: 400% 100%;
+  animation: skel-shimmer 1.4s ease infinite;
+}
+
+.skel--date { width: 62px; }
+.skel--title { width: 68%; }
+.skel--meta { width: 46px; justify-self: end; }
+
+.skel-row {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  margin: 0 -6px;
+  padding: 9px 8px 9px 10px;
+  pointer-events: none;
+}
+
+.skel-row--notice {
+  grid-template-columns: 86px minmax(0, 1fr);
+}
+
+@keyframes skel-shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; }
+}
+
+/* ---------- 行式列表（博客 / 公告） ---------- */
+
+.home-rows {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 92px;
+}
+
+.home-row {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  margin: 0 -6px;
+  padding: 9px 8px 9px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  border-left: 2px solid transparent;
+  border-radius: 6px;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.home-rows li:last-child .home-row,
+.home-rows li:last-child .home-notice__head {
+  border-bottom-color: transparent;
+}
+
+.home-row:hover {
+  background: var(--surface-soft);
+  border-left-color: var(--brand);
+}
+
+.home-row:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.home-row__date,
+.home-row__rank {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-row__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14.5px;
+}
+
+.home-row__meta {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 行尾箭头：默认淡出，悬停/聚焦时出现（列表不靠 hover 才能用，只是加点提示） */
+.home-row__meta svg:last-child {
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.home-row:hover .home-row__meta svg:last-child,
+.home-row:focus-visible .home-row__meta svg:last-child {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* 最热榜前三名：主色底徽标 */
+.home-row__rank.is-top {
+  justify-self: start;
+  min-width: 30px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 600;
+  text-align: center;
+}
+
+.home-notice__new {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+
+.home-notice__toggle {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-soft);
+  transition: transform 0.2s, color 0.2s;
+}
+
+.home-notice__toggle.is-open {
+  transform: rotate(180deg);
+  color: var(--brand);
+}
+
+.home-notice__head:hover .home-notice__toggle {
+  color: var(--brand);
+}
+
+/* 公告：标题按钮可展开正文 */
+.home-notice {
+  display: grid;
+}
+
+.home-notice__head {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  margin: 0 -6px;
+  padding: 9px 8px 9px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--border-soft);
+  border-left: 2px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-main);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.home-notice__head:hover:not(:disabled) {
+  background: var(--surface-soft);
+  border-left-color: var(--brand);
+}
+
+.home-notice__head:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.home-notice__head:disabled {
+  cursor: default;
+}
+
+.home-notice__body {
+  margin: 0 -6px;
+  padding: 0 10px 12px 100px;
+  color: var(--text-soft);
+  font-size: 13.5px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

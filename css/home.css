@@ -1,0 +1,161 @@
+/* 首页：顶部小字 + 引文条 + 两栏卡片。
+   卡片外观由 css/cards.css 的 .panel/.card-head 提供（1px 描边 + 极轻抬升 + 统一内边距），
+   这里只负责版面：两栏对齐、列内间距一致、行式列表贴合卡片内边距。 */
+
+.home {
+  display: grid;
+  gap: 18px;
+  padding: 22px 0 56px;
+  /* 顶部一层极淡的主色洗底：给纯白版面一点纵深，不引入图片或重装饰 */
+  background: radial-gradient(1100px 260px at 50% -140px, var(--brand-soft), transparent 72%);
+}
+
+/* ---------- 今日引文条（小字，一行） ---------- */
+
+.home-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.home-strip__label {
+  color: var(--text-soft);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.home-quote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+  user-select: none;
+  animation: home-quote-fade 0.5s ease-out;
+}
+
+.home-quote::before {
+  content: "「";
+}
+
+.home-quote::after {
+  content: "」";
+}
+
+.home-quote:hover {
+  color: var(--text-main);
+}
+
+.home-quote:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@keyframes home-quote-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- 两栏（列内卡片等宽、等间距，列顶对齐） ---------- */
+
+/* 2×2 卡片网格：显式定位，保证同一行的两张卡上下边界严格对齐。
+   DOM 顺序仍是 随心一记 → 最新 → 公告 → 最热（窄屏塌成单栏时即阅读顺序）。 */
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.home-grid__note { grid-area: 1 / 1; }
+.home-grid__latest { grid-area: 2 / 1; }
+.home-grid__notice { grid-area: 1 / 2; }
+.home-grid__hot { grid-area: 2 / 2; }
+
+/* 卡片内部纵向铺满：内容顶端对齐，底部留白由同行最高的一张决定 */
+.home-grid > .panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-col {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+}
+
+/* ---------- 卡片内的小字与空态 ---------- */
+
+.home-list-state {
+  padding: 2px 0;
+  color: var(--text-soft);
+  font-size: 13.5px;
+}
+
+.home-more {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.home-more:hover {
+  color: var(--brand);
+}
+
+/* ---------- 窄屏：两栏塌成单栏（DOM 顺序即阅读顺序） ---------- */
+
+@media (max-width: 900px) {
+  .home {
+    gap: 16px;
+    padding: 18px 0 40px;
+  }
+
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 16px;
+  }
+
+  /* 单栏时按 DOM 顺序堆叠（随心一记 → 最新 → 公告 → 最热） */
+  .home-grid__note,
+  .home-grid__latest,
+  .home-grid__notice,
+  .home-grid__hot {
+    grid-area: auto;
+  }
+
+  .home-col {
+    gap: 16px;
+  }
+
+  .home-row,
+  .home-notice__head {
+    grid-template-columns: 74px minmax(0, 1fr);
+  }
+
+  .home-row__meta {
+    grid-column: 2;
+  }
+
+  .home-notice__body {
+    padding-left: 86px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-quote {
+    animation: none;
+  }
+}

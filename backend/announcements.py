@@ -43,6 +43,18 @@ def list_for(user_id: int) -> dict:
     return {"items": items, "unread": sum(1 for item in items if not item["read"])}
 
 
+def list_public(limit: int) -> list[dict]:
+    """公开只读列表（首页公告栗用）：不带已读状态，也不需要登录。"""
+    conn = db.get_conn()
+    rows = conn.execute(
+        "SELECT id, title, body, created_at FROM announcements"
+        " ORDER BY id DESC LIMIT ?",
+        [limit],
+    ).fetchall()
+    conn.close()
+    return [_announcement(row) for row in rows]
+
+
 def mark_read(user_id: int, announcement_id: int) -> bool:
     conn = db.get_conn()
     exists = conn.execute(

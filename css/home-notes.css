@@ -1,0 +1,144 @@
+/* 首页「随心一记」快入口：带边框的输入框 + 记下按钮 + 最近几条（可删）。
+   卡片外观（强调卡底色）由 css/cards.css 的 .card--accent 提供。 */
+
+.home-note-login {
+  color: var(--text-soft);
+  font-size: 13.5px;
+}
+
+.home-note-login a {
+  color: var(--brand);
+}
+
+/* 输入区：一个可见的圆角输入框，按钮贴在右下角 */
+.home-note-field {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-soft);
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.home-note-field:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.home-note-input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.home-note-input::placeholder {
+  color: var(--text-soft);
+}
+
+.home-note-save {
+  justify-self: end;
+  padding: 5px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.home-note-save:hover:not(:disabled) {
+  background: var(--brand-hover);
+}
+
+.home-note-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.home-note-save:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.home-note-status {
+  margin-top: 10px;
+  color: var(--text-soft);
+  font-size: 12.5px;
+}
+
+.home-note-list {
+  display: grid;
+  gap: 0;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-note-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 7px 4px 7px 8px;
+  border-bottom: 1px solid var(--border-soft);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.home-note-row:hover {
+  background: var(--surface);
+}
+
+.home-note-row__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.home-note-row__time {
+  color: var(--text-soft);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.home-note-row__remove {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.home-note-row:hover .home-note-row__remove,
+.home-note-row:focus-within .home-note-row__remove {
+  opacity: 1;
+}
+
+.home-note-row__remove:hover {
+  color: var(--danger);
+}
+
+.home-note-row__remove:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}

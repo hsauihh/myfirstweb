@@ -55,6 +55,16 @@ export default function KnowledgeView() {
     setTab("qna");
   }, []);
 
+  // 首页「全部 N 条 →」等入口用 /knowledge#notes 直接落到随心一记页签
+  useEffect(() => {
+    const applyHash = () => {
+      if (window.location.hash === "#notes") selectTab("notes");
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, [selectTab]);
+
   const notesChanged = useCallback(() => {
     setNotesNonce((value) => value + 1);
     void refreshStatus();

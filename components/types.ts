@@ -344,6 +344,13 @@ export interface AnnouncementsResponse {
   unread: number;
 }
 
+/** 首页公告栗用的公开条目：没有已读状态（未读只对登录用户有意义）。 */
+export type PublicAnnouncement = Omit<Announcement, "read">;
+
+export interface PublicAnnouncementsResponse {
+  items: PublicAnnouncement[];
+}
+
 /** WebSocket 新公告事件里的公告（刚创建，还没有 read 标记）。 */
 export type AnnouncementDraft = Omit<Announcement, "read">;
 

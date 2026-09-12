@@ -1,5 +1,6 @@
-// 页面顶部 hero：eyebrow 小标签 + 大标题 + 副标题 + 可选 CTA 按钮。
-// 纯展示、无交互，服务端组件。cta 为 { href, label } 时显示按钮。
+// 页面顶部：只有小字（分区名 + 一句话说明），不再渲染大标题。
+// 标题仍以 <h1 class="sr-only"> 保留，文档大纲与 SEO 不受影响。
+// cta 存在时作为右侧的小按钮（登录引导等），不是导航替代品。
 import Link from "next/link";
 
 interface PageHeadingProps {
@@ -11,12 +12,14 @@ interface PageHeadingProps {
 
 export default function PageHeading({ eyebrow, title, subtitle, cta }: PageHeadingProps) {
   return (
-    <section className="hero">
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="hero-title">{title}</h1>
-      {subtitle && <p className="hero-subtitle">{subtitle}</p>}
+    <section className="page-top">
+      <h1 className="sr-only">{title}</h1>
+      <div className="page-top__main">
+        {eyebrow && <p className="page-top__label">{eyebrow}</p>}
+        {subtitle && <p className="page-top__subtitle">{subtitle}</p>}
+      </div>
       {cta && (
-        <Link href={cta.href} className="btn btn-primary hero-cta">
+        <Link href={cta.href} className="btn btn-outline page-top__cta">
           {cta.label}
         </Link>
       )}

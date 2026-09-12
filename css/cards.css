@@ -1,11 +1,93 @@
-/* 卡片体系：实色浅块 + 边框 + 圆角 + 轻阴影（无玻璃拟态） */
+/* 卡片体系：实色浅块 + 1px 描边 + 圆角 + 极轻抬升（无玻璃拟态）。
+   全站统一：每个内容区域一张卡片，边距/圆角/描边一致，靠对齐与留白取胜。 */
 
 .panel {
-  padding: 28px 32px;
+  padding: var(--card-pad);
   background: var(--surface);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-panel);
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+/* 可交互卡片：悬停抬升 1px（很轻，不做位移花活） */
+.panel:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* 强调卡：主内容卡片的淡主色底，给页面一个视觉落点 */
+.card--accent {
+  background: var(--card-accent-bg);
+  border-color: var(--card-accent-border);
+  box-shadow: var(--card-shadow), 0 0 0 4px var(--card-accent-ring);
+}
+
+.card {
+  /* .card 只做标记（入场动画与面板语义）；外观由 .panel 提供 */
+}
+
+/* 卡片头部：小号大写分区名 + 右侧动作/元信息，下方一条细线。
+   语义上用 h2/h3 包住标题，保证文档大纲完整。 */
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.card-head__title {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-head__title svg {
+  flex: none;
+  color: var(--text-soft);
+  transition: color 0.2s;
+}
+
+.panel:hover .card-head__title svg {
+  color: var(--brand);
+}
+
+.card-head__meta,
+.card-head__action {
+  color: var(--text-soft);
+  font-size: 12.5px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.card-head__action {
+  text-decoration: none;
+}
+
+.card-head__action:hover {
+  color: var(--brand);
+}
+
+/* 只在屏幕阅读器里存在（保留 h1 的文档大纲与 SEO，视觉上不占位） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* 入场初始态：只在 AnimatedCardGrid（.animated-grid）内、且它还没接管动画时生效。
@@ -17,16 +99,7 @@
   transform: translateY(24px);
 }
 
-/* 分区标题（eyebrow 小标签 + 大标题） */
-.section-heading {
-  margin-bottom: 24px;
-}
-
-.section-heading .eyebrow {
-  display: block;
-  margin-bottom: 10px;
-}
-
+/* 分区标题（页内大标题 + 副标题；卡片头部用小号大写的 .card-head） */
 .section-title {
   font-size: clamp(26px, 4vw, 36px);
   line-height: 1.16;
@@ -51,100 +124,6 @@
   text-transform: uppercase;
 }
 
-/* === 作品卡片网格（参考站「课程系列」卡片式） === */
-.works-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.work-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 28px;
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-panel);
-  box-shadow: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.work-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
-}
-
-.work-card__badge {
-  align-self: flex-start;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--brand-soft);
-  color: var(--brand);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.work-card__title {
-  font-size: 24px;
-  line-height: 1.2;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.work-card__desc {
-  color: var(--text-soft);
-  font-size: 16px;
-  line-height: 1.5;
-  flex: 1;
-}
-
-.work-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tech-tag {
-  padding: 4px 10px;
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.work-card__footer {
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-}
-
-.work-card__footer .btn {
-  width: 100%;
-  justify-content: center;
-}
-
-/* === 身份面板（每日一句 + 正在学习） === */
-.identity-panel {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 32px;
-  align-items: start;
-}
-
-.identity-item { padding-top: 4px; }
-
-.identity-value {
-  font-size: clamp(24px, 3vw, 30px);
-  line-height: 1.16;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-@media (max-width: 900px) {
-  .works-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 /* === 关于页：架构图入口 === */
 .about-actions {
   display: flex;
@@ -153,7 +132,3 @@
   margin-top: 20px;
 }
 
-@media (max-width: 640px) {
-  .works-grid { grid-template-columns: 1fr; }
-  .identity-panel { grid-template-columns: 1fr; }
-}

@@ -11,6 +11,9 @@ from friends_ws import manager
 TITLE_MAX_LENGTH = 100
 BODY_MAX_LENGTH = 5000
 ANNOUNCE_KEY_HEADER = "X-Announce-Key"
+# 首页公告栗只要最近几条
+PUBLIC_LIMIT = 4
+PUBLIC_MAX_LIMIT = 20
 
 router = APIRouter(prefix="/api/announcements", tags=["announcements"])
 
@@ -24,6 +27,15 @@ class AnnouncementRequest(BaseModel):
 def list_announcements(request: Request) -> dict:
     user = require_user(request)
     return announcements.list_for(user["id"])
+
+
+@router.get("/public")
+def list_public_announcements(limit: int = PUBLIC_LIMIT) -> dict:
+    """首页公告栗：公开只读（不登录也能看），不带已读状态。
+
+    已读/未读仍只走上面的登录接口，这里不做任何标记。
+    """
+    return {"items": announcements.list_public(min(max(limit, 1), PUBLIC_MAX_LIMIT))}
 
 
 @router.post("/{announcement_id}/read")
