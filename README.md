@@ -103,6 +103,7 @@ zero-to-full/
 │                 #  direct_messages.py（私聊消息）、announcements.py（公告存储）、avatars.py（头像文件）、
 │                 #  db.py（连接/归属）、schema.py / schema_rag.py（建表与迁移）、blog.py / blog_api.py（博客）、
 │                 #  users.py（用户与额度）、session.py（匿名 Cookie）、storage.py（数据层）、weather.py（天气）
+│                 #  graph_build.py（只补图谱）、import_public.py（只把公共知识库导入另一份库，用于上线）
 ├── next.config.mjs
 └── .env.local
 ```

@@ -66,7 +66,7 @@ curl -s http://8.133.217.95/api/rag/status                              # 期望
 | `backend/.env`（模型 Key / 高德 Key / ANNOUNCE_KEY / ADMIN_USERNAMES） | 不用重建前端，只需 `sudo systemctl restart zero-to-full` |
 | `deploy/config.sh`（站点地址、路径） | **必须重建前端**（API 基址内联在产物里），必要时重建 nginx 配置 |
 | `package.json` / `package-lock.json` | 服务器会重跑 `npm ci`（国内较慢，见 §8） |
-| `RAGdata/` 资料更新 | `cd backend && uv run python ingest.py ../RAGdata --rebuild`（只影响站内公共库） |
+| `RAGdata/` 资料更新 | 本机重建后导入线上（§5「只把公共知识库搬到服务器」），**不要在服务器上跑 `ingest.py --rebuild`** |
 | 只想发一条公告 | `cd backend && uv run python announce.py notice.json`（不涉及发布） |
 
 > 前端产物 `out/` **不入库**（gitignore），所以永远不要「只 push 产物」：要么服务器重建，要么用 §4 的 rsync 方式。
@@ -95,7 +95,7 @@ uv run python graph_build.py              # 站内公共库补图
 
 > 什么时候**不需要**重建：只要求问答可用（向量检索照常工作）时可以不管；但想要「知识图谱」页、首页概览里的实体/关系数字、以及一问一跳的图谱增益，就必须补上。
 
-> 顺带一提：线上与本地如果块数不一致（例如线上 416 / 本地 513），说明服务器上的 `RAGdata/` 是另一份（该目录被 gitignore，`git pull` 带不过去）。想让两边资料一致，要先把 `RAGdata/` rsync 上去再 `ingest.py ../RAGdata --rebuild`。
+> 顺带一提：线上与本地如果块数不一致（例如线上 416 / 本地 513），说明服务器上的 `RAGdata/` 是另一份（该目录被 gitignore，`git pull` 带不过去）。想让两边资料一致，按 §5「只把公共知识库搬到服务器」做——本机重建后导入，不在服务器上重跑 `ingest.py`。
 
 ---
 
@@ -183,12 +183,42 @@ rsync -az --delete out/ <user>@8.133.217.95:/var/www/zero-to-full/
 - `backend/history.db` 是**唯一**的业务数据源（用户、登录态会话、对话与消息、博客、订单、知识库块与向量、图谱、公告与已读）。
 - 首次部署若不传该文件，服务器会新建空库：用户要重新注册、知识库为空、`RAGdata` 需要重新入库。
 - **表结构迁移是自动的**：后端起服务时会执行 `init_db()`（幂等）。历史上做过一次 `kb_sources` 表重建（升级成多态来源表），迁移在事务外关闭外键执行、逐行保留 id，并用「有没有块失去来源行」自检；这类迁移改动前务必**先拿 `history.db` 副本跑一遍**再上生产。
-- 备份（建议加进 crontab）：
+- 备份（建议加进 crontab；**备份落在项目目录外**，`history.db.*.bak` 这种名字不被 gitignore 匹配，留在仓库里有被误提交的风险）：
 
   ```bash
-  cd /opt/zero-to-full/backend && cp history.db "history.db.$(date +%F).bak"
+  cd /opt/zero-to-full/backend && cp history.db ~/history-backup-$(date +%F).db
   rsync -az avatars/ /path/to/backup/avatars/
   ```
+
+### 只把公共知识库搬到服务器（不覆盖用户数据）
+
+线上已有真实用户时，**不要**整体覆盖 `history.db`，也**不要**在服务器上跑 `ingest.py --rebuild`：它先清空公共库再重算，中途卡住（模型联网下载、OOM）就只剩一个空库。正确做法是本机重建、服务器导入：
+
+```bash
+# 1. 本机：重建公共库（含图谱）
+cd backend && uv run python ingest.py ../RAGdata --rebuild
+
+# 2. 本机：把库副本推上去（放项目目录外，别覆盖线上那个）
+rsync -avz --progress backend/history.db ubuntu@8.133.217.95:~/history.db.push
+
+# 3. 服务器：停服务 → 先看会导入什么 → 导入 → 重启
+cd ~/zero-to-full/backend
+sudo systemctl stop zero-to-full
+uv run python import_public.py ~/history.db.push --dry-run
+uv run python import_public.py ~/history.db.push
+sudo systemctl restart zero-to-full      # 必须重启：检索层缓存了整库向量矩阵
+curl -s http://127.0.0.1:8001/api/rag/status
+```
+
+`import_public.py` 的行为：
+
+- 只替换站内公共库（`documents.source_id IS NULL`）；用户、登录态、对话、博客、个人知识库与配额一行不动；
+- 块与图谱 **id 会重映射**（源库的 id 会和个人库撞车）；单事务，失败整笔回滚，提交前还会自检「块 / 向量条数是否与源库一致」；
+- 幂等：同源库连跑两次结果一致；
+- 顺手清掉指向已删块的死数据（向量 / 提及 / 关系）与不再被任何块提到的实体；
+- `--no-extractions` 不搬图谱抽取缓存（默认搬，服务器上以后补图就不用再调模型）。
+
+> 先在本地拿真实库演练一遍再动线上：把 `backend/history.db` 复制到临时目录当「线上库」，把脚本的 `DB_FILE`（`db.py`）临时指过去跑一次。脚本在测试里已覆盖「只换公共库、保留用户与个人库、可重复执行、清死数据」四种情形。
 
 ---
 
